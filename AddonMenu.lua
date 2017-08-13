@@ -5,7 +5,8 @@ AutoCategory.AddonMenu = {}
 AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME = "AutoCategory.AddonMenu.DropDownCategories"
 
 local selectedCategoryName = AC_UNGROUPED_NAME
-
+local categoryDropDownShowNames = {}
+local categoryDropDownTooltips = {}
 
 local emptyCategory = {
 	priority = 0,
@@ -24,8 +25,42 @@ function AutoCategory.AddonMenu.GetCategorySetting(categoryName)
 	return emptyCategory
 end
 
+local function CategoriesSortingFunction(left, right, accend)
+	local a = AutoCategory.AddonMenu.GetCategorySetting(left)
+	local b = AutoCategory.AddonMenu.GetCategorySetting(right)
+	local a_less_than_b = a.priority < b.priority
+	if not accend then
+		a_less_than_b = not a_less_than_b
+	end
+	return a_less_than_b
+end
+
+local function UpdateCategoryData()
+	categoryDropDownShowNames = {}
+	categoryDropDownTooltips = {}
+	table.sort(AutoCategory.curSavedVars.categories, function(a, b) return CategoriesSortingFunction(a, b, false) end )
+	for i = 1, #AutoCategory.curSavedVars.categories do
+		local name = AutoCategory.curSavedVars.categories[i]
+		local cat = AutoCategory.AddonMenu.GetCategorySetting(name)
+		categoryDropDownShowNames[i] = string.format("%s (%d)", name, cat.priority)
+		
+		if cat.description ~= "" then
+			categoryDropDownTooltips[i] = cat.description 
+		else 
+			categoryDropDownTooltips[i] = cat.categoryName
+		end
+	end
+end
+
+local function UpdateDropDownCategories()
+	UpdateCategoryData()
+	local dropdownCtrl = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME, "")
+	dropdownCtrl:UpdateChoices(categoryDropDownShowNames, AutoCategory.curSavedVars.categories, categoryDropDownTooltips) 	
+end
+
 function AutoCategory.AddonMenu.Init()
 	AutoCategory.UpdateCurrentSavedVars()
+	UpdateCategoryData()
 	if #AutoCategory.curSavedVars.categories > 0 then
 		selectedCategoryName = AutoCategory.curSavedVars.categories[1]
 	end
@@ -68,13 +103,14 @@ function AutoCategory.AddonMenu.Init()
 			type = "dropdown",
 			name = "Categories",
 			tooltip = "Categories to put items in",
-			choices = AutoCategory.curSavedVars.categories,
+			choices = categoryDropDownShowNames,
+			choicesValues = AutoCategory.curSavedVars.categories,
+			choicesTooltips = categoryDropDownTooltips,
+			
 			getFunc = function() 
-				d("get dropdown: ".. selectedCategoryName)
 				return selectedCategoryName 
 			end,
 			setFunc = function(value) 			
-				d("set dropdown: ".. selectedCategoryName)
 				selectedCategoryName = value
 				--refresh edit controls
 			end, 
@@ -93,13 +129,12 @@ function AutoCategory.AddonMenu.Init()
 					bag = 1,
 					categoryName = newName,
 					description = "",
-					
+					priority = 0,
 				}
 				table.insert(AutoCategory.curSavedVars.categorySettings, newCategory)
 									
 				selectedCategoryName = newName
-				local dropdownCtrl = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME, "")
-				dropdownCtrl:UpdateChoices(AutoCategory.curSavedVars.categories) 	
+				UpdateDropDownCategories()
 				
 			end,
 			width = "half",
@@ -142,8 +177,7 @@ function AutoCategory.AddonMenu.Init()
 					selectedCategoryName = AutoCategory.curSavedVars.categories[lastIndex]	
 				end
 				
-				local dropdownCtrl = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME, "")
-				dropdownCtrl:UpdateChoices(AutoCategory.curSavedVars.categories) 
+				UpdateDropDownCategories()
 			end,
 			width = "half",
 			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
@@ -162,8 +196,7 @@ function AutoCategory.AddonMenu.Init()
 				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).categoryName = value 				
 				selectedCategoryName = value
 				
-				local dropdownCtrl = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME, "")
-				dropdownCtrl:UpdateChoices(AutoCategory.curSavedVars.categories) 
+				UpdateDropDownCategories()
 			end,
 			isMultiline = false,
 			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
@@ -189,8 +222,11 @@ function AutoCategory.AddonMenu.Init()
 			name = "Description",
 			tooltip = "Description",
 			getFunc = function() return AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).description end,
-			setFunc = function(value) AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).description = value end,
-			isMultiline = true,
+			setFunc = function(value) 
+				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).description = value 
+				UpdateDropDownCategories()
+			end,
+			isMultiline = false,
 			isExtraWide = true,
 			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
 			width = "full",
@@ -213,7 +249,10 @@ function AutoCategory.AddonMenu.Init()
 			min = 0,
 			max = 100,
 			getFunc = function() return AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).priority end,
-			setFunc = function(value) AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).priority = value end,
+			setFunc = function(value) 
+				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).priority = value 
+				UpdateDropDownCategories()
+			end,
 			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
 			width = "half",
 		},
@@ -227,8 +266,7 @@ function AutoCategory.AddonMenu.Init()
 				AutoCategory.acctSavedVariables = AutoCategory.defaultAcctSettings
 				AutoCategory.UpdateCurrentSavedVars()
 				selectedCategoryName = AC_UNGROUPED_NAME
-				local dropdownCtrl = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME, "")
-				dropdownCtrl:UpdateChoices(AutoCategory.curSavedVars.categories)
+				UpdateDropDownCategories()
 			end,
 			width = "full",
 		},

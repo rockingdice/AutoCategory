@@ -97,7 +97,7 @@ function AutoCategory.Initialize(event, addon)
 	-- load our saved variables
 	AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
 	AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
-	d("ac init")
+
 	AutoCategory.AddonMenu.Init()
 end
 
@@ -117,7 +117,6 @@ function AutoCategory.RuleFunc.SpecializedItemType( ... )
 		end
 		
 		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
-		--d("Match Item: " .. GetItemLinkName(itemLink))
 		local _, sptype = GetItemLinkItemType(itemLink)
 		if type( arg ) == "number" then
 			if arg == sptype then
@@ -278,7 +277,6 @@ function AutoCategory.RuleFunc.ItemType( ... )
 		end
 		
 		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
-		--d("Match Item: " .. GetItemLinkName(itemLink))
 		local itemType = GetItemLinkItemType(itemLink)
 		if type( arg ) == "number" then
 			if arg == itemType then
@@ -393,7 +391,7 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 		if needCheck then
 			cat.damaged = false
 			if cat.rule == nil then
-				return false
+				return false, "", 0
 			end
 			local ruleCode, res = zo_loadstring( "return(" .. cat.rule ..")" )
 			if not ruleCode then
@@ -404,7 +402,7 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 				local ok, res = pcall( ruleCode )
 				if ok then
 					if res == true then
-						return true, cat.categoryName
+						return true, cat.categoryName, cat.priority
 					end
 					
 				else
@@ -414,11 +412,11 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 			end
 		end
 		if cat.damaged then
-			return false
+			return false, "", 0
 		end
 	end
 	
-	return false
+	return false, "", 0
 end
 -- register our event handler function to be called to do initialization
 EVENT_MANAGER:RegisterForEvent(AutoCategory.name, EVENT_ADD_ON_LOADED, function(...) AutoCategory.Initialize(...) end)
