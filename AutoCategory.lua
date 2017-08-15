@@ -58,9 +58,6 @@ function AutoCategory.UpdateCurrentSavedVars()
 	end
 end
 AutoCategory.defaultSettings = {
-	categories = {
-		[1] = AC_UNGROUPED_NAME,
-	},
 	categorySettings = {
 		[1] = {
 			priority = 0,
@@ -74,9 +71,6 @@ AutoCategory.defaultSettings = {
 
 
 AutoCategory.defaultAcctSettings = {
-	categories = {
-		[1] = AC_UNGROUPED_NAME,
-	},
 	categorySettings = {
 		[1] = {
 			priority = 0,
@@ -90,6 +84,17 @@ AutoCategory.defaultAcctSettings = {
 	accountWideSetting = false
 }
 
+local function removeSameNamedCategory(categories)
+	local names = {}
+	local name = nil
+	for i = 1, #categories do
+		name = categories[i].categoryName
+		if not name or names[name] then
+			table.remove(categories, i)
+		end
+	end
+end
+
 function AutoCategory.Initialize(event, addon)
     -- filter for just BUI addon event as EVENT_ADD_ON_LOADED is addon-blind
 	if addon ~= AutoCategory.name then return end
@@ -97,7 +102,9 @@ function AutoCategory.Initialize(event, addon)
 	-- load our saved variables
 	AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
 	AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
-
+	removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
+	removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
+	
 	AutoCategory.AddonMenu.Init()
 end
 
@@ -105,7 +112,7 @@ function AutoCategory.RuleFunc.SpecializedItemType( ... )
 	local fn = "type"
 	local ac = select( '#', ... )
 	if ac == 0 then
-		error( "error: type(): require arguments." )
+		error( string.format("error: %s(): require arguments." , fn))
 	end
 	
 	for ax = 1, ac do
@@ -113,7 +120,7 @@ function AutoCategory.RuleFunc.SpecializedItemType( ... )
 		local arg = select( ax, ... )
 		
 		if not arg then
-			error("error: type():  argument is nil." )
+			error( string.format("error: %s():  argument is nil." , fn))
 		end
 		
 		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
@@ -252,7 +259,7 @@ function AutoCategory.RuleFunc.SpecializedItemType( ... )
 				return true
 			end
 		else
-			error( "error: type(): argument is error." )
+			error( string.format("error: %s(): argument is error." , fn ) )
 		end
 		
 	end
@@ -265,7 +272,7 @@ function AutoCategory.RuleFunc.ItemType( ... )
 	local fn = "type"
 	local ac = select( '#', ... )
 	if ac == 0 then
-		error( "error: type(): require arguments." )
+		error( string.format("error: %s(): require arguments." , fn))
 	end
 	
 	for ax = 1, ac do
@@ -273,7 +280,7 @@ function AutoCategory.RuleFunc.ItemType( ... )
 		local arg = select( ax, ... )
 		
 		if not arg then
-			error("error: type():  argument is nil." )
+			error( string.format("error: %s():  argument is nil." , fn))
 		end
 		
 		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
@@ -354,7 +361,7 @@ function AutoCategory.RuleFunc.ItemType( ... )
 				return true
 			end
 		else
-			error( "error: type(): argument is error." )
+			error( string.format("error: %s(): argument is error." , fn ) )
 		end
 		
 	end
@@ -363,14 +370,100 @@ function AutoCategory.RuleFunc.ItemType( ... )
 	
 end
 
+function AutoCategory.RuleFunc.IsBound( ... )
+	local fn = "isbound"
+	
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local isBound = IsItemLinkBound(itemLink)
+	return isBound
+end
+
+
+function AutoCategory.RuleFunc.BoundType( ... )
+	local fn = "boundtype"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		local boundType = GetItemLinkBindType(itemLink)
+		if type( arg ) == "number" then
+			if arg == boundType then
+				return true
+			end
+		elseif type( arg ) == "string" then
+			
+		local itemTypeMap = {
+				["none"] = BIND_TYPE_NONE,
+				["on_equip"] = BIND_TYPE_ON_EQUIP,
+				["on_pickup"] = BIND_TYPE_ON_PICKUP,
+				["on_pickup_backpack"] = BIND_TYPE_ON_PICKUP_BACKPACK,
+				["unset"] = BIND_TYPE_UNSET,
+			}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == boundType then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		
+	end
+	
+	return false
+	
+end
+
+function AutoCategory.RuleFunc.Level( ... )
+	local fn = "level"
+	local level = GetItemRequiredLevel(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return level
+end
+
+
+function AutoCategory.RuleFunc.CPLevel( ... )
+	local fn = "cp"
+	local level = GetItemRequiredChampionPoints(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return level
+end
+
+
+function AutoCategory.RuleFunc.KeepForResearch( ... )
+	if GamePadBuddy then
+		local itemFlagStatus = GamePadBuddy:GetItemFlagStatus(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		return itemFlagStatus == GamePadBuddy.CONST.ItemFlags.ITEM_FLAG_TRAIT_RESEARABLE
+	else
+		return true
+	end
+end
 
 AutoCategory.Environment = {
 	-- rule functions
+	
 	type = AutoCategory.RuleFunc.ItemType,
+	
 	sptype = AutoCategory.RuleFunc.SpecializedItemType,
+	
+	isbound = AutoCategory.RuleFunc.IsBound,
+	
+	boundtype = AutoCategory.RuleFunc.BoundType,
+	
+	level = AutoCategory.RuleFunc.Level,
+	
+	cp = AutoCategory.RuleFunc.CPLevel,
+	
+	-- GamePadBuddy
+	keepresearch = AutoCategory.RuleFunc.KeepForResearch,
 }
-
-
 
 function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 	self.checkingItemBagId = bagId

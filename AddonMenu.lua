@@ -6,6 +6,7 @@ AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME = "AutoCategory.AddonMenu.DropDo
 
 local selectedCategoryName = AC_UNGROUPED_NAME
 local categoryDropDownShowNames = {}
+local categoryDropDownValues = {}
 local categoryDropDownTooltips = {}
 
 local emptyCategory = {
@@ -19,30 +20,37 @@ function AutoCategory.AddonMenu.GetCategorySetting(categoryName)
 	for i = 1, #AutoCategory.curSavedVars.categorySettings  do
 		local set = AutoCategory.curSavedVars.categorySettings[i]
 		if set and set.categoryName == categoryName then
-			return set
+			return set, i
 		end
 	end
-	return emptyCategory
+	return emptyCategory, -1
 end
 
-local function CategoriesSortingFunction(left, right, accend)
-	local a = AutoCategory.AddonMenu.GetCategorySetting(left)
-	local b = AutoCategory.AddonMenu.GetCategorySetting(right)
-	local a_less_than_b = a.priority < b.priority
-	if not accend then
-		a_less_than_b = not a_less_than_b
+local function CategoriesSortingFunction(a, b)
+	local result = false
+	--d("a.priority: " .. a.priority .. " b.priority: " .. b.priority)
+	--d("a.name: " .. a.categoryName .. " b.name: " .. b.categoryName)
+	
+	if a.priority == b.priority then
+		--alphabetical sort, cannot have same name rules
+		result = a.categoryName < b.categoryName
+	else
+		result = a.priority > b.priority
 	end
-	return a_less_than_b
+	
+	return result
 end
 
 local function UpdateCategoryData()
 	categoryDropDownShowNames = {}
+	categoryDropDownValues = {}
 	categoryDropDownTooltips = {}
-	table.sort(AutoCategory.curSavedVars.categories, function(a, b) return CategoriesSortingFunction(a, b, false) end )
-	for i = 1, #AutoCategory.curSavedVars.categories do
-		local name = AutoCategory.curSavedVars.categories[i]
+	table.sort(AutoCategory.curSavedVars.categorySettings, function(a, b) return CategoriesSortingFunction(a, b) end )
+	for i = 1, #AutoCategory.curSavedVars.categorySettings do
+		local name = AutoCategory.curSavedVars.categorySettings[i].categoryName
 		local cat = AutoCategory.AddonMenu.GetCategorySetting(name)
 		categoryDropDownShowNames[i] = string.format("%s (%d)", name, cat.priority)
+		categoryDropDownValues[i] = name
 		
 		if cat.description ~= "" then
 			categoryDropDownTooltips[i] = cat.description 
@@ -55,14 +63,15 @@ end
 local function UpdateDropDownCategories()
 	UpdateCategoryData()
 	local dropdownCtrl = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME, "")
-	dropdownCtrl:UpdateChoices(categoryDropDownShowNames, AutoCategory.curSavedVars.categories, categoryDropDownTooltips) 	
+	dropdownCtrl:UpdateChoices(categoryDropDownShowNames, categoryDropDownValues, categoryDropDownTooltips) 	
 end
+
 
 function AutoCategory.AddonMenu.Init()
 	AutoCategory.UpdateCurrentSavedVars()
 	UpdateCategoryData()
-	if #AutoCategory.curSavedVars.categories > 0 then
-		selectedCategoryName = AutoCategory.curSavedVars.categories[1]
+	if #AutoCategory.curSavedVars.categorySettings > 0 then
+		selectedCategoryName = AutoCategory.curSavedVars.categorySettings[1].categoryName
 	end
 	
 	local panelData =  {
@@ -102,9 +111,9 @@ function AutoCategory.AddonMenu.Init()
 		{		
 			type = "dropdown",
 			name = "Categories",
-			tooltip = "Categories to put items in",
+			tooltip = "Category Name (Priority)",
 			choices = categoryDropDownShowNames,
-			choicesValues = AutoCategory.curSavedVars.categories,
+			choicesValues = categoryDropDownValues,
 			choicesTooltips = categoryDropDownTooltips,
 			
 			getFunc = function() 
@@ -122,14 +131,14 @@ function AutoCategory.AddonMenu.Init()
 			tooltip = "Add",
 			func = function() 
 				--add a category
-				local num = #AutoCategory.curSavedVars.categories+1
+				local num = #AutoCategory.curSavedVars.categorySettings+1
 				local newName = "Category_" .. num
-				AutoCategory.curSavedVars.categories[num] = newName
 				local newCategory = {
 					bag = 1,
 					categoryName = newName,
 					description = "",
 					priority = 0,
+					rule = "true",
 				}
 				table.insert(AutoCategory.curSavedVars.categorySettings, newCategory)
 									
@@ -146,21 +155,15 @@ function AutoCategory.AddonMenu.Init()
 			func = function() 
 				--remove a category
 				local lastIndex = -1
-				local num = #AutoCategory.curSavedVars.categories
+				local num = #AutoCategory.curSavedVars.categorySettings
 				for i = 1, num do
-					if selectedCategoryName == AutoCategory.curSavedVars.categories[i] then
-						table.remove(AutoCategory.curSavedVars.categories, i)
+					if selectedCategoryName == AutoCategory.curSavedVars.categorySettings[i].categoryName then
+						table.remove(AutoCategory.curSavedVars.categorySettings, i)
 						if i ~= num then
 							lastIndex = i
 						else
 							lastIndex = i - 1
 						end
-						break
-					end
-				end
-				for i = 1, num do
-					if selectedCategoryName == AutoCategory.curSavedVars.categorySettings[i].categoryName then
-						table.remove(AutoCategory.curSavedVars.categorySettings, i)
 						break
 					end
 				end
@@ -174,22 +177,22 @@ function AutoCategory.AddonMenu.Init()
 				if lastIndex < 1 then
 					selectedCategoryName = ""
 				else
-					selectedCategoryName = AutoCategory.curSavedVars.categories[lastIndex]	
+					selectedCategoryName = AutoCategory.curSavedVars.categorySettings[lastIndex].categoryName	
 				end
 				
 				UpdateDropDownCategories()
 			end,
 			width = "half",
-			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 		},
 		{
 			type = "editbox",
 			name = "Category Name",
 			getFunc = function() return AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).categoryName end,
 			setFunc = function(value) 
-				for i = 1, #AutoCategory.curSavedVars.categories do
-					if AutoCategory.curSavedVars.categories[i] == selectedCategoryName then
-						AutoCategory.curSavedVars.categories[i] = value
+				for i = 1, #AutoCategory.curSavedVars.categorySettings do
+					if AutoCategory.curSavedVars.categorySettings[i].categoryName == selectedCategoryName then
+						AutoCategory.curSavedVars.categorySettings[i].categoryName = value
 						break
 					end
 				end
@@ -199,7 +202,7 @@ function AutoCategory.AddonMenu.Init()
 				UpdateDropDownCategories()
 			end,
 			isMultiline = false,
-			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 			width = "half",
 		},
 		{		
@@ -214,7 +217,7 @@ function AutoCategory.AddonMenu.Init()
 			setFunc = function(value) 
 				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bag = value
 			end, 
-			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 			width = "half",
 		},
 		{
@@ -228,7 +231,7 @@ function AutoCategory.AddonMenu.Init()
 			end,
 			isMultiline = false,
 			isExtraWide = true,
-			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 			width = "full",
 		},
 		{
@@ -239,7 +242,7 @@ function AutoCategory.AddonMenu.Init()
 			setFunc = function(value) AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).rule = value end,
 			isMultiline = true,
 			isExtraWide = true,
-			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 			width = "full",
 		},
 		{
@@ -253,7 +256,7 @@ function AutoCategory.AddonMenu.Init()
 				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).priority = value 
 				UpdateDropDownCategories()
 			end,
-			disabled = function() return #AutoCategory.curSavedVars.categories == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 			width = "half",
 		},
 		{
