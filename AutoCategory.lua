@@ -12,12 +12,13 @@ local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0");
 --create Addon UI table
 AutoCategory = {};
 AutoCategory.RuleFunc = {}
+AutoCategory.Inited = false
 
 --define name of addon
 AutoCategory.name = "AutoCategory";
 --define addon version number
 AutoCategory.version = 1.00;
-AC_UNGROUPED_NAME = "Default Category"
+AC_UNGROUPED_NAME = "Others"
 
 
 key = ""
@@ -62,7 +63,7 @@ AutoCategory.defaultSettings = {
 		[1] = {
 			priority = 0,
 			rule = "true",
-			bag = 1,
+			bags = {},
 			description = "",
 			categoryName = AC_UNGROUPED_NAME,
 		}
@@ -75,7 +76,7 @@ AutoCategory.defaultAcctSettings = {
 		[1] = {
 			priority = 0,
 			rule = "true",
-			bag = 1,
+			bags = {},
 			description = "",
 			categoryName = AC_UNGROUPED_NAME,
 		}
@@ -95,17 +96,23 @@ local function removeSameNamedCategory(categories)
 	end
 end
 
+function AutoCategory.LazyInit()
+	if not AutoCategory.Inited then
+		-- load our saved variables
+		AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
+		AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
+		removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
+		removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
+		
+		AutoCategory.AddonMenu.Init()
+		AutoCategory.Inited = true
+	end
+end
+
 function AutoCategory.Initialize(event, addon)
     -- filter for just BUI addon event as EVENT_ADD_ON_LOADED is addon-blind
 	if addon ~= AutoCategory.name then return end
-
-	-- load our saved variables
-	AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
-	AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
-	removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
-	removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
-	
-	AutoCategory.AddonMenu.Init()
+	AutoCategory.LazyInit()
 end
 
 function AutoCategory.RuleFunc.SpecializedItemType( ... )
@@ -446,6 +453,79 @@ function AutoCategory.RuleFunc.KeepForResearch( ... )
 	end
 end
 
+function AutoCategory.RuleFunc.SetName( ... )
+	local fn = "set"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		local hasSet, setName = GetItemLinkSetInfo(itemLink)
+		if not hasSet then
+			return false
+		end
+		local findString
+		if type( arg ) == "number" then
+			findString = tostring(arg)
+		elseif type( arg ) == "string" then
+			findString = arg
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		if string.find(setName, findString, 1 ,true) then
+			return true
+		end
+	end
+	
+	return false
+end
+
+
+
+function AutoCategory.RuleFunc.Trait( ... )
+	local fn = "trait"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		local traitType, _ = GetItemLinkTraitInfo(itemLink)
+		local traitText = GetString("SI_ITEMTRAITTYPE", traitType)
+		local findString;
+		if type( arg ) == "number" then
+			findString = tostring(arg)
+		elseif type( arg ) == "string" then
+			findString = arg
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		if string.find(traitText, findString, 1, true) then
+			return true
+		end 
+	end
+	
+	return false
+	
+end
+
 AutoCategory.Environment = {
 	-- rule functions
 	
@@ -460,22 +540,29 @@ AutoCategory.Environment = {
 	level = AutoCategory.RuleFunc.Level,
 	
 	cp = AutoCategory.RuleFunc.CPLevel,
+
+	set = AutoCategory.RuleFunc.SetName,
+
+	trait = AutoCategory.RuleFunc.Trait,
 	
 	-- GamePadBuddy
 	keepresearch = AutoCategory.RuleFunc.KeepForResearch,
 }
 
+--====API====--
 function AutoCategory:MatchCategoryRules( bagId, slotIndex )
+	AutoCategory.LazyInit()
+
 	self.checkingItemBagId = bagId
 	self.checkingItemSlotIndex = slotIndex
 	local needCheck = false
 	for i = 1, #AutoCategory.curSavedVars.categorySettings do
 		local cat = AutoCategory.curSavedVars.categorySettings[i]
 		--PrintTable(AutoCategory.curSavedVars, 3)
-		if cat.bag == 1 and (bagId == BAG_BACKPACK or bagId == BAG_WORN) then
+		if cat.bags["backpack"] and (bagId == BAG_BACKPACK or bagId == BAG_WORN) then
 			--check backpack
 			needCheck = true
-		elseif cat.bag == 2 and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
+		elseif cat.bags["bank"] and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
 			--check bank
 			needCheck = true
 		else

@@ -134,7 +134,7 @@ function AutoCategory.AddonMenu.Init()
 				local num = #AutoCategory.curSavedVars.categorySettings+1
 				local newName = "Category_" .. num
 				local newCategory = {
-					bag = 1,
+					bags = {},
 					categoryName = newName,
 					description = "",
 					priority = 0,
@@ -203,20 +203,35 @@ function AutoCategory.AddonMenu.Init()
 			end,
 			isMultiline = false,
 			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
-			width = "half",
+			width = "full",
 		},
-		{		
-			type = "dropdown",
-			name = "Bag",
-			tooltip = "Backpack or Bank",
-			choices = {"Backpack", "Bank"},
-			choicesValues = {1, 2},
-			getFunc = function()  
-				return AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bag
+		{
+			type = "checkbox",
+			name = "Backpack",
+			tooltip = "Apply the category rules to backpack",
+			getFunc = function()
+				local bags = AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bags
+				return bags["backpack"] ~= nil
 			end,
 			setFunc = function(value) 
-				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bag = value
-			end, 
+				local bags = AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bags
+				bags["backpack"] = true
+			end,
+			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			width = "half",
+		},
+		{
+			type = "checkbox",
+			name = "Bank",
+			tooltip = "Apply the category rules to bank",
+			getFunc = function()
+				local bags = AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bags
+				return bags["bank"] ~= nil
+			end,
+			setFunc = function(value) 
+				local bags = AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bags
+				bags["bank"] = true
+			end,
 			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
 			width = "half",
 		},
