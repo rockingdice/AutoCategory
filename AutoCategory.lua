@@ -377,6 +377,61 @@ function AutoCategory.RuleFunc.ItemType( ... )
 	
 end
 
+function AutoCategory.RuleFunc.EquipType( ... )
+	local fn = "equiptype"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local _, _, _, _, _, equipType = GetItemInfo(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+
+		if type( arg ) == "number" then
+			if arg == equipType then
+				return true
+			end
+		elseif type( arg ) == "string" then
+			
+			local itemTypeMap = {
+				["chest"] = EQUIP_TYPE_CHEST,
+				["costume"] = EQUIP_TYPE_COSTUME,
+				["feet"] = EQUIP_TYPE_FEET,
+				["hand"] = EQUIP_TYPE_HAND,
+				["head"] = EQUIP_TYPE_HEAD,
+				["invalid"] = EQUIP_TYPE_INVALID,
+				["legs"] = EQUIP_TYPE_LEGS,
+				["main_hand"] = EQUIP_TYPE_MAIN_HAND,
+				["neck"] = EQUIP_TYPE_NECK,
+				["off_hand"] = EQUIP_TYPE_OFF_HAND,
+				["one_hand"] = EQUIP_TYPE_ONE_HAND,
+				["poison"] = EQUIP_TYPE_POISON,
+				["ring"] = EQUIP_TYPE_RING,
+				["shoulders"] = EQUIP_TYPE_SHOULDERS,
+				["two_hand"] = EQUIP_TYPE_TWO_HAND,
+				["waist"] = EQUIP_TYPE_WAIST,
+			}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == equipType then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		
+	end
+	
+	return false
+	
+end
+
 function AutoCategory.RuleFunc.IsBound( ... )
 	local fn = "isbound"
 	
@@ -424,6 +479,69 @@ function AutoCategory.RuleFunc.BoundType( ... )
 			error( string.format("error: %s(): argument is error." , fn ) )
 		end
 		
+	end
+	
+	return false
+	
+end
+
+
+function AutoCategory.RuleFunc.FilterType( ... )
+	local fn = "filtertype"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	local itemTypeMap = {
+				["alchemy"] = ITEMFILTERTYPE_ALCHEMY,
+				["all"] = ITEMFILTERTYPE_ALL,
+				["armor"] = ITEMFILTERTYPE_ARMOR,
+				["blacksmithing"] = ITEMFILTERTYPE_BLACKSMITHING,
+				["buyback"] = ITEMFILTERTYPE_BUYBACK,
+				["clothing"] = ITEMFILTERTYPE_CLOTHING,
+				["collectible"] = ITEMFILTERTYPE_COLLECTIBLE,
+				["consumable"] = ITEMFILTERTYPE_CONSUMABLE,
+				["crafting"] = ITEMFILTERTYPE_CRAFTING,
+				["damaged"] = ITEMFILTERTYPE_DAMAGED,
+				["enchanting"] = ITEMFILTERTYPE_ENCHANTING,
+				["furnishing"] = ITEMFILTERTYPE_FURNISHING,
+				["house_with_template"] = ITEMFILTERTYPE_HOUSE_WITH_TEMPLATE,
+				["junk"] = ITEMFILTERTYPE_JUNK,
+				["miscellaneous"] = ITEMFILTERTYPE_MISCELLANEOUS,
+				["provisioning"] = ITEMFILTERTYPE_PROVISIONING,
+				["quest"] = ITEMFILTERTYPE_QUEST,
+				["quickslot"] = ITEMFILTERTYPE_QUICKSLOT,
+				["reuse"] = ITEMFILTERTYPE_REUSE,
+				["style_materials"] = ITEMFILTERTYPE_STYLE_MATERIALS,
+				["trait_items"] = ITEMFILTERTYPE_TRAIT_ITEMS,
+				["weapons"] = ITEMFILTERTYPE_WEAPONS,
+				["woodworking"] = ITEMFILTERTYPE_WOODWORKING,
+	}
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local itemFilterType = { GetItemFilterTypeInfo(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex) }
+		local testFilterType
+		if type( arg ) == "number" then
+			testFilterType = arg
+		elseif type( arg ) == "string" then  
+			testFilterType = itemTypeMap[string.lower( arg )]
+			if testFilterType == nil then
+				error( string.format("error: %s(): argument '%s' is not recoginzed.", fn, string.lower(arg)))
+			end			
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		for i = 1, #itemFilterType do
+			if itemFilterType[i] == testFilterType then
+				return true
+			end
+		end
 	end
 	
 	return false
@@ -526,12 +644,91 @@ function AutoCategory.RuleFunc.Trait( ... )
 	
 end
 
+
+local function IokaniGearChanger_GetGearSet(bagId, slotIndex)
+	local result = {}
+	if GearChangerByIakoni and GearChangerByIakoni.savedVariables then
+		local itemType = GetItemType(bagId, slotIndex)
+		if itemType == ITEMTYPE_ARMOR or itemType == ITEMTYPE_WEAPON then
+			local a=GearChangerByIakoni.savedVariables.ArraySet
+			local b=GearChangerByIakoni.savedVariables.ArraySetSavedFlag
+			local itemID = Id64ToString(GetItemUniqueId(bagId, slotIndex))
+			for i=1, 10 do
+				if b[i] == 1 then --check only if the set is saved
+					for _,u in pairs(GearChangerByIakoni.WornArray) do
+						if itemID==a[i][u] then
+							--find gear in set i
+							table.insert(result, i)
+						end
+					end
+				end
+			end	
+		end
+	end
+	return result
+end
+
+function AutoCategory.RuleFunc.SetIndex( ... )
+	local fn = "setindex"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	local setIndices = IokaniGearChanger_GetGearSet(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		local comIndex = -1
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		if type( arg ) == "number" then
+			comIndex = arg
+		elseif type( arg ) == "string" then
+			comIndex = tonumber(arg)
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		for i=1, #setIndices do
+			local index = setIndices[i]
+			if comIndex == index then
+				return true
+			end
+		end 
+	end
+	
+	return false 
+end
+
+function AutoCategory.RuleFunc.InSet( ... )
+	local fn = "inset"
+	
+	local setIndices = IokaniGearChanger_GetGearSet(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return #setIndices ~= 0
+end
+
+function AutoCategory.RuleFunc.IsEquipping( ... )
+	local fn = "isequipping"
+	return AutoCategory.checkingItemBagId == BAG_WORN
+end
+
+function AutoCategory.RuleFunc.IsInQuickslot( ... )
+	local fn = "isinquickslot"
+	local slotIndex = GetItemCurrentActionBarSlot(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return slotIndex ~= nil
+end
+
 AutoCategory.Environment = {
 	-- rule functions
 	
 	type = AutoCategory.RuleFunc.ItemType,
 	
 	sptype = AutoCategory.RuleFunc.SpecializedItemType,
+
+	equiptype = AutoCategory.RuleFunc.EquipType,
+
+	filtertype = AutoCategory.RuleFunc.FilterType,
 	
 	isbound = AutoCategory.RuleFunc.IsBound,
 	
@@ -544,9 +741,18 @@ AutoCategory.Environment = {
 	set = AutoCategory.RuleFunc.SetName,
 
 	trait = AutoCategory.RuleFunc.Trait,
+
+	isequipping = AutoCategory.RuleFunc.IsEquipping,
+
+	isinquickslot = AutoCategory.RuleFunc.IsInQuickslot,
 	
 	-- GamePadBuddy
 	keepresearch = AutoCategory.RuleFunc.KeepForResearch,
+
+	-- Iakoni's Gear Changer
+	setindex = AutoCategory.RuleFunc.SetIndex,
+
+	inset = AutoCategory.RuleFunc.InSet,
 }
 
 --====API====--

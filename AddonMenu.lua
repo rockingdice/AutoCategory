@@ -76,7 +76,7 @@ function AutoCategory.AddonMenu.Init()
 	
 	local panelData =  {
 		type = "panel",
-		name = "AutoCategory",
+		name = "Auto Category",
 		displayName = "RockingDice's AutoCategory",
 		author = "RockingDice",
 		version = "1.00",

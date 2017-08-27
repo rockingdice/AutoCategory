@@ -1,5 +1,5 @@
 ## Title: AutoCategory
-## APIVersion: 100019
+## APIVersion: 100020
 ## Author: RockingDice
 ## Description: Type "/ac" 
 ## Version: 1.00
