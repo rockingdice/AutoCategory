@@ -1,0 +1,18 @@
+<GuiXml>
+    <Controls>
+        <Control name="AC_InventorySlotWithHeader" mouseEnabled="false" tier="MEDIUM" layer="CONTROLS" virtual="true">
+            <Dimensions x="509" y="100"/>
+            <Controls>
+                <!-- Craft Bags can have large sell prices due to massive stacks, so we need more room here -->
+                <Label name="$(parent)HeaderName" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Dimensions y="40"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="TOPRIGHT"/>
+                </Label>
+                <Control name="$(parent)InventoryItemRow" inherits="ZO_PlayerInventorySlot">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)" relativePoint="BOTTOMLEFT"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>
