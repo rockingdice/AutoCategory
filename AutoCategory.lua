@@ -101,26 +101,113 @@ local CUSTOM_GAMEPAD_ITEM_SORT =
 	sortPriorityName  = { tiebreaker = "bestItemTypeName" },
 	bestItemTypeName = { tiebreaker = "name" },
     name = { tiebreaker = "requiredLevel" },
-    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
-    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
-    iconFile = { tiebreaker = "uniqueId" },
-    uniqueId = { isId64 = true },
+}
+ 
+local sortKeys =
+{
+    slotIndex = { isNumeric = true },
+    stackCount = { tiebreaker = "slotIndex", isNumeric = true },
+    name = { tiebreaker = "stackCount" },
+    quality = { tiebreaker = "name", isNumeric = true },
+    stackSellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true },
+    statusSortOrder = { tiebreaker = "age", isNumeric = true},
+    age = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true},
+    statValue = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
 }
 
-local function AutoCategory_ItemSortComparator(left, right)
-    return ZO_TableOrderingFunction(left, right, "sortPriorityName", CUSTOM_GAMEPAD_ITEM_SORT, ZO_SORT_ORDER_UP)
+local function NilOrLessThan(value1, value2)
+    if value1 == nil then
+        return true
+    elseif value2 == nil then
+        return false
+    else
+        return value1 < value2
+    end
 end
 
-function AutoCategory.HookKeyboardInventory()
+
+local function FixIakoniGearChanger()
+	if GearChangerByIakoni then
+		local function GearChangerByIakoni_DoRefresh(list)
+			local a=GearChangerByIakoni.savedVariables.ArraySet
+			local b=GearChangerByIakoni.savedVariables.ArraySetSavedFlag
+
+			--loop through the currently shown inventory items
+			for _,v in pairs(list.activeControls) do
+				local bag = v.dataEntry.data.bagId
+				local slot = v.dataEntry.data.slotIndex
+				if bag ~= nil and slot ~= nil then
+					local itemID = Id64ToString(GetItemUniqueId(bag, slot))
+					local marker = v:GetNamedChild("GCBISet")
+					if not marker then
+						marker = GearChangerByIakoni.CreateControlMarker(v)
+					end
+					marker:SetHidden(true)
+					
+					local itemType = GetItemType(bag, slot)
+					
+					if itemType == ITEMTYPE_ARMOR or itemType == ITEMTYPE_WEAPON then
+						local founditem = false
+
+						for i=1, 10 do
+							if b[i] == 1 then --check only if the set is saved
+								for _,u in pairs(GearChangerByIakoni.WornArray) do
+									if itemID==a[i][u] then
+										marker:SetHidden(false)
+										founditem = true
+										break
+									end
+								end
+							end
+							
+							if founditem then
+								break
+							end
+						end
+					end
+				end 
+			end 
+		end
+		GearChangerByIakoni.DoRefresh = GearChangerByIakoni_DoRefresh
+	end
+end
+
+function AutoCategory.HookKeyboardMode()
 	--Add a new data type: row with header
 	local function AC_Setup_InventoryRowWithHeader(rowControl, slot, overrideOptions)
-		PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listSetupCallback(rowControl:GetNamedChild("InventoryItemRow"), slot, overrideOptions)
+		--PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listSetupCallback(rowControl:GetNamedChild("InventoryItemRow"), slot, overrideOptions)
+		--PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listSetupCallback(rowControl, slot, overrideOptions)
 		--set header
-		rowControl:GetNamedChild("HeaderName"):SetText(slot.dataEntry.bestItemTypeName)
+		rowControl:GetNamedChild("HeaderName"):SetText(slot.bestItemTypeName)
 	end
-	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventorySlotWithHeader", 100, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_GuildBankBackpack, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
         
-	local function ZO_InventoryManager_ApplySort(self, inventoryType, dontCommit)
+    -- fix fence- launder issue
+	function ZO_Fence_Keyboard_OnEnterLaunder(self, totalLaunders, laundersUsed)
+	    self.mode = ZO_MODE_STORE_LAUNDER
+	    ZO_PlayerInventoryInfoBarAltFreeSlots:SetHidden(false)
+	    ZO_PlayerInventoryInfoBarAltMoney:SetHidden(true)
+	    self:UpdateTransactionLabel(totalLaunders, laundersUsed, SI_FENCE_LAUNDER_LIMIT, SI_FENCE_LAUNDER_LIMIT_REACHED)
+
+	    local function ColorCost(control, data, scrollList)
+	        priceControl = control:GetNamedChild("SellPrice")
+	        if priceControl then
+		        ZO_CurrencyControl_SetCurrencyData(priceControl, CURT_MONEY, data.stackLaunderPrice, CURRENCY_DONT_SHOW_ALL, (GetCarriedCurrencyAmount(CURT_MONEY) < data.stackLaunderPrice))
+		        ZO_CurrencyControl_SetCurrency(priceControl, ZO_KEYBOARD_CURRENCY_OPTIONS)
+		    end
+	    end
+
+	    PLAYER_INVENTORY:RefreshBackpackWithFenceData(ColorCost)
+	    ZO_PlayerInventorySortByPriceName:SetText(GetString(SI_LAUNDER_SORT_TYPE_COST))
+	    self:RefreshFooter()
+	end
+	ZO_Fence_Keyboard.OnEnterLaunder = ZO_Fence_Keyboard_OnEnterLaunder
+
+    --Custom sort with group name
+	local function ZO_InventoryManager_ApplySort(self, inventoryType)
 	    local inventory
 	    if inventoryType == INVENTORY_BANK then
 	        inventory = self.inventories[INVENTORY_BANK]
@@ -142,10 +229,23 @@ function AutoCategory.HookKeyboardInventory()
 	                            end
 	    end
 
-	    table.sort(scrollData, inventory.sortFn)
-	    if dontCommit then
-	    	return
+	    table.sort(scrollData, inventory.sortFn) 
+ 
+        -- change data type
+	    local lastBestItemCategoryName
+        scrollData = ZO_ScrollList_GetDataList(list)
+        local newScrollData = {}
+	    for i, entry in ipairs(scrollData) do 
+	    	if entry.typeId ~= 998 then
+		        if entry.bestItemTypeName ~= lastBestItemCategoryName then
+		            lastBestItemCategoryName = entry.bestItemTypeName
+		            table.insert(newScrollData, ZO_ScrollList_CreateDataEntry(998, {bestItemTypeName = entry.bestItemTypeName}))
+		        end
+		        table.insert(newScrollData, entry)
+	    	end
 	    end
+	    list.data = newScrollData
+
 	    ZO_ScrollList_Commit(list)
 	end
 
@@ -153,7 +253,12 @@ function AutoCategory.HookKeyboardInventory()
 	    local inventory = self.inventories[inventoryType]
 
 	    --temp, need switch
-	    inventory.sortFn = AutoCategory_ItemSortComparator
+	    inventory.sortFn = function(left, right)
+		    if right.sortPriorityName ~= left.sortPriorityName then
+		        return NilOrLessThan(left.sortPriorityName, right.sortPriorityName)
+		    end
+		    return ZO_TableOrderingFunction(left.data, right.data, inventory.currentSortKey, sortKeys, inventory.currentSortOrder)
+		end
 
 	    local list = inventory.listView
 	    if (list and not list:IsHidden()) or updateEvenIfHidden then
@@ -202,20 +307,7 @@ function AutoCategory.HookKeyboardInventory()
 	        self.cachedSearchText = nil
 
 	        -- don't commit after sort, need fix data
-	        self:ApplySort(inventoryType, true)
-
-	        -- change data type
-		    local lastBestItemCategoryName
-	        scrollData = ZO_ScrollList_GetDataList(list)
-		    for i, entry in ipairs(scrollData) do
-		        if entry.bestItemTypeName ~= lastBestItemCategoryName then
-		            lastBestItemCategoryName = entry.bestItemTypeName
-		            entry.typeId = 998		            
-		        end
-		    end
-
-		    -- then commit the list
-	    	ZO_ScrollList_Commit(list) 
+	        self:ApplySort(inventoryType)
 
 	        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.bankWithdrawTabKeybindButtonGroup)
 
@@ -343,7 +435,10 @@ function AutoCategory.LazyInit()
 		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
 		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
 
-		AutoCategory.HookKeyboardInventory()
+		AutoCategory.HookKeyboardMode()
+
+		--capabilities with other add-ons
+		FixIakoniGearChanger()
 
 		AutoCategory.Inited = true
 	end
