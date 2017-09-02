@@ -9,6 +9,17 @@ local categoryDropDownShowNames = {}
 local categoryDropDownValues = {}
 local categoryDropDownTooltips = {}
 
+local dataTags = {}
+dataTags["Values"] = {}
+
+local dataTagRules = {}
+
+local dataBags = {}
+dataBags["ShowNames"] = {[1] = "Backpack", [2] = "Bank"}
+dataBags["Values"] = {1, 2}
+
+local dataBagRules = {}
+
 local emptyCategory = {
 	priority = 0,
 	rule = "",
@@ -17,8 +28,8 @@ local emptyCategory = {
 	categoryName = "",
 }
 function AutoCategory.AddonMenu.GetCategorySetting(categoryName)
-	for i = 1, #AutoCategory.curSavedVars.categorySettings  do
-		local set = AutoCategory.curSavedVars.categorySettings[i]
+	for i = 1, #AutoCategory.curSavedVars.ruleSettings  do
+		local set = AutoCategory.curSavedVars.ruleSettings[i]
 		if set and set.categoryName == categoryName then
 			return set, i
 		end
@@ -31,31 +42,53 @@ local function CategoriesSortingFunction(a, b)
 	--d("a.priority: " .. a.priority .. " b.priority: " .. b.priority)
 	--d("a.name: " .. a.categoryName .. " b.name: " .. b.categoryName)
 	
-	if a.priority == b.priority then
+	if a.tag == b.tag then
 		--alphabetical sort, cannot have same name rules
-		result = a.categoryName < b.categoryName
+		result = a.ruleName <b.ruleName
 	else
-		result = a.priority > b.priority
+		result = a.tag <b.tag
 	end
 	
 	return result
 end
 
 local function UpdateCategoryData()
-	categoryDropDownShowNames = {}
-	categoryDropDownValues = {}
-	categoryDropDownTooltips = {}
-	table.sort(AutoCategory.curSavedVars.categorySettings, function(a, b) return CategoriesSortingFunction(a, b) end )
-	for i = 1, #AutoCategory.curSavedVars.categorySettings do
-		local name = AutoCategory.curSavedVars.categorySettings[i].categoryName
-		local cat = AutoCategory.AddonMenu.GetCategorySetting(name)
-		categoryDropDownShowNames[i] = string.format("%s (%d)", name, cat.priority)
-		categoryDropDownValues[i] = name
-		
-		if cat.description ~= "" then
-			categoryDropDownTooltips[i] = cat.description 
-		else 
-			categoryDropDownTooltips[i] = cat.categoryName
+	dataTags["Values"] = {}
+	dataTagRules = {}
+	dataBagRules = {}
+	table.sort(AutoCategory.curSavedVars.ruleSettings, function(a, b) return CategoriesSortingFunction(a, b) end )
+	for i = 1, #AutoCategory.curSavedVars.ruleSettings do
+		local rule = AutoCategory.curSavedVars.ruleSettings[i]
+		local tag = rule.tag
+		local ruleName = rule.ruleName
+		if not dataTagRules[tag] then
+			dataTagRules[tag] = {["ShowNames"] = {}, ["Values"] = {}, ["Tooltips"] = {}}
+			table.insert(dataTags["Values"], tag)
+		end
+		local tooltip = rule.description
+		if rule.description == "" then
+			tooltip = rule.ruleName
+		end
+		table.insert(dataTagRules[tag]["ShowNames"], ruleName)
+		table.insert(dataTagRules[tag]["Values"], ruleName)
+		table.insert(dataTagRules[tag]["Tooltips"], tooltip)
+	end
+
+	for i = 1, #AutoCategory.curSavedVars.bagSettings do
+		local bagSetting = AutoCategory.curSavedVars.bagSettings[i]
+		if not dataBagRules[bagSetting.bag] then
+			dataBagRules[bagSetting.bag] = {["ShowNames"] = {}, ["Values"] = {}, ["Tooltips"] = {}}
+		end
+		for j = 1, #bagSetting["rules"] do
+			local rule = bagSetting["rules"][j]
+			local ruleName = rule.ruleName
+			local tooltip = rule.description
+			if rule.description == "" then
+				tooltip = rule.ruleName
+			end
+			table.insert(dataBagRules[bagSetting.bag]["ShowNames"], ruleName)
+			table.insert(dataBagRules[bagSetting.bag]["Values"], ruleName)
+			table.insert(dataBagRules[bagSetting.bag]["Tooltips"], tooltip)
 		end
 	end
 end
@@ -70,8 +103,8 @@ end
 function AutoCategory.AddonMenu.Init()
 	AutoCategory.UpdateCurrentSavedVars()
 	UpdateCategoryData()
-	if #AutoCategory.curSavedVars.categorySettings > 0 then
-		selectedCategoryName = AutoCategory.curSavedVars.categorySettings[1].categoryName
+	if #AutoCategory.curSavedVars.ruleSettings > 0 then
+		selectedCategoryName = AutoCategory.curSavedVars.ruleSettings[1].categoryName
 	end
 	
 	local panelData =  {
@@ -105,12 +138,27 @@ function AutoCategory.AddonMenu.Init()
 		},
 		{
 			type = "header",
-			name = "|c0066FF[Categories Setting]|r",
+			name = "|c0066FF[Rules Setting]|r",
 			width = "full",
 		},
 		{		
 			type = "dropdown",
-			name = "Categories",
+			name = "Tags",
+			tooltip = "Tags are used to filter rules.",
+			choices = AutoCategory.curSavedVars.tags,
+			
+			getFunc = function() 
+				return selectedCategoryName 
+			end,
+			setFunc = function(value) 			
+				selectedCategoryName = value
+				--refresh edit controls
+			end, 
+			reference = AutoCategory.AddonMenu.DROPDOWN_CATEGORIES_NAME
+		},
+		{		
+			type = "dropdown",
+			name = "Rules",
 			tooltip = "Category Name (Priority)",
 			choices = categoryDropDownShowNames,
 			choicesValues = categoryDropDownValues,
@@ -131,7 +179,7 @@ function AutoCategory.AddonMenu.Init()
 			tooltip = "Add",
 			func = function() 
 				--add a category
-				local num = #AutoCategory.curSavedVars.categorySettings+1
+				local num = #AutoCategory.curSavedVars.ruleSettings+1
 				local newName = "Category_" .. num
 				local newCategory = {
 					bags = {},
@@ -140,7 +188,7 @@ function AutoCategory.AddonMenu.Init()
 					priority = 0,
 					rule = "true",
 				}
-				table.insert(AutoCategory.curSavedVars.categorySettings, newCategory)
+				table.insert(AutoCategory.curSavedVars.ruleSettings, newCategory)
 									
 				selectedCategoryName = newName
 				UpdateDropDownCategories()
@@ -155,10 +203,10 @@ function AutoCategory.AddonMenu.Init()
 			func = function() 
 				--remove a category
 				local lastIndex = -1
-				local num = #AutoCategory.curSavedVars.categorySettings
+				local num = #AutoCategory.curSavedVars.ruleSettings
 				for i = 1, num do
-					if selectedCategoryName == AutoCategory.curSavedVars.categorySettings[i].categoryName then
-						table.remove(AutoCategory.curSavedVars.categorySettings, i)
+					if selectedCategoryName == AutoCategory.curSavedVars.ruleSettings[i].categoryName then
+						table.remove(AutoCategory.curSavedVars.ruleSettings, i)
 						if i ~= num then
 							lastIndex = i
 						else
@@ -177,22 +225,22 @@ function AutoCategory.AddonMenu.Init()
 				if lastIndex < 1 then
 					selectedCategoryName = ""
 				else
-					selectedCategoryName = AutoCategory.curSavedVars.categorySettings[lastIndex].categoryName	
+					selectedCategoryName = AutoCategory.curSavedVars.ruleSettings[lastIndex].categoryName	
 				end
 				
 				UpdateDropDownCategories()
 			end,
 			width = "half",
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 		},
 		{
 			type = "editbox",
 			name = "Category Name",
 			getFunc = function() return AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).categoryName end,
 			setFunc = function(value) 
-				for i = 1, #AutoCategory.curSavedVars.categorySettings do
-					if AutoCategory.curSavedVars.categorySettings[i].categoryName == selectedCategoryName then
-						AutoCategory.curSavedVars.categorySettings[i].categoryName = value
+				for i = 1, #AutoCategory.curSavedVars.ruleSettings do
+					if AutoCategory.curSavedVars.ruleSettings[i].categoryName == selectedCategoryName then
+						AutoCategory.curSavedVars.ruleSettings[i].categoryName = value
 						break
 					end
 				end
@@ -202,7 +250,7 @@ function AutoCategory.AddonMenu.Init()
 				UpdateDropDownCategories()
 			end,
 			isMultiline = false,
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 			width = "full",
 		},
 		{
@@ -217,7 +265,7 @@ function AutoCategory.AddonMenu.Init()
 				local bags = AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bags
 				bags["backpack"] = true
 			end,
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 			width = "half",
 		},
 		{
@@ -232,7 +280,7 @@ function AutoCategory.AddonMenu.Init()
 				local bags = AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).bags
 				bags["bank"] = true
 			end,
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 			width = "half",
 		},
 		{
@@ -246,7 +294,7 @@ function AutoCategory.AddonMenu.Init()
 			end,
 			isMultiline = false,
 			isExtraWide = true,
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 			width = "full",
 		},
 		{
@@ -257,7 +305,7 @@ function AutoCategory.AddonMenu.Init()
 			setFunc = function(value) AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).rule = value end,
 			isMultiline = true,
 			isExtraWide = true,
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 			width = "full",
 		},
 		{
@@ -271,7 +319,7 @@ function AutoCategory.AddonMenu.Init()
 				AutoCategory.AddonMenu.GetCategorySetting(selectedCategoryName).priority = value 
 				UpdateDropDownCategories()
 			end,
-			disabled = function() return #AutoCategory.curSavedVars.categorySettings == 0 end,
+			disabled = function() return #AutoCategory.curSavedVars.ruleSettings == 0 end,
 			width = "half",
 		},
 		{
