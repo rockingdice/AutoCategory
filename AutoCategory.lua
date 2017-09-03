@@ -14,12 +14,18 @@ AutoCategory = {};
 AutoCategory.RuleFunc = {}
 AutoCategory.Inited = false
 
---define name of addon
 AutoCategory.name = "AutoCategory";
---define addon version number
 AutoCategory.version = 1.00;
-AC_UNGROUPED_NAME = "Others"
+AutoCategory.settingName = "Auto Category"
+AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
+AutoCategory.author = "RockingDice"
 
+AC_UNGROUPED_NAME = "Others"
+AC_EMPTY_TAG_NAME = "<Empty>"
+
+AC_BAG_TYPE_BACKPACK = 1
+AC_BAG_TYPE_BANK = 2
+AC_BAG_TYPE_GUILDBANK = 3
 
 key = ""
 function PrintTable(table , level)
@@ -58,29 +64,43 @@ function AutoCategory.UpdateCurrentSavedVars()
 		d("Use Accountwide Setting")
 	end
 end
+
+function AutoCategory.ResetToDefaults()
+	if not AutoCategory.acctSavedVariables.accountWideSetting  then
+		AutoCategory.curSavedVars.rules = AutoCategory.defaultSettings.rules
+		AutoCategory.curSavedVars.bags = AutoCategory.defaultSettings.bags 
+	else 
+		AutoCategory.curSavedVars.rules = AutoCategory.defaultAcctSettings.rules
+		AutoCategory.curSavedVars.bags = AutoCategory.defaultAcctSettings.bags 
+	end
+end
 AutoCategory.defaultSettings = {
-	categorySettings = {
-		[1] = {
-			priority = 0,
-			rule = "true",
-			bags = {},
-			description = "",
-			categoryName = AC_UNGROUPED_NAME,
-		}
+	rules = {
+
 	},
+	bags = {
+		[AC_BAG_TYPE_BACKPACK] = {
+			rules = {},
+		},
+		[AC_BAG_TYPE_BANK] = {
+			rules = {},
+		},
+	}, 
 }
 
 
 AutoCategory.defaultAcctSettings = {
-	categorySettings = {
-		[1] = {
-			priority = 0,
-			rule = "true",
-			bags = {},
-			description = "",
-			categoryName = AC_UNGROUPED_NAME,
-		}
+	rules = {
+
 	},
+	bags = {
+		[AC_BAG_TYPE_BACKPACK] = {
+			rules = {},
+		},
+		[AC_BAG_TYPE_BANK] = {
+			rules = {},
+		},
+	}, 
 	--account specific settings
 	accountWideSetting = false
 }
@@ -448,8 +468,8 @@ function AutoCategory.LazyInit()
 		-- load our saved variables
 		AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
 		AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
-		removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
-		removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
+		--removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
+		--removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
 		
 		AutoCategory.AddonMenu.Init()
 		
@@ -469,6 +489,8 @@ end
 function AutoCategory.Initialize(event, addon)
     -- filter for just BUI addon event as EVENT_ADD_ON_LOADED is addon-blind
 	if addon ~= AutoCategory.name then return end
+
+    SLASH_COMMANDS["/ac"] = AutoCategory.cmd
 	AutoCategory.LazyInit()
 end
 
@@ -1141,48 +1163,66 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 
 	self.checkingItemBagId = bagId
 	self.checkingItemSlotIndex = slotIndex
+	local bag_type_id
+	if bagId == BAG_BACKPACK or bagId == BAG_WORN then
+		bag_type_id = AC_BAG_TYPE_BACKPACK
+	elseif bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK then
+		bag_type_id = AC_BAG_TYPE_BANK
+	end
+	if not bag_type_id then
+		return false, "", 0
+	end
 	local needCheck = false
-	for i = 1, #AutoCategory.curSavedVars.categorySettings do
-		local cat = AutoCategory.curSavedVars.categorySettings[i]
-		--PrintTable(AutoCategory.curSavedVars, 3)
-		if cat.bags["backpack"] and (bagId == BAG_BACKPACK or bagId == BAG_WORN) then
-			--check backpack
-			needCheck = true
-		elseif cat.bags["bank"] and (bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK) then
-			--check bank
-			needCheck = true
-		else
-			needCheck = false
+	local bag = AutoCategory.curSavedVars.bags[bag_type_id]
+	for i = 1, #bag.rules do
+		local rule = bag.rules[i] 
+
+		rule.damaged = false
+		if rule.rule == nil then
+			return false, "", 0
 		end
-		if needCheck then
-			cat.damaged = false
-			if cat.rule == nil then
-				return false, "", 0
-			end
-			local ruleCode, res = zo_loadstring( "return(" .. cat.rule ..")" )
-			if not ruleCode then
-				d("Error1: " .. res)
-				cat.damaged = true 
-			else 
-				setfenv( ruleCode, AutoCategory.Environment )
-				AutoCategory.AdditionCategoryName = ""
-				local ok, res = pcall( ruleCode )
-				if ok then
-					if res == true then
-						return true, cat.categoryName .. AutoCategory.AdditionCategoryName, cat.priority
-					end 
-				else
-					d("Error2: " .. res)
-					cat.damaged = true 
-				end
+		local ruleCode, res = zo_loadstring( "return(" .. rule.rule ..")" )
+		if not ruleCode then
+			d("Error1: " .. res)
+			rule.damaged = true 
+		else 
+			setfenv( ruleCode, AutoCategory.Environment )
+			AutoCategory.AdditionCategoryName = ""
+			local ok, res = pcall( ruleCode )
+			if ok then
+				if res == true then
+					return true, rule.categoryName .. AutoCategory.AdditionCategoryName, rule.priority
+				end 
+			else
+				d("Error2: " .. res)
+				rule.damaged = true 
 			end
 		end
-		if cat.damaged then
+		if rule.damaged then
 			return false, "", 0
 		end
 	end
 	
 	return false, "", 0
+end
+
+--== Slash command ==--
+function AutoCategory.cmd( text )
+	if text == nil then text = true end
+    LAM2:OpenToPanel(AC_CATEGORY_SETTINGS) 
+	local addons = LAM2.addonList:GetChild(1)
+	if addons:GetNumChildren() ~= 0 then
+		for a=1,addons:GetNumChildren(),1 do 
+			if addons:GetChild(a):GetText() == AutoCategory.settingName then
+				addons:GetChild(a):SetSelected(true)
+				break
+			end	
+		end
+	end	
+	--Second time's the charm
+	if text then
+		zo_callLater(function()AutoCategory.cmd(false)end,500)
+	end
 end
 -- register our event handler function to be called to do initialization
 EVENT_MANAGER:RegisterForEvent(AutoCategory.name, EVENT_ADD_ON_LOADED, function(...) AutoCategory.Initialize(...) end)
