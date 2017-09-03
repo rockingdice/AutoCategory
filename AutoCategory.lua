@@ -101,6 +101,10 @@ local CUSTOM_GAMEPAD_ITEM_SORT =
 	sortPriorityName  = { tiebreaker = "bestItemTypeName" },
 	bestItemTypeName = { tiebreaker = "name" },
     name = { tiebreaker = "requiredLevel" },
+    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
+    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
+    iconFile = { tiebreaker = "uniqueId" },
+    uniqueId = { isId64 = true },
 }
  
 local sortKeys =
@@ -114,6 +118,10 @@ local sortKeys =
     age = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true},
     statValue = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
 }
+
+local function AutoCategory_ItemSortComparator(left, right)
+    return ZO_TableOrderingFunction(left, right, "sortPriorityName", CUSTOM_GAMEPAD_ITEM_SORT, ZO_SORT_ORDER_UP)
+end
 
 local function NilOrLessThan(value1, value2)
     if value1 == nil then
@@ -322,8 +330,22 @@ function AutoCategory.HookKeyboardMode()
 	        self.isListDirty[inventoryType] = true
 	    end
 	end
-	ZO_InventoryManager.UpdateList = ZO_InventoryManager_UpdateList
-	ZO_InventoryManager.ApplySort = ZO_InventoryManager_ApplySort
+	local originalUpdateList = ZO_InventoryManager.UpdateList
+	local originalApplySort = ZO_InventoryManager.ApplySort
+	ZO_InventoryManager.UpdateList = function(...)
+		if IsInGamepadPreferredMode() then
+			originalUpdateList(...)
+		else
+			ZO_InventoryManager_UpdateList(...)
+		end
+	end
+	ZO_InventoryManager.ApplySort = function(...)
+		if IsInGamepadPreferredMode() then
+			originalApplySort(...)
+		else
+			ZO_InventoryManager_ApplySort(...)
+		end
+	end	
 end
 
 function AutoCategory.HookGamepadCraft()
@@ -778,6 +800,11 @@ function AutoCategory.RuleFunc.IsBound( ... )
 	return isBound
 end
 
+function AutoCategory.RuleFunc.IsNew( ... )
+	local fn = "isnew"
+
+	return SHARED_INVENTORY:IsItemNew(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+end
 
 function AutoCategory.RuleFunc.BoundType( ... )
 	local fn = "boundtype"
@@ -946,6 +973,17 @@ function AutoCategory.RuleFunc.SetName( ... )
 end
 
 
+function AutoCategory.RuleFunc.AutoSetName( ... )
+	local fn = "autoset"
+
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local hasSet, setName = GetItemLinkSetInfo(itemLink)
+	if not hasSet then
+		return false
+	end
+	AutoCategory.AdditionCategoryName = AutoCategory.AdditionCategoryName .. string.format(" (%s)", setName)
+	return true
+end
 
 function AutoCategory.RuleFunc.Trait( ... )
 	local fn = "trait"
@@ -1067,6 +1105,8 @@ AutoCategory.Environment = {
 	equiptype = AutoCategory.RuleFunc.EquipType,
 
 	filtertype = AutoCategory.RuleFunc.FilterType,
+
+	isnew = AutoCategory.RuleFunc.IsNew,
 	
 	isbound = AutoCategory.RuleFunc.IsBound,
 	
@@ -1077,6 +1117,8 @@ AutoCategory.Environment = {
 	cp = AutoCategory.RuleFunc.CPLevel,
 
 	set = AutoCategory.RuleFunc.SetName,
+
+	autoset = AutoCategory.RuleFunc.AutoSetName,
 
 	trait = AutoCategory.RuleFunc.Trait,
 
@@ -1123,12 +1165,12 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 				cat.damaged = true 
 			else 
 				setfenv( ruleCode, AutoCategory.Environment )
+				AutoCategory.AdditionCategoryName = ""
 				local ok, res = pcall( ruleCode )
 				if ok then
 					if res == true then
-						return true, cat.categoryName, cat.priority
-					end
-					
+						return true, cat.categoryName .. AutoCategory.AdditionCategoryName, cat.priority
+					end 
 				else
 					d("Error2: " .. res)
 					cat.damaged = true 
