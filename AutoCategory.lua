@@ -1021,7 +1021,7 @@ function AutoCategory.RuleFunc.Trait( ... )
 		
 		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
 		local traitType, _ = GetItemLinkTraitInfo(itemLink)
-		local traitText = GetString("SI_ITEMTRAITTYPE", traitType)
+		local traitText = string.lower(GetString("SI_ITEMTRAITTYPE", traitType))
 		local findString;
 		if type( arg ) == "number" then
 			findString = tostring(arg)
@@ -1030,6 +1030,7 @@ function AutoCategory.RuleFunc.Trait( ... )
 		else
 			error( string.format("error: %s(): argument is error." , fn ) )
 		end
+		findString = string.lower(findString)
 		if string.find(traitText, findString, 1, true) then
 			return true
 		end 
@@ -1173,30 +1174,31 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 	for i = 1, #bag.rules do
 		local entry = bag.rules[i] 
 		local rule = AutoCategory.GetRuleByName(entry.name)
-
-		rule.damaged = false
-		if rule.rule == nil then
-			return false, "", 0
-		end
-		local ruleCode, res = zo_loadstring( "return(" .. rule.rule ..")" )
-		if not ruleCode then
-			d("Error1: " .. res)
-			rule.damaged = true 
-		else 
-			setfenv( ruleCode, AutoCategory.Environment )
-			AutoCategory.AdditionCategoryName = ""
-			local ok, res = pcall( ruleCode )
-			if ok then
-				if res == true then
-					return true, rule.name .. AutoCategory.AdditionCategoryName, entry.priority
-				end 
-			else
-				d("Error2: " .. res)
-				rule.damaged = true 
+		if rule then
+			rule.damaged = false
+			if rule.rule == nil then
+				return false, "", 0
 			end
-		end
-		if rule.damaged then
-			return false, "", 0
+			local ruleCode, res = zo_loadstring( "return(" .. rule.rule ..")" )
+			if not ruleCode then
+				d("Error1: " .. res)
+				rule.damaged = true 
+			else 
+				setfenv( ruleCode, AutoCategory.Environment )
+				AutoCategory.AdditionCategoryName = ""
+				local ok, res = pcall( ruleCode )
+				if ok then
+					if res == true then
+						return true, rule.name .. AutoCategory.AdditionCategoryName, entry.priority
+					end 
+				else
+					d("Error2: " .. res)
+					rule.damaged = true 
+				end
+			end
+			if rule.damaged then
+				return false, "", 0
+			end
 		end
 	end
 	

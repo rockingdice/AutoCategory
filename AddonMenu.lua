@@ -89,6 +89,7 @@ local function ToggleSubmenu(typeString, open)
 end
 
 local function RefreshCache() 
+	--d("|cFF4444RefreshCache|r")
 	cacheRulesByName = {}
 	cacheBagEntriesByName = {}
 	cacheTags = {}
@@ -164,6 +165,7 @@ end
 
 
 local function RefreshDropdownData()
+	--d("|cFF8888RefreshDropdownData|r")
 	local dataCurrentRules_AddCategory = {}
 	dataCurrentRules_AddCategory.showNames = {}
 	dataCurrentRules_AddCategory.values = {}
@@ -253,10 +255,14 @@ local function RefreshDropdownData()
 end
  
 local function UpdateDropDownMenu(name)
+
+	--d("|cFFCCCCUpdateDropDownMenu|r")
 	local dropdownCtrl = WINDOW_MANAGER:GetControlByName(name, "")
 	local data = dropdownData[name]
 
 	dropdownCtrl:UpdateChoices(data.choices, data.choicesValues, data.choicesTooltips) 
+	--dropdownCtrl.data.choicesTooltips = nil
+	--dropdownCtrl:UpdateChoices(data.choices, data.choicesValues) 
 end
 
 local function RemoveDropDownItem(typeString, dataArray, removeItem, emptyCallback)
@@ -382,6 +388,7 @@ function AutoCategory.AddonMenuInit()
 				{		
 					type = "dropdown",
 					name = "Bag",
+					scrollable = false,
 					tooltip = "Select a bag to modify rules that apply on",
 					choices = dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choices,
 					choicesValues = dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choicesValues,
@@ -406,6 +413,7 @@ function AutoCategory.AddonMenuInit()
 				{		
 					type = "dropdown",
 					name = "Categories",
+					scrollable = true,
 					choices = dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choices,
 					choicesValues = dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues,
 					choicesTooltips = dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesTooltips,
@@ -506,6 +514,7 @@ function AutoCategory.AddonMenuInit()
 				{		
 					type = "dropdown",
 					name = "Tag",
+					scrollable = true,
 					choices = dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choices, 
 					choicesValues = dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesValues,
 					choicesTooltips = dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesTooltips,
@@ -526,6 +535,7 @@ function AutoCategory.AddonMenuInit()
 				{		
 					type = "dropdown",
 					name = "Category",
+					scrollable = true,
 					choices = dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choices, 
 					choicesValues = dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues,
 					choicesTooltips = dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesTooltips,
@@ -592,6 +602,7 @@ function AutoCategory.AddonMenuInit()
 				{		
 					type = "dropdown",
 					name = "Tag",
+					scrollable = true,
 					tooltip = "Tag the rule and make them organized.",
 					choices = dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choices, 
 					choicesValues = dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues, 
@@ -613,6 +624,7 @@ function AutoCategory.AddonMenuInit()
 				{		
 					type = "dropdown",
 					name = "Category", 
+					scrollable = true,
 					choices = dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choices, 
 					choicesValues =  dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues, 
 					choicesTooltips =  dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesTooltips, 
@@ -627,72 +639,7 @@ function AutoCategory.AddonMenuInit()
 					width = "half",
 					reference = "AC_DROPDOWN_EDITRULE_RULE"
 				},
-				{
-					type = "button",
-					name = "New",
-					tooltip = "Create a new rule",
-					func = function() 
-						local newName = GetUsableRuleName("NewCategory")
-						local tag = GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")
-						if tag == "" then
-							tag = AC_EMPTY_TAG_NAME
-						end
-						local newRule = CreateNewRule(newName, tag)
-						table.insert(AutoCategory.curSavedVars.rules, newRule)
-											
-						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", newName)
-						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", newRule.tag)
-						
-						RefreshCache()
-						RefreshDropdownData()
-						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
-						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
-						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
-						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
-					end,
-					width = "full",
-				},
-				{
-					type = "button",
-					name = "Delete",
-					tooltip = "Delete selected rule",
-					func = function()  
-						local oldRuleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
-						local oldTagName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")
-						local num = #AutoCategory.curSavedVars.rules
-						for i = 1, num do
-							if oldRuleName == AutoCategory.curSavedVars.rules[i].name then
-								table.remove(AutoCategory.curSavedVars.rules, i)
-								break
-							end
-						end 
-						
-						if oldRuleName == GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE") then
-							--rule removed, clean selection in add rule menu if selected
-							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
-						end
-						
-						RemoveDropDownItem("AC_DROPDOWN_EDITRULE_RULE", dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues, oldRuleName, function(typeString)
-							--if tag has no rules, will remove it.
-							if oldTagName == GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG") then
-								--tag removed, clean tag selection in add rule menu if selected
-								SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", "")
-							end
-							RemoveDropDownItem("AC_DROPDOWN_EDITRULE_TAG", dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues, oldTagName)
-						end)
- 
-						RefreshCache()   
-						RefreshDropdownData()
-						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
-						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
-						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
-						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
-						--rule is missing
-						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
-					end,
-					width = "full",
-					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues	== 0 end,
-				},
+				
 				{
 					type = "header",
 					name = "Edit Category",
@@ -848,7 +795,104 @@ function AutoCategory.AddonMenuInit()
 					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
 					width = "full",
 				},
-				
+				{
+					type = "divider",
+				},
+				{
+					type = "button",
+					name = "New",
+					tooltip = "Create a new category with selected tag",
+					func = function() 
+						local newName = GetUsableRuleName("NewCategory")
+						local tag = GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")
+						if tag == "" then
+							tag = AC_EMPTY_TAG_NAME
+						end
+						local newRule = CreateNewRule(newName, tag)
+						table.insert(AutoCategory.curSavedVars.rules, newRule)
+											
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", newName)
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", newRule.tag)
+						
+						RefreshCache()
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+					end,
+					width = "full",
+				},
+				{
+					type = "button",
+					name = "Copy",
+					tooltip = "Make a new copy of selected category",
+					func = function() 
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						local rule = cacheRulesByName[ruleName]
+						local newName = GetUsableRuleName(rule.name)
+						local tag = rule.tag
+						if tag == "" then
+							tag = AC_EMPTY_TAG_NAME
+						end
+						local newRule = CreateNewRule(newName, tag)
+						newRule.description = rule.description
+						newRule.rule = rule.rule
+						table.insert(AutoCategory.curSavedVars.rules, newRule)
+											
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", newName)
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", newRule.tag)
+						
+						RefreshCache()
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+					end,
+					width = "full",
+				},
+				{
+					type = "button",
+					name = "Delete",
+					tooltip = "Delete selected rule",
+					func = function()  
+						local oldRuleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						local oldTagName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")
+						local num = #AutoCategory.curSavedVars.rules
+						for i = 1, num do
+							if oldRuleName == AutoCategory.curSavedVars.rules[i].name then
+								table.remove(AutoCategory.curSavedVars.rules, i)
+								break
+							end
+						end 
+						
+						if oldRuleName == GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE") then
+							--rule removed, clean selection in add rule menu if selected
+							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						end
+						
+						RemoveDropDownItem("AC_DROPDOWN_EDITRULE_RULE", dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues, oldRuleName, function(typeString)
+							--if tag has no rules, will remove it.
+							if oldTagName == GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG") then
+								--tag removed, clean tag selection in add rule menu if selected
+								SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", "")
+							end
+							RemoveDropDownItem("AC_DROPDOWN_EDITRULE_TAG", dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues, oldTagName)
+						end)
+ 
+						RefreshCache()   
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						--rule is missing
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+					end,
+					width = "full",
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues	== 0 end,
+				},
 		    },
 		},
 		
