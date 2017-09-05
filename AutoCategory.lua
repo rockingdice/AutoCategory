@@ -4,6 +4,7 @@
 
 --load LibAddonsMenu-2.0
 local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0");
+local LibItemStatus = LibStub:GetLibrary("LibItemStatus")
 
 ----------------------
 --INITIATE VARIABLES--
@@ -471,7 +472,7 @@ function AutoCategory.LazyInit()
 		--removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
 		--removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
 		
-		AutoCategory.AddonMenu.Init()
+		AutoCategory.AddonMenuInit()
 		
 		AutoCategory.HookGamepadCraft()
 		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
@@ -950,12 +951,8 @@ end
 
 
 function AutoCategory.RuleFunc.KeepForResearch( ... )
-	if GamePadBuddy then
-		local itemFlagStatus = GamePadBuddy:GetItemFlagStatus(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
-		return itemFlagStatus == GamePadBuddy.CONST.ItemFlags.ITEM_FLAG_TRAIT_RESEARABLE
-	else
-		return true
-	end
+	local itemFlagStatus = LibItemStatus:GetItemFlagStatus(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return itemFlagStatus == LibItemStatus.CONST.ItemFlags.ITEM_FLAG_TRAIT_RESEARABLE
 end
 
 function AutoCategory.RuleFunc.SetName( ... )
@@ -1147,8 +1144,7 @@ AutoCategory.Environment = {
 	isequipping = AutoCategory.RuleFunc.IsEquipping,
 
 	isinquickslot = AutoCategory.RuleFunc.IsInQuickslot,
-	
-	-- GamePadBuddy
+	 
 	keepresearch = AutoCategory.RuleFunc.KeepForResearch,
 
 	-- Iakoni's Gear Changer
@@ -1175,7 +1171,8 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 	local needCheck = false
 	local bag = AutoCategory.curSavedVars.bags[bag_type_id]
 	for i = 1, #bag.rules do
-		local rule = bag.rules[i] 
+		local entry = bag.rules[i] 
+		local rule = AutoCategory.GetRuleByName(entry.name)
 
 		rule.damaged = false
 		if rule.rule == nil then
@@ -1191,7 +1188,7 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex )
 			local ok, res = pcall( ruleCode )
 			if ok then
 				if res == true then
-					return true, rule.categoryName .. AutoCategory.AdditionCategoryName, rule.priority
+					return true, rule.name .. AutoCategory.AdditionCategoryName, entry.priority
 				end 
 			else
 				d("Error2: " .. res)

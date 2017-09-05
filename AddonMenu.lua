@@ -1,52 +1,39 @@
 local _
 local LAM = LibStub:GetLibrary("LibAddonMenu-2.0")
+  
+--cache data for dropdown: 
+local cacheTags = {}
+cacheTags = {}
+ 
+local cacheBags = {}
+cacheBags.showNames = {[AC_BAG_TYPE_BACKPACK] = "Backpack", [AC_BAG_TYPE_BANK] = "Bank"}
+cacheBags.values = {AC_BAG_TYPE_BACKPACK, AC_BAG_TYPE_BANK}
+cacheBags.tooltips = {"Backpack", "Bank"}
 
-AutoCategory.AddonMenu = {}
-AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_BAG = "AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_BAG"
-AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE = "AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE"
-AutoCategory.AddonMenu.DROPDOWN_ADDRULE_TAG = "AutoCategory.AddonMenu.DROPDOWN_ADDRULE_TAG"
-AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE = "AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE"
-AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG = "AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG"
-AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE = "AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE"
-AutoCategory.AddonMenu.EDITBOX_EDITRULE_NAME = "AutoCategory.AddonMenu.EDITBOX_EDITRULE_NAME"
-AutoCategory.AddonMenu.EDITBOX_EDITRULE_TAG = "AutoCategory.AddonMenu.EDITBOX_EDITRULE_TAG"
-local selectedTag_RuleEditTab = ""
-local selectedRule_RuleEditTab = ""
-local selectedBag_BagViewTab = AC_BAG_TYPE_BACKPACK
-local selectedRule_BagViewTab = ""
-local selectedTag_BagAddRuleTab = ""
-local selectedRule_BagAddRuleTab = ""
+local cacheRulesByTag = {}
+local cacheRulesByBag = {}
 
-
-
---array: tagName
-local dataTags = {}
-dataTags.values = {}
-
---array: bagData
-local dataBags = {}
-dataBags.showNames = {[AC_BAG_TYPE_BACKPACK] = "Backpack", [AC_BAG_TYPE_BANK] = "Bank"}
-dataBags.values = {AC_BAG_TYPE_BACKPACK, AC_BAG_TYPE_BANK}
-dataBags.tooltips = {"Backpack", "Bank"}
-
-local dataRulesByTag = {}
-local dataRulesByBag = {}
-
-local dataCurrentRules_AddRule = {}
-local dataCurrentRules_EditRule = {}
-local dataCurrentRules_BagView = {}
-
---map{tagName : array{ruleData}} 
+--cache for quick index
 local cacheRulesByName = {}
 local cacheBagEntriesByName = {}
 
-local dropdownData = {}
+--dropdown data for index
+local dropdownData = {
+	["AC_DROPDOWN_EDITBAG_BAG"] = {indexValue = AC_BAG_TYPE_BACKPACK, choices = {}, choicesValues = {}, choicesTooltips = {}},
+	["AC_DROPDOWN_EDITBAG_RULE"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
+	["AC_DROPDOWN_ADDCATEGORY_TAG"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
+	["AC_DROPDOWN_ADDCATEGORY_RULE"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
+	["AC_DROPDOWN_EDITRULE_TAG"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
+	["AC_DROPDOWN_EDITRULE_RULE"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
+}
+
+--warning message
 local warningDuplicatedName = {
 	warningMessage = nil,
 }
 
 local function UpdateDuplicateNameWarning()
-	local control = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.EDITBOX_EDITRULE_NAME, "")
+	local control = WINDOW_MANAGER:GetControlByName("AC_EDITBOX_EDITRULE_NAME", "")
 	if control then
 		control:UpdateWarning()			
 	end
@@ -57,24 +44,7 @@ local function RefreshPanel()
 
 	--restore warning
 	warningDuplicatedName.warningMessage = nil	
-end
-
-local emptyCategory = {
-	priority = 0,
-	rule = "",
-	bag = 1,
-	description = "",
-	categoryName = "",
-}
-function AutoCategory.AddonMenu.GetCategorySetting(categoryName)
-	for i = 1, #AutoCategory.curSavedVars.ruleSettings  do
-		local set = AutoCategory.curSavedVars.ruleSettings[i]
-		if set and set.categoryName == categoryName then
-			return set, i
-		end
-	end
-	return emptyCategory, -1
-end
+end 
 
 local function RuleDataSortingFunction(a, b)
 	local result = false
@@ -98,11 +68,32 @@ local function BagDataSortingFunction(a, b)
 	return result
 end 
 
+local function SelectDropDownItem(typeString, item)
+	dropdownData[typeString].indexValue = item
+end
+
+local function GetDropDownSelection(typeString)
+	return dropdownData[typeString].indexValue
+end
+
+local function ToggleSubmenu(typeString, open)
+	local control = WINDOW_MANAGER:GetControlByName(typeString, "")
+	if control then
+		control.open = open
+		if control.open then
+			control.animation:PlayFromStart()
+		else
+			control.animation:PlayFromEnd()
+		end	
+	end
+end
+
 local function RefreshCache() 
 	cacheRulesByName = {}
-	dataTags.values = {}
-	dataRulesByTag = {}
-	dataRulesByBag = {}
+	cacheBagEntriesByName = {}
+	cacheTags = {}
+	cacheRulesByTag = {}
+	cacheRulesByBag = {}
 
 	table.sort(AutoCategory.curSavedVars.rules, function(a, b) return RuleDataSortingFunction(a, b) end )
 	for i = 1, #AutoCategory.curSavedVars.rules do
@@ -116,33 +107,36 @@ local function RefreshCache()
 		cacheRulesByName[name] = rule
 
 		--update data for showing in the dropdown menu
-		if not dataRulesByTag[tag] then
+		if not cacheRulesByTag[tag] then
 			--d("add tag rule: ".. tag)
-			dataRulesByTag[tag] = {showNames = {}, values = {}, tooltips = {}}
-			table.insert(dataTags.values, tag)
+			cacheRulesByTag[tag] = {showNames = {}, values = {}, tooltips = {}}
+			table.insert(cacheTags, tag)
 		end
 		local tooltip = rule.description
 		if rule.description == "" then
 			tooltip = rule.name
 		end
 		--d("added rule: ".. name)
-		table.insert(dataRulesByTag[tag].showNames, name)
-		table.insert(dataRulesByTag[tag].values, name)
-		table.insert(dataRulesByTag[tag].tooltips, tooltip)
+		table.insert(cacheRulesByTag[tag].showNames, name)
+		table.insert(cacheRulesByTag[tag].values, name)
+		table.insert(cacheRulesByTag[tag].tooltips, tooltip)
 	end
 
 	for i = 1, #AutoCategory.curSavedVars.bags do
 		local bag = AutoCategory.curSavedVars.bags[i]
-		table.sort(bag, function(a, b) return BagDataSortingFunction(a, b) end )
+		table.sort(bag.rules, function(a, b) return BagDataSortingFunction(a, b) end )
 		--update data for showing in the dropdown menu
 		local bagId = i
-		if not dataRulesByBag[bagId] then
-			dataRulesByBag[bagId] = {showNames = {}, values = {}, tooltips = {}}
+		if not cacheRulesByBag[bagId] then
+			cacheRulesByBag[bagId] = {showNames = {}, values = {}, tooltips = {}}
+		end
+		if not cacheBagEntriesByName[bagId] then
+			cacheBagEntriesByName[bagId] = {}
 		end
 		for j = 1, #bag.rules do
 			local data = bag.rules[j]
 			local ruleName = data.name
-			cacheBagEntriesByName[ruleName] = data
+			cacheBagEntriesByName[bagId][ruleName] = data
 			
 			local priority = data.priority
 			local rule = cacheRulesByName[ruleName]
@@ -155,122 +149,145 @@ local function RefreshCache()
 				if tooltip == "" then
 					tooltip = rule.name
 				end 
-				table.insert(dataRulesByBag[bagId].showNames, string.format("%s%s (%d)", ruleName, priority))
-				table.insert(dataRulesByBag[bagId].values, ruleName)
-				table.insert(dataRulesByBag[bagId].tooltips, tooltip)
+				table.insert(cacheRulesByBag[bagId].showNames, string.format("%s (%d)", ruleName, priority))
+				table.insert(cacheRulesByBag[bagId].values, ruleName)
+				table.insert(cacheRulesByBag[bagId].tooltips, tooltip)
 			else
-				table.insert(dataRulesByBag[bagId].showNames, string.format("! %s (%d)", ruleName, priority))
-				table.insert(dataRulesByBag[bagId].values, ruleName)
-				table.insert(dataRulesByBag[bagId].tooltips, "This rule is missing, please make sure the rule with this name exist.")
+				table.insert(cacheRulesByBag[bagId].showNames, string.format("|cFF4444(!)|r %s (%d)", ruleName, priority))				
+				table.insert(cacheRulesByBag[bagId].values, ruleName)
+				table.insert(cacheRulesByBag[bagId].tooltips, "This rule is missing, please make sure the rule with this name exist.")
 			end
-			
 		end
 	end
-end
+	
+end 
 
-local function RefreshDropDownSelection()
-	--try to select first 
-	if selectedTag_BagAddRuleTab == "" and #dataTags.values > 0 then
-		selectedTag_BagAddRuleTab = dataTags.values[1]
-	end
-	if selectedTag_RuleEditTab == "" and #dataTags.values > 0 then
-		selectedTag_RuleEditTab = dataTags.values[1]
-	end
-	if selectedBag_BagViewTab == "" and #dataBags.values > 0 then
-		selectedBag_BagViewTab = dataBags.values[1]
-	end
-	if selectedRule_BagViewTab == "" and dataRulesByBag[selectedBag_BagViewTab] and #dataRulesByBag[selectedBag_BagViewTab].values > 0 then
-		selectedRule_BagViewTab = dataRulesByBag[selectedBag_BagViewTab].values[1]
-	end
-	if selectedRule_RuleEditTab == "" and dataRulesByTag[selectedTag_RuleEditTab] and #dataRulesByTag[selectedTag_RuleEditTab].values > 0 then
-		selectedRule_RuleEditTab = dataRulesByTag[selectedTag_RuleEditTab].values[1]
-	end
-	if selectedRule_BagAddRuleTab == "" and dataRulesByTag[selectedTag_BagAddRuleTab] and #dataRulesByTag[selectedTag_BagAddRuleTab].values > 0 then
-		selectedRule_BagAddRuleTab = dataRulesByTag[selectedTag_BagAddRuleTab].values[1]
-	end
-end
 
-local function RefreshCurrentRules()
-	dataCurrentRules_AddRule = {}
-	dataCurrentRules_AddRule.showNames = {}
-	dataCurrentRules_AddRule.values = {}
-	dataCurrentRules_AddRule.tooltips = {}
-	dataCurrentRules_EditRule = {}
+local function RefreshDropdownData()
+	local dataCurrentRules_AddCategory = {}
+	dataCurrentRules_AddCategory.showNames = {}
+	dataCurrentRules_AddCategory.values = {}
+	dataCurrentRules_AddCategory.tooltips = {}
+	local dataCurrentRules_EditRule = {}
 	dataCurrentRules_EditRule.showNames = {}
 	dataCurrentRules_EditRule.values = {}
 	dataCurrentRules_EditRule.tooltips = {}
-	dataCurrentRules_BagView = {}
-	dataCurrentRules_BagView.showNames = {}
-	dataCurrentRules_BagView.values = {}
-	dataCurrentRules_BagView.tooltips = {}
-	  
-	if dataRulesByTag[selectedTag_BagAddRuleTab] then 
-		dataCurrentRules_AddRule.showNames = dataRulesByTag[selectedTag_BagAddRuleTab].showNames
-		dataCurrentRules_AddRule.values = dataRulesByTag[selectedTag_BagAddRuleTab].values
-		dataCurrentRules_AddRule.tooltips = dataRulesByTag[selectedTag_BagAddRuleTab].tooltips
+	local dataCurrentRules_EditBag = {}
+	dataCurrentRules_EditBag.showNames = {}
+	dataCurrentRules_EditBag.values = {}
+	dataCurrentRules_EditBag.tooltips = {}
+	 
+	--update tag & bag selection first
+	if GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG") == "" and #cacheTags > 0 then
+		SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", cacheTags[1])
+	end
+	if GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG") == "" and #cacheTags > 0 then
+		SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", cacheTags[1])
+	end
+	if GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") == "" and #cacheBags.values > 0 then
+		SelectDropDownItem("AC_DROPDOWN_EDITBAG_BAG", cacheBags.values[1])
 	end
 
-	if dataRulesByTag[selectedTag_RuleEditTab] then 
-		dataCurrentRules_EditRule.showNames = dataRulesByTag[selectedTag_RuleEditTab].showNames
-		dataCurrentRules_EditRule.values = dataRulesByTag[selectedTag_RuleEditTab].values
-		dataCurrentRules_EditRule.tooltips = dataRulesByTag[selectedTag_RuleEditTab].tooltips
+	--refresh current dropdown rules
+	if cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")] then 
+		dataCurrentRules_EditRule.showNames = cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")].showNames
+		dataCurrentRules_EditRule.values = cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")].values
+		dataCurrentRules_EditRule.tooltips = cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")].tooltips
 	end
 
-	if dataRulesByBag[selectedBag_BagViewTab] then 
-		dataCurrentRules_BagView.showNames = dataRulesByBag[selectedBag_BagViewTab].showNames
-		dataCurrentRules_BagView.values =dataRulesByBag[selectedBag_BagViewTab].values
-		dataCurrentRules_BagView.tooltips = dataRulesByBag[selectedBag_BagViewTab].tooltips
+	if cacheRulesByBag[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")] then 
+		dataCurrentRules_EditBag.showNames = cacheRulesByBag[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")].showNames
+		dataCurrentRules_EditBag.values =cacheRulesByBag[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")].values
+		dataCurrentRules_EditBag.tooltips = cacheRulesByBag[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")].tooltips
 	end
 
-end
-
-local function RefreshDropdownData()
-	dropdownData = {
-		[AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_BAG] = {
-			choices = dataBags.showNames,
-			choicesValues = dataBags.values,
-			choicesTooltips = dataBags.tooltips,
-		},
-
-		[AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE] = {
-			choices = dataCurrentRules_BagView.showNames,
-			choicesValues = dataCurrentRules_BagView.values,
-			choicesTooltips = dataCurrentRules_BagView.tooltips,
-		},
-
-		[AutoCategory.AddonMenu.DROPDOWN_ADDRULE_TAG] = {
-			choices = dataTags.values, 
-			choicesValues = dataTags.values,
-			choicesTooltips = dataTags.values,
-		},
-
-		[AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE] = {
-			choices = dataCurrentRules_AddRule.showNames,
-			choicesValues = dataCurrentRules_AddRule.values,
-			choicesTooltips = dataCurrentRules_AddRule.tooltips,
-		},
-
-		[AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG] = {
-			choices = dataTags.values, 
-			choicesValues = dataTags.values,
-			choicesTooltips = dataTags.values,
-		},
-
-		[AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE] = {
-			choices = dataCurrentRules_EditRule.showNames,
-			choicesValues =  dataCurrentRules_EditRule.values,
-			choicesTooltips =  dataCurrentRules_EditRule.tooltips,
-		},
-	}  
+	if cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG")] then 
+		--remove the rules alreadly in bag
+		for i = 1, #cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG")].values do
+			local value = cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG")].values[i]
+			if cacheBagEntriesByName[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")][value] == nil then
+				--add the rule if not in bag
+				table.insert(dataCurrentRules_AddCategory.showNames, cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG")].showNames[i])
+				table.insert(dataCurrentRules_AddCategory.values, cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG")].values[i])
+				table.insert(dataCurrentRules_AddCategory.tooltips, cacheRulesByTag[GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG")].tooltips[i])
+			end
+		end
+	end
+	
+	--update rules selection base on current dropdown data
+	if GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE") == "" and #dataCurrentRules_EditBag.values > 0 then
+		SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", dataCurrentRules_EditBag.values[1])
+	end
+	if GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE") == "" and #dataCurrentRules_EditRule.values > 0 then
+		SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", dataCurrentRules_EditRule.values[1])
+	end
+	if GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE") == "" and #dataCurrentRules_AddCategory.values > 0 then
+		SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", dataCurrentRules_AddCategory.values[1])
+	end
+	
+	--update data indices
+	dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choices = cacheBags.showNames
+	dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choicesValues = cacheBags.values
+	dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choicesTooltips = cacheBags.tooltips
+	 
+	dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choices = dataCurrentRules_EditBag.showNames
+	dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues = dataCurrentRules_EditBag.values
+	dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesTooltips = dataCurrentRules_EditBag.tooltips
+	
+	dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choices = cacheTags
+	dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesValues = cacheTags
+	dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesTooltips = cacheTags
+	
+	dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choices = dataCurrentRules_AddCategory.showNames
+	dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues = dataCurrentRules_AddCategory.values
+	dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesTooltips = dataCurrentRules_AddCategory.tooltips
+	
+	dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choices = cacheTags
+	dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues = cacheTags
+	dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesTooltips = cacheTags
+	
+	dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choices = dataCurrentRules_EditRule.showNames
+	dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues = dataCurrentRules_EditRule.values
+	dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesTooltips = dataCurrentRules_EditRule.tooltips
+	
 end
  
 local function UpdateDropDownMenu(name)
 	local dropdownCtrl = WINDOW_MANAGER:GetControlByName(name, "")
-	RefreshDropdownData()
 	local data = dropdownData[name]
 
 	dropdownCtrl:UpdateChoices(data.choices, data.choicesValues, data.choicesTooltips) 
 end
+
+local function RemoveDropDownItem(typeString, dataArray, removeItem, emptyCallback)
+	local removeIndex = -1
+	local num = #dataArray
+	for i = 1, num do
+		if removeItem == dataArray[i] then
+			removeIndex = i
+			table.remove(dataArray, removeIndex)
+			break
+		end
+	end
+	
+	assert(removeIndex ~= -1, "Cannot remove item " .. removeItem .. " in dropdown: " .. typeString)
+	
+	if num == 1 then
+		--select none
+		SelectDropDownItem(typeString, "")
+		if emptyCallback then
+			emptyCallback(typeString)
+		end
+	elseif removeIndex == num then
+		--no next one, select previous one
+		SelectDropDownItem(typeString, dataArray[removeIndex-1])
+	else
+		--select next one
+		SelectDropDownItem(typeString, dataArray[removeIndex])
+	end
+	
+end
+
 
 local function IsRuleNameUsed(name)
 	return cacheRulesByName[name] ~= nil
@@ -315,11 +332,16 @@ local function RemoveRuleFromBag(ruleName, bagId)
 	return -1
 end
 
-function AutoCategory.AddonMenu.Init()
-	AutoCategory.UpdateCurrentSavedVars()
-	RefreshCache() 
-	RefreshDropDownSelection()
-	RefreshCurrentRules()
+function AutoCategory.GetRuleByName(name)
+	if cacheRulesByName then
+		return cacheRulesByName[name]
+	end
+end
+
+function AutoCategory.AddonMenuInit()
+	AutoCategory.UpdateCurrentSavedVars() 
+	RefreshCache()  
+	RefreshDropdownData() 
  
 	local panelData =  {
 		type = "panel",
@@ -331,9 +353,8 @@ function AutoCategory.AddonMenu.Init()
 		registerForDefaults = true,
 		resetFunc = function() 
 			AutoCategory.ResetToDefaults()
-			RefreshCache()
-			RefreshDropDownSelection()
-			RefreshCurrentRules()
+			RefreshCache() 
+			RefreshDropdownData()
 		end,
 	}
 	
@@ -356,98 +377,78 @@ function AutoCategory.AddonMenu.Init()
 		{
 			type = "submenu",
 		    name = "|c0066FF[Bag Setting]|r", -- or string id or function returning a string
+			reference = "AC_SUBMENU_BAG_SETTING",
 		    controls = {
 				{		
 					type = "dropdown",
 					name = "Bag",
 					tooltip = "Select a bag to modify rules that apply on",
-					choices = dataBags.showNames,
-					choicesValues = dataBags.values,
-					choicesTooltips = dataBags.tooltips,
+					choices = dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choices,
+					choicesValues = dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choicesValues,
+					choicesTooltips = dropdownData["AC_DROPDOWN_EDITBAG_BAG"].choicesTooltips,
 					
-					getFunc = function() 
-						return selectedBag_BagViewTab 
+					getFunc = function()  
+						return GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
 					end,
-					setFunc = function(value) 			
-						selectedBag_BagViewTab = value
-						RefreshCurrentRules()
-						RefreshDropDownSelection()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
+					setFunc = function(value) 	
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_BAG", value)
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+						--reset add rule's selection, since all data will be changed.
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						 
+						RefreshDropdownData() 
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
 					end, 
 					width = "half",
-					reference = AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_BAG
+					reference = "AC_DROPDOWN_EDITBAG_BAG"
 				},
 				{		
 					type = "dropdown",
-					name = "Groups",
-					choices = dataCurrentRules_BagView.showNames,
-					choicesValues = dataCurrentRules_BagView.values,
-					choicesTooltips = dataCurrentRules_BagView.tooltips,
+					name = "Categories",
+					choices = dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choices,
+					choicesValues = dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues,
+					choicesTooltips = dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesTooltips,
 					
 					getFunc = function() 
-						return selectedRule_BagViewTab 
+						return GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE") 
 					end,
-					setFunc = function(value) 			
-						selectedRule_BagViewTab = value
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
+					setFunc = function(value) 			 
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", value )
 					end, 
-					disabled = function() return #dataCurrentRules_BagView == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues == 0 end,
 					width = "half",
-					reference = AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE
-				},
-				{
-					type = "button",
-					name = "Remove",
-					tooltip = "Remove selected rule from bag",
-					func = function()  
-						local ruleName = selectedRule_BagViewTab
-						local removedIndex = RemoveRuleFromBag(ruleName, selectedBag_BagViewTab)
-						local rules = AutoCategory.curSavedVars.bags[selectedBag_BagViewTab].rules
-						if #rules == 0 then
-							selectedRule_BagViewTab = ""
-						else
-							if removedIndex >= #rules then
-								removedIndex = #rules - 1
-							end
-							selectedRule_BagViewTab = rules[removedIndex].name
-						end
-						RefreshCache()
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
-					end,
-					disabled = function() return #dataCurrentRules_BagView == 0 end,
-					width = "full",
-				},
-				{
-					type = "header",
-					name = "Edit Group Order",
-					width = "full",
+					reference = "AC_DROPDOWN_EDITBAG_RULE"
 				},
 				{
 					type = "slider",
-					name = "Priority",
-					tooltip = "Priority determines the order of the group in the bag, higher means more ahead position.",
+					name = "Category Priority",
+					tooltip = "Category Priority determines the order of the category in the bag, higher means more ahead position.",
 					min = 0,
 					max = 100,
 					getFunc = function() 
-						if cacheBagEntriesByName[selectedRule_BagViewTab] then
-							return cacheBagEntriesByName[selectedRule_BagViewTab].priority
+						local bag = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
+						local rule = GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE")
+						if cacheBagEntriesByName[bag][rule] then
+							return cacheBagEntriesByName[bag][rule].priority
 						end
 						return 0
 					end, 
 					setFunc = function(value) 
-						if cacheBagEntriesByName[selectedRule_BagViewTab] then
-							cacheBagEntriesByName[selectedRule_BagViewTab].priority = value 
+						local bag = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
+						local rule = GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE")
+						if cacheBagEntriesByName[bag][rule] then
+							cacheBagEntriesByName[bag][rule].priority = value 
 							RefreshCache()
-							RefreshCurrentRules()
-							UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
+							RefreshDropdownData()
+							UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
 						end
 					end,
 					disabled = function() 
-						if selectedRule_BagViewTab == "" then
+						if GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE") == "" then
 							return true
-						end
-						if not cacheBagEntriesByName[selectedRule_BagViewTab] then
+						end 
+						if #dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues == 0 then
 							return true
 						end
 						return false
@@ -455,61 +456,129 @@ function AutoCategory.AddonMenu.Init()
 					width = "full",
 				},
 				{
+					type = "button",
+					name = "Edit",
+					tooltip = "Edit selected category in the category setting.",
+					func = function()
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE")
+						local rule = cacheRulesByName[ruleName]
+						if rule then
+							SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", rule.tag)
+							SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", rule.name) 
+							RefreshDropdownData()
+							UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+							ToggleSubmenu("AC_SUBMENU_BAG_SETTING", false)
+							ToggleSubmenu("AC_SUBMENU_CATEGORY_SETTING", true)
+						end
+					end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues == 0 end,
+					width = "full",
+				},
+				{
+					type = "button",
+					name = "Remove",
+					tooltip = "Remove selected rule from bag",
+					func = function()  
+						local bagId = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE")
+						for i = 1, #AutoCategory.curSavedVars.bags[bagId].rules do
+							local bagEntry = AutoCategory.curSavedVars.bags[bagId].rules[i]
+							if bagEntry.name == ruleName then
+								table.remove(AutoCategory.curSavedVars.bags[bagId].rules, i)
+								break
+							end
+						end
+						RemoveDropDownItem("AC_DROPDOWN_EDITBAG_RULE", dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues, ruleName)
+						
+						RefreshCache()
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+					end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues == 0 end,
+					width = "full",
+				},
+				{
 					type = "header",
-					name = "Add Group",
+					name = "Add Category",
 					width = "full",
 				},
 				{		
 					type = "dropdown",
 					name = "Tag",
-					choices = dataTags.values, 
-					choicesValues = dataTags.values,
-					choicesTooltips = dataTags.values,
+					choices = dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choices, 
+					choicesValues = dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesValues,
+					choicesTooltips = dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesTooltips,
 					
 					getFunc = function() 
-						return selectedTag_BagAddRuleTab 
+						return GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG") 
 					end,
 					setFunc = function(value) 			
-						selectedTag_BagAddRuleTab = value
-						RefreshCurrentRules()
-						RefreshDropDownSelection()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE)
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", value)
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						RefreshDropdownData() 
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
 					end, 
 					width = "half",
-					disabled = function() return #dataTags.values == 0 end,
-					reference = AutoCategory.AddonMenu.DROPDOWN_ADDRULE_TAG
+					disabled = function() return #dropdownData["AC_DROPDOWN_ADDCATEGORY_TAG"].choicesValues == 0 end,
+					reference = "AC_DROPDOWN_ADDCATEGORY_TAG"
 				},
 				{		
 					type = "dropdown",
-					name = "Rule",
-					choices = dataCurrentRules_AddRule.showNames,
-					choicesValues = dataCurrentRules_AddRule.values,
-					choicesTooltips = dataCurrentRules_AddRule.tooltips,
+					name = "Category",
+					choices = dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choices, 
+					choicesValues = dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues,
+					choicesTooltips = dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesTooltips,
 					
 					getFunc = function() 
-						return selectedRule_BagAddRuleTab 
+						return GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE") 
 					end,
 					setFunc = function(value) 			
-						selectedRule_BagAddRuleTab = value
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", value)
 					end, 
-					disabled = function() return #dataCurrentRules_AddRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues == 0 end,
 					width = "half",
-					reference = AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE
+					reference = "AC_DROPDOWN_ADDCATEGORY_RULE"
+				},
+				{
+					type = "button",
+					name = "Edit",
+					tooltip = "Edit selected category in the category setting.",
+					func = function()
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE")
+						local rule = cacheRulesByName[ruleName]
+						if rule then
+							SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", rule.tag)
+							SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", rule.name) 
+							RefreshDropdownData()
+							UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+							ToggleSubmenu("AC_SUBMENU_BAG_SETTING", false)
+							ToggleSubmenu("AC_SUBMENU_CATEGORY_SETTING", true)
+						end
+					end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues == 0 end,
+					width = "full",
 				},
 				{
 					type = "button",
 					name = "Add",
 					tooltip = "Add selected rule to the bag",
 					func = function()  
-						local ruleName = selectedRule_BagAddRuleTab
+						local bagId = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE")
+						assert(cacheBagEntriesByName[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")][ruleName] == nil, "Bag(" .. bagId .. ") already has the rule: ".. ruleName)
+					 
 						local entry = CreateNewBagRuleEntry(ruleName)
-						table.insert(AutoCategory.curSavedVars.bags[selectedBag_BagViewTab], entry) 
-						selectedRule_BagViewTab = ruleName
+						table.insert(AutoCategory.curSavedVars.bags[bagId].rules, entry) 
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", ruleName) 
+						RemoveDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues, ruleName)
+						 
 						RefreshCache()
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
 					end,
-					disabled = function() return #dataCurrentRules_AddRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues == 0 end,
 					width = "full",
 				},
 				
@@ -517,67 +586,69 @@ function AutoCategory.AddonMenu.Init()
 		},
 		{
 			type = "submenu",
-		    name = "|c0066FF[Rule Setting]|r", -- or string id or function returning a string
+		    name = "|c0066FF[Category Setting]|r",
+			reference = "AC_SUBMENU_CATEGORY_SETTING",
 		    controls = {
 				{		
 					type = "dropdown",
 					name = "Tag",
 					tooltip = "Tag the rule and make them organized.",
-					choices = dataTags.values, 
-					choicesValues = dataTags.values,
-					choicesTooltips = dataTags.values,
+					choices = dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choices, 
+					choicesValues = dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues, 
+					choicesTooltips = dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesTooltips, 
 					
 					getFunc = function() 
-						return selectedTag_RuleEditTab 
+						return GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG") 
 					end,
 					setFunc = function(value) 			
-						selectedTag_RuleEditTab = value
-						selectedRule_RuleEditTab = ""
-						RefreshCurrentRules()
-						RefreshDropDownSelection()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE)
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", value)
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", "")
+						RefreshDropdownData() 
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
 					end, 
 					width = "half",
-					disabled = function() return #dataTags.values == 0 end,
-					reference = AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
+					reference = "AC_DROPDOWN_EDITRULE_TAG"
 				},
 				{		
 					type = "dropdown",
-					name = "Rule", 
-					choices = dataCurrentRules_EditRule.showNames,
-					choicesValues =  dataCurrentRules_EditRule.values,
-					choicesTooltips =  dataCurrentRules_EditRule.tooltips,
+					name = "Category", 
+					choices = dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choices, 
+					choicesValues =  dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues, 
+					choicesTooltips =  dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesTooltips, 
 					
 					getFunc = function() 
-						return selectedRule_RuleEditTab 
+						return GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE") 
 					end,
 					setFunc = function(value) 			
-						selectedRule_RuleEditTab = value
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", value)
 					end, 
-					disabled = function() return #dataCurrentRules_EditRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues == 0 end,
 					width = "half",
-					reference = AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE
+					reference = "AC_DROPDOWN_EDITRULE_RULE"
 				},
 				{
 					type = "button",
 					name = "New",
 					tooltip = "Create a new rule",
 					func = function() 
-						local newName = GetUsableRuleName("NewRule")
-						local tag = selectedTag_RuleEditTab
+						local newName = GetUsableRuleName("NewCategory")
+						local tag = GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")
 						if tag == "" then
 							tag = AC_EMPTY_TAG_NAME
 						end
 						local newRule = CreateNewRule(newName, tag)
 						table.insert(AutoCategory.curSavedVars.rules, newRule)
 											
-						selectedRule_RuleEditTab = newName
-						selectedTag_RuleEditTab = newRule.tag
-						--d("tag:"..selectedTag_RuleEditTab)
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", newName)
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", newRule.tag)
+						
 						RefreshCache()
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE)
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
 					end,
 					width = "full",
 				},
@@ -586,52 +657,45 @@ function AutoCategory.AddonMenu.Init()
 					name = "Delete",
 					tooltip = "Delete selected rule",
 					func = function()  
+						local oldRuleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						local oldTagName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_TAG")
 						local num = #AutoCategory.curSavedVars.rules
 						for i = 1, num do
-							if selectedRule_RuleEditTab == AutoCategory.curSavedVars.rules[i].name then
+							if oldRuleName == AutoCategory.curSavedVars.rules[i].name then
 								table.remove(AutoCategory.curSavedVars.rules, i)
 								break
 							end
 						end 
-
-						--find the one after delete
-						local lastIndex = -1
-						num = #dataCurrentRules_EditRule.values
-						for i = 1, num do
-							if dataCurrentRules_EditRule.values[i] == selectedRule_RuleEditTab then			
-								table.remove(dataCurrentRules_EditRule.values, i)
-								if i ~= num then
-									lastIndex = i
-								else
-									lastIndex = i - 1
-								end
-								break
-							end
-						end
-						if lastIndex == -1 then 
-							--don't find
-							return
+						
+						if oldRuleName == GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE") then
+							--rule removed, clean selection in add rule menu if selected
+							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
 						end
 						
-						--last one deleted
-						if lastIndex == 0 then
-							selectedRule_RuleEditTab = ""
-							selectedTag_RuleEditTab = ""	
-						else
-							selectedRule_RuleEditTab = dataCurrentRules_EditRule.values[lastIndex]
-						end
-						RefreshCache()  
-						RefreshDropDownSelection()
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE)
+						RemoveDropDownItem("AC_DROPDOWN_EDITRULE_RULE", dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues, oldRuleName, function(typeString)
+							--if tag has no rules, will remove it.
+							if oldTagName == GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_TAG") then
+								--tag removed, clean tag selection in add rule menu if selected
+								SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", "")
+							end
+							RemoveDropDownItem("AC_DROPDOWN_EDITRULE_TAG", dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues, oldTagName)
+						end)
+ 
+						RefreshCache()   
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						--rule is missing
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
 					end,
 					width = "full",
-					disabled = function() return #dataCurrentRules_EditRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues	== 0 end,
 				},
 				{
 					type = "header",
-					name = "Edit Rule",
+					name = "Edit Category",
 					width = "full",
 				},
 				{
@@ -639,8 +703,9 @@ function AutoCategory.AddonMenu.Init()
 					name = "Name",
 					tooltip = "Name cannot be duplicated.",
 					getFunc = function()  
-						if cacheRulesByName[selectedRule_RuleEditTab] then
-							return cacheRulesByName[selectedRule_RuleEditTab].name
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						if cacheRulesByName[ruleName] then
+							return cacheRulesByName[ruleName].name
 						end
 						return "" 
 					end,
@@ -648,7 +713,8 @@ function AutoCategory.AddonMenu.Init()
 						return warningDuplicatedName.warningMessage
 					end,
 					setFunc = function(value) 
-						local oldName = cacheRulesByName[selectedRule_RuleEditTab].name
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						local oldName = cacheRulesByName[ruleName].name
 						if oldName == value then 
 							return
 						end
@@ -663,11 +729,11 @@ function AutoCategory.AddonMenu.Init()
 							value = oldName
 						end
 						--change editbox's value
-						local control = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.EDITBOX_EDITRULE_NAME, "")
+						local control = WINDOW_MANAGER:GetControlByName("AC_EDITBOX_EDITRULE_NAME", "")
 						control.editbox:SetText(value)
 
-						cacheRulesByName[selectedRule_RuleEditTab].name = value  				
-						selectedRule_RuleEditTab = value 
+						cacheRulesByName[ruleName].name = value  				
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", value )
 
 						--Update bags so that every entry has the same name, should be changed to new name.
 						for i = 1, #AutoCategory.curSavedVars.bags do
@@ -682,23 +748,24 @@ function AutoCategory.AddonMenu.Init()
 						end
 						--Update drop downs
 						RefreshCache()
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE)
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
 					end,
 					isMultiline = false,
-					disabled = function() return #dataCurrentRules_EditRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
 					width = "half",
-					reference = AutoCategory.AddonMenu.EDITBOX_EDITRULE_NAME,
+					reference = "AC_EDITBOX_EDITRULE_NAME",
 				},
 				{
 					type = "editbox",
 					name = "Tag",
 					tooltip = "The rule is visible only when you select its tag. <Empty> will be applied if leave the name blank.",
 					getFunc = function()  
-						if cacheRulesByName[selectedRule_RuleEditTab] then
-							return cacheRulesByName[selectedRule_RuleEditTab].tag
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						if cacheRulesByName[ruleName] then
+							return cacheRulesByName[ruleName].tag
 						end
 						return "" 
 					end, 
@@ -706,50 +773,63 @@ function AutoCategory.AddonMenu.Init()
 						if value == "" then
 							value = AC_EMPTY_TAG_NAME
 						end
-						local control = WINDOW_MANAGER:GetControlByName(AutoCategory.AddonMenu.EDITBOX_EDITRULE_TAG, "")
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						local control = WINDOW_MANAGER:GetControlByName("AC_EDITBOX_EDITRULE_TAG", "")
 						control.editbox:SetText(value)
 
-						local oldGroup = cacheRulesByName[selectedRule_RuleEditTab].tag
-						cacheRulesByName[selectedRule_RuleEditTab].tag = value
+						local oldGroup = cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].tag
+						cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].tag = value
+						
+						
+						RemoveDropDownItem("AC_DROPDOWN_EDITRULE_RULE", dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues, ruleName, function(typeString)
+							--try to remove this rule from the tag, if tag needs delete, reselect it in add rule tab		
+							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", "")		
+							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						end)
+						
+						if GetDropDownSelection("AC_DROPDOWN_ADDCATEGORY_RULE") == ruleName then
+							--modify the same rule, reselect add rule tab
+							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", value)
+							SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", ruleName)
+						end
 
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", value) 
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", ruleName) 
+						
 						RefreshCache()
-						--If using this group, change selected group to new one.
-						if selectedTag_BagAddRuleTab == oldGroup then
-							selectedTag_BagAddRuleTab = value
-						end 
-						selectedTag_RuleEditTab = value
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_ADDRULE_TAG)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_TAG)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE)
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
 					 
 					end,
 					isMultiline = false,
-					disabled = function() return #dataCurrentRules_EditRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
 					width = "half",
-					reference = AutoCategory.AddonMenu.EDITBOX_EDITRULE_TAG,
+					reference = "AC_EDITBOX_EDITRULE_TAG",
 				},
 				{
 					type = "editbox",
 					name = "Description",
 					tooltip = "Description",
 					getFunc = function() 
-						if cacheRulesByName[selectedRule_RuleEditTab] then
-							return cacheRulesByName[selectedRule_RuleEditTab].description
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						if cacheRulesByName[ruleName] then
+							return cacheRulesByName[ruleName].description
 						end
 						return "" 
 					end, setFunc = function(value) 
-						cacheRulesByName[selectedRule_RuleEditTab].description = value 
+						cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].description = value 
 						RefreshCache()
-						RefreshCurrentRules()
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_BAGVIEW_RULE)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_EDITRULE_RULE)
-						UpdateDropDownMenu(AutoCategory.AddonMenu.DROPDOWN_ADDRULE_RULE)
+						RefreshDropdownData()
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
 					end,
 					isMultiline = false,
 					isExtraWide = true,
-					disabled = function() return #dataCurrentRules_EditRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
 					width = "full",
 				},
 				{
@@ -757,14 +837,15 @@ function AutoCategory.AddonMenu.Init()
 					name = "Rule",
 					tooltip = "Rules will be applied to bags to categorize items",
 					getFunc = function() 
-						if cacheRulesByName[selectedRule_RuleEditTab] then
-							return cacheRulesByName[selectedRule_RuleEditTab].rule
+						local ruleName = GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")
+						if cacheRulesByName[ruleName] then
+							return cacheRulesByName[ruleName].rule
 						end
 						return "" 
-					end, setFunc = function(value) cacheRulesByName[selectedRule_RuleEditTab].rule = value end,
+					end, setFunc = function(value) cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].rule = value end,
 					isMultiline = true,
 					isExtraWide = true,
-					disabled = function() return #dataCurrentRules_EditRule.values == 0 end,
+					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
 					width = "full",
 				},
 				
