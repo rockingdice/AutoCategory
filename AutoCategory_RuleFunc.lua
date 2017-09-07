@@ -1,6 +1,6 @@
-
 --============Rule Function==============--
 
+local LibItemStatus = LibStub:GetLibrary("LibItemStatus")
 function AutoCategory.RuleFunc.SpecializedItemType( ... )
 	local fn = "type"
 	local ac = select( '#', ... )

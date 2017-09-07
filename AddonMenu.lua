@@ -364,13 +364,7 @@ function AutoCategory.AddonMenuInit()
 		end,
 	}
 	
-	local optionsTable = {
-		{
-			type = "submenu",
-		    name = "|c0066FF[General Setting]|r", -- or string id or function returning a string
-		    controls = {
-			},
-		},
+	local optionsTable = { 
 		{
 			type = "submenu",
 		    name = "|c0066FF[Bag Setting]|r", -- or string id or function returning a string
