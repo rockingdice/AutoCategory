@@ -23,6 +23,9 @@ Libs/LibAddonMenu-2.0/controls/slider.lua
 Libs/LibAddonMenu-2.0/controls/texture.lua
 Libs/LibAddonMenu-2.0/controls/iconpicker.lua
 
+AutoCategory_Defaults.lua
 AutoCategory.xml
 AutoCategory.lua
 AddonMenu.lua
+AutoCategory_RuleFunc.lua
+AutoCategory_API.lua

@@ -369,15 +369,6 @@ function AutoCategory.AddonMenuInit()
 			type = "submenu",
 		    name = "|c0066FF[General Setting]|r", -- or string id or function returning a string
 		    controls = {
-				{
-					type = "checkbox",
-					name = "Account Wide Setting",
-					tooltip = "Use these settings as account-wide",
-					getFunc = function() return AutoCategory.acctSavedVariables.accountWideSetting end,
-					setFunc = function(value) AutoCategory.acctSavedVariables.accountWideSetting = value
-						AutoCategory.UpdateCurrentSavedVars()
-					end,
-				},
 			},
 		},
 		{
@@ -385,6 +376,18 @@ function AutoCategory.AddonMenuInit()
 		    name = "|c0066FF[Bag Setting]|r", -- or string id or function returning a string
 			reference = "AC_SUBMENU_BAG_SETTING",
 		    controls = {
+				{
+					type = "checkbox",
+					name = "Account Wide Setting",
+					tooltip = "Use account-wide bag setting",
+					getFunc = function() return AutoCategory.acctSavedVariables.accountWideSetting end,
+					setFunc = function(value) AutoCategory.acctSavedVariables.accountWideSetting = value
+						AutoCategory.UpdateCurrentSavedVars()
+					end,
+				},
+				{
+					type = "divider",
+				},
 				{		
 					type = "dropdown",
 					name = "Bag",

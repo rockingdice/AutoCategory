@@ -20,6 +20,17 @@
                 <Label name="$(parent)HeaderName" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                     <AnchorFill />
                 </Label>
+				
+                <Control name="$(parent)Status" hidden="true">
+                    <Controls> 
+                        <Texture name="$(parent)Texture" inherits="ZO_MultiIcon"  hidden="true">
+                        </Texture>
+                    </Controls>
+                </Control>
+				
+				
+                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate" hidden="true">
+                </Label>
             </Controls>
         </Control>
 
