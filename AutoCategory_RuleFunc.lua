@@ -519,8 +519,73 @@ function AutoCategory.RuleFunc.AutoSetName( ... )
 	return true
 end
 
-function AutoCategory.RuleFunc.Trait( ... )
-	local fn = "trait"
+function AutoCategory.RuleFunc.TraitType( ... )
+	local fn = "traittype"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		local traitType, _ = GetItemLinkTraitInfo(itemLink)
+		 
+		if type( arg ) == "number" then
+			if arg == traitType then
+				return true
+			end
+		elseif type( arg ) == "string" then 
+			local itemTypeMap = {
+					["armor_divines"] = ITEM_TRAIT_TYPE_ARMOR_DIVINES,
+					["armor_impenetrable"] = ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE,
+					["armor_infused"] = ITEM_TRAIT_TYPE_ARMOR_INFUSED,
+					["armor_intricate"] = ITEM_TRAIT_TYPE_ARMOR_INTRICATE,
+					["armor_nirnhoned"] = ITEM_TRAIT_TYPE_ARMOR_NIRNHONED,
+					["armor_ornate"] = ITEM_TRAIT_TYPE_ARMOR_ORNATE,
+					["armor_prosperous"] = ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS,
+					["armor_reinforced"] = ITEM_TRAIT_TYPE_ARMOR_REINFORCED,
+					["armor_sturdy"] = ITEM_TRAIT_TYPE_ARMOR_STURDY,
+					["armor_training"] = ITEM_TRAIT_TYPE_ARMOR_TRAINING,
+					["armor_well_fitted"] = ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED,
+					["deprecated"] = ITEM_TRAIT_TYPE_DEPRECATED,
+					["jewelry_arcane"] = ITEM_TRAIT_TYPE_JEWELRY_ARCANE,
+					["jewelry_healthy"] = ITEM_TRAIT_TYPE_JEWELRY_HEALTHY,
+					["jewelry_ornate"] = ITEM_TRAIT_TYPE_JEWELRY_ORNATE,
+					["jewelry_robust"] = ITEM_TRAIT_TYPE_JEWELRY_ROBUST,
+					["none"] = ITEM_TRAIT_TYPE_NONE,
+					["weapon_charged"] = ITEM_TRAIT_TYPE_WEAPON_CHARGED,
+					["weapon_decisive"] = ITEM_TRAIT_TYPE_WEAPON_DECISIVE,
+					["weapon_defending"] = ITEM_TRAIT_TYPE_WEAPON_DEFENDING,
+					["weapon_infused"] = ITEM_TRAIT_TYPE_WEAPON_INFUSED,
+					["weapon_intricate"] = ITEM_TRAIT_TYPE_WEAPON_INTRICATE,
+					["weapon_nirnhoned"] = ITEM_TRAIT_TYPE_WEAPON_NIRNHONED,
+					["weapon_ornate"] = ITEM_TRAIT_TYPE_WEAPON_ORNATE,
+					["weapon_powered"] = ITEM_TRAIT_TYPE_WEAPON_POWERED,
+					["weapon_precise"] = ITEM_TRAIT_TYPE_WEAPON_PRECISE,
+					["weapon_sharpened"] = ITEM_TRAIT_TYPE_WEAPON_SHARPENED,
+					["weapon_training"] = ITEM_TRAIT_TYPE_WEAPON_TRAINING,
+				}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == equipType then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+	end
+	
+	return false
+end
+
+function AutoCategory.RuleFunc.TraitString( ... )
+	local fn = "traitstring"
 	local ac = select( '#', ... )
 	if ac == 0 then
 		error( string.format("error: %s(): require arguments." , fn))
@@ -640,6 +705,8 @@ AutoCategory.Environment = {
 	equiptype = AutoCategory.RuleFunc.EquipType,
 
 	filtertype = AutoCategory.RuleFunc.FilterType,
+	
+	traittype = AutoCategory.RuleFunc.TraitType,
 
 	isnew = AutoCategory.RuleFunc.IsNew,
 	
@@ -659,7 +726,7 @@ AutoCategory.Environment = {
 
 	autoset = AutoCategory.RuleFunc.AutoSetName,
 
-	trait = AutoCategory.RuleFunc.Trait,
+	traitstring = AutoCategory.RuleFunc.TraitString,
 
 	isequipping = AutoCategory.RuleFunc.IsEquipping,
 

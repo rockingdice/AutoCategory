@@ -65,13 +65,12 @@ function AutoCategory.UpdateCurrentSavedVars()
 end
 
 function AutoCategory.ResetToDefaults()
-	if not AutoCategory.acctSavedVariables.accountWideSetting  then
-		AutoCategory.curSavedVars.rules = AutoCategory.defaultAcctSettings.rules
-		AutoCategory.curSavedVars.bags = AutoCategory.defaultSettings.bags 
-	else 
-		AutoCategory.curSavedVars.rules = AutoCategory.defaultAcctSettings.rules
-		AutoCategory.curSavedVars.bags = AutoCategory.defaultAcctSettings.bags 
-	end
+	AutoCategory.acctSavedVariables.accountWideSetting = AutoCategory.defaultAcctSettings.accountWideSetting
+	AutoCategory.acctSavedVariables.rules = AutoCategory.defaultAcctSettings.rules
+	AutoCategory.acctSavedVariables.bags = AutoCategory.defaultAcctSettings.bags
+	AutoCategory.charSavedVariables.rules = AutoCategory.defaultSettings.rules
+	AutoCategory.charSavedVariables.bags = AutoCategory.defaultSettings.bags
+	
 end
 
 local function removeSameNamedCategory(categories)

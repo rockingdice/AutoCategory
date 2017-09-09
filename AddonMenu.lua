@@ -359,8 +359,24 @@ function AutoCategory.AddonMenuInit()
 		registerForDefaults = true,
 		resetFunc = function() 
 			AutoCategory.ResetToDefaults()
+			AutoCategory.UpdateCurrentSavedVars()
 			RefreshCache() 
+			
+			SelectDropDownItem("AC_DROPDOWN_EDITBAG_BAG", AC_BAG_TYPE_BACKPACK)
+			SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+			SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", "")
+			SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+			SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", "")
+			SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", "")
+			
 			RefreshDropdownData()
+			
+			UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_BAG")
+			UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+			UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+			UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+			UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+			UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
 		end,
 	}
 	
@@ -653,7 +669,6 @@ function AutoCategory.AddonMenuInit()
 					width = "half",
 					reference = "AC_DROPDOWN_EDITRULE_RULE"
 				},
-				
 				{
 					type = "header",
 					name = "Edit Category",
@@ -807,6 +822,12 @@ function AutoCategory.AddonMenuInit()
 					isMultiline = true,
 					isExtraWide = true,
 					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
+					width = "full",
+				},
+				{			
+					type = "button",
+					name = "Learn Rules",
+					func = function() RequestOpenUnsafeURL("https://github.com/rockingdice/AutoCategory/wiki/Rule-Index-Page") end,
 					width = "full",
 				},
 				{

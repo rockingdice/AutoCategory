@@ -18,203 +18,615 @@ AutoCategory.defaultAcctSettings = {
 	rules = {
 		[1] = 
 		{
-			["description"] = "BoE gears for selling",
+			["rule"] = "type(\"armor\") and not equiptype(\"neck\") and not equiptype(\"ring\")",
 			["tag"] = "Gears",
-			["name"] = "BoE",
-			["rule"] = "boundtype(\"on_equip\") and not isbound()",
+			["name"] = "Armor",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[2] = 
 		{
-			["description"] = "Currently equipping gears (Gamepad Only)",
+			["rule"] = "boundtype(\"on_equip\") and not isbound() and not keepresearch()",
 			["tag"] = "Gears",
-			["name"] = "Equipping",
-			["rule"] = "isequipping()",
+			["name"] = "BoE",
 			["damaged"] = false,
+			["description"] = "BoE gears for selling",
 		},
 		[3] = 
 		{
-			["description"] = "",
+			["rule"] = "isboptradeable()",
 			["tag"] = "Gears",
-			["name"] = "Intricate",
-			["rule"] = "trait(\"intricate\")",
+			["name"] = "BoP Tradeable",
 			["damaged"] = false,
+			["description"] = "Gears are tradeable within a limited time",
 		},
 		[4] = 
 		{
-			["description"] = "Gears below cp 160",
+			["rule"] = "traitstring(\"intricate\")",
 			["tag"] = "Gears",
-			["name"] = "Low Level",
-			["rule"] = "cp() < 160 and type(\"armor\", \"weapon\")",
+			["name"] = "Deconstruct",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[5] = 
 		{
-			["description"] = "Gears that keep for research purpose, only keep the low quality, low level one.",
+			["rule"] = "isequipping()",
 			["tag"] = "Gears",
-			["name"] = "Researchable",
-			["rule"] = "keepresearch()",
+			["name"] = "Equipping",
 			["damaged"] = false,
+			["description"] = "Currently equipping gears (Gamepad Only)",
 		},
 		[6] = 
 		{
-			["description"] = "Auto categorize set gears",
+			["rule"] = "cp() < 160 and type(\"armor\", \"weapon\")",
 			["tag"] = "Gears",
-			["name"] = "Set",
-			["rule"] = "autoset()",
+			["name"] = "Low Level",
 			["damaged"] = false,
+			["description"] = "Gears below cp 160",
 		},
 		[7] = 
 		{
-			["description"] = "Food, Drink, Potion",
-			["tag"] = "General Items",
-			["name"] = "Consumables",
-			["rule"] = "type(\"food\", \"drink\", \"potion\")",
+			["rule"] = "equiptype(\"neck\")",
+			["tag"] = "Gears",
+			["name"] = "Necklace",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[8] = 
 		{
-			["description"] = "",
-			["tag"] = "General Items",
-			["name"] = "Container",
-			["rule"] = "type(\"container\")",
+			["rule"] = "keepresearch()",
+			["tag"] = "Gears",
+			["name"] = "Researchable",
 			["damaged"] = false,
+			["description"] = "Gears that keep for research purpose, only keep the low quality, low level one.",
 		},
 		[9] = 
 		{
-			["description"] = "",
-			["tag"] = "General Items",
-			["name"] = "Furnishing",
-			["rule"] = "filtertype(\"furnishing\")",
+			["rule"] = "equiptype(\"ring\")",
+			["tag"] = "Gears",
+			["name"] = "Ring",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[10] = 
 		{
-			["description"] = "",
-			["tag"] = "General Items",
-			["name"] = "Glyphs & Gems",
-			["rule"] = "type(\"soul_gem\", \"glyph_armor\", \"glyph_jewelry\", \"glyph_weapon\")",
+			["rule"] = "autoset()",
+			["tag"] = "Gears",
+			["name"] = "Set",
 			["damaged"] = false,
+			["description"] = "Auto categorize set gears",
 		},
 		[11] = 
 		{
-			["description"] = "New Items receive recently.",
-			["tag"] = "General Items",
-			["name"] = "New",
-			["rule"] = "isnew()",
+			["rule"] = "type(\"weapon\")",
+			["tag"] = "Gears",
+			["name"] = "Weapon",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[12] = 
 		{
-			["description"] = "equipped in quickslots",
+			["rule"] = "type(\"food\", \"drink\", \"potion\")",
 			["tag"] = "General Items",
-			["name"] = "Quickslots",
-			["rule"] = "isinquickslot()",
+			["name"] = "Consumables",
 			["damaged"] = false,
+			["description"] = "Food, Drink, Potion",
 		},
 		[13] = 
 		{
-			["description"] = "All recipes, motifs and recipe fragments.",
+			["rule"] = "type(\"container\")",
 			["tag"] = "General Items",
-			["name"] = "Recipes & Motifs",
-			["rule"] = "type(\"recipe\",\"racial_style_motif\") or sptype(\"trophy_recipe_fragment\")",
+			["name"] = "Container",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[14] = 
 		{
-			["description"] = "Treasure maps and survey reports",
+			["rule"] = "filtertype(\"furnishing\")",
 			["tag"] = "General Items",
-			["name"] = "Treasure Maps",
-			["rule"] = "sptype(\"trophy_survey_report\", \"trophy_treasure_map\")",
+			["name"] = "Furnishing",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[15] = 
 		{
-			["description"] = "#1 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#1",
-			["rule"] = "setindex(1)",
+			["rule"] = "type(\"soul_gem\", \"glyph_armor\", \"glyph_jewelry\", \"glyph_weapon\")",
+			["tag"] = "General Items",
+			["name"] = "Glyphs & Gems",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[16] = 
 		{
-			["description"] = "#2 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#2",
-			["rule"] = "setindex(2)",
+			["rule"] = "isnew()",
+			["tag"] = "General Items",
+			["name"] = "New",
 			["damaged"] = false,
+			["description"] = "New Items receive recently.",
 		},
 		[17] = 
 		{
-			["description"] = "#3 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#3",
-			["rule"] = "setindex(3)",
+			["rule"] = "type(\"poison\")",
+			["tag"] = "General Items",
+			["name"] = "Poison",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[18] = 
 		{
-			["description"] = "#4 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#4",
-			["rule"] = "setindex(4)",
+			["rule"] = "isinquickslot()",
+			["tag"] = "General Items",
+			["name"] = "Quickslots",
 			["damaged"] = false,
+			["description"] = "equipped in quickslots",
 		},
 		[19] = 
 		{
-			["description"] = "#5 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#5",
-			["rule"] = "setindex(5)",
+			["rule"] = "type(\"recipe\",\"racial_style_motif\") or sptype(\"trophy_recipe_fragment\")",
+			["tag"] = "General Items",
+			["name"] = "Recipes & Motifs",
 			["damaged"] = false,
+			["description"] = "All recipes, motifs and recipe fragments.",
 		},
 		[20] = 
 		{
-			["description"] = "#6 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#6",
-			["rule"] = "setindex(6)",
+			["rule"] = "traitstring(\"ornate\") or sptype(\"collectible_monster_trophy\") or type(\"trash\")",
+			["tag"] = "General Items",
+			["name"] = "Selling",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[21] = 
 		{
-			["description"] = "#7 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#7",
-			["rule"] = "setindex(7)",
+			["rule"] = "isstolen()",
+			["tag"] = "General Items",
+			["name"] = "Stolen",
 			["damaged"] = false,
+			["description"] = "",
 		},
 		[22] = 
 		{
-			["description"] = "#8 Set from Iakoni's Gear Changer",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#8",
-			["rule"] = "setindex(8)",
+			["rule"] = "sptype(\"trophy_survey_report\", \"trophy_treasure_map\")",
+			["tag"] = "General Items",
+			["name"] = "Treasure Maps",
 			["damaged"] = false,
+			["description"] = "Treasure maps and survey reports",
 		},
 		[23] = 
 		{
-			["description"] = "#9 Set from Iakoni's Gear Changer",
+			["rule"] = "setindex(1)",
 			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#9",
-			["rule"] = "setindex(9)",
+			["name"] = "Set#1",
 			["damaged"] = false,
+			["description"] = "#1 Set from Iakoni's Gear Changer",
 		},
 		[24] = 
 		{
-			["description"] = "#10 Set from Iakoni's Gear Changer",
+			["rule"] = "setindex(2)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#2",
+			["damaged"] = false,
+			["description"] = "#2 Set from Iakoni's Gear Changer",
+		},
+		[25] = 
+		{
+			["rule"] = "setindex(3)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#3",
+			["damaged"] = false,
+			["description"] = "#3 Set from Iakoni's Gear Changer",
+		},
+		[26] = 
+		{
+			["rule"] = "setindex(4)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#4",
+			["damaged"] = false,
+			["description"] = "#4 Set from Iakoni's Gear Changer",
+		},
+		[27] = 
+		{
+			["rule"] = "setindex(5)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#5",
+			["damaged"] = false,
+			["description"] = "#5 Set from Iakoni's Gear Changer",
+		},
+		[28] = 
+		{
+			["rule"] = "setindex(6)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#6",
+			["damaged"] = false,
+			["description"] = "#6 Set from Iakoni's Gear Changer",
+		},
+		[29] = 
+		{
+			["rule"] = "setindex(7)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#7",
+			["damaged"] = false,
+			["description"] = "#7 Set from Iakoni's Gear Changer",
+		},
+		[30] = 
+		{
+			["rule"] = "setindex(8)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#8",
+			["damaged"] = false,
+			["description"] = "#8 Set from Iakoni's Gear Changer",
+		},
+		[31] = 
+		{
+			["rule"] = "setindex(9)",
+			["tag"] = "Iakoni's Gear Changer",
+			["name"] = "Set#9",
+			["damaged"] = false,
+			["description"] = "#9 Set from Iakoni's Gear Changer",
+		},
+		[32] = 
+		{
+			["rule"] = "setindex(10)",
 			["tag"] = "Iakoni's Gear Changer",
 			["name"] = "Set#10",
-			["rule"] = "setindex(10)",
 			["damaged"] = false,
-		}, 
+			["description"] = "#10 Set from Iakoni's Gear Changer",
+		},
+		[33] = 
+		{
+			["rule"] = "filtertype(\"alchemy\")",
+			["tag"] = "Materials",
+			["name"] = "Alchemy",
+			["damaged"] = false,
+			["description"] = "",
+		},
+		[34] = 
+		{
+			["rule"] = "filtertype(\"blacksmithing\")",
+			["tag"] = "Materials",
+			["name"] = "Blacksmithing",
+			["damaged"] = false,
+			["description"] = "",
+		},
+		[35] = 
+		{
+			["rule"] = "filtertype(\"clothing\")",
+			["tag"] = "Materials",
+			["name"] = "Clothing",
+			["damaged"] = false,
+			["description"] = "",
+		},
+		[36] = 
+		{
+			["rule"] = "filtertype(\"enchanting\")",
+			["tag"] = "Materials",
+			["name"] = "Enchanting",
+			["damaged"] = false,
+			["description"] = "",
+		},
+		[37] = 
+		{
+			["rule"] = "filtertype(\"provisioning\")",
+			["tag"] = "Materials",
+			["name"] = "Provisioning",
+			["damaged"] = false,
+			["description"] = "",
+		},
+		[38] = 
+		{
+			["rule"] = "filtertype(\"trait_items\", \"style_materials\", \"miscellaneous\")",
+			["tag"] = "Materials",
+			["name"] = "Trait/Style Gems",
+			["damaged"] = false,
+			["description"] = "",
+		},
+		[39] = 
+		{
+			["rule"] = "filtertype(\"woodworking\")",
+			["tag"] = "Materials",
+			["name"] = "Woodworking",
+			["damaged"] = false,
+			["description"] = "",
+		},
 	},
 	bags = {
 		[AC_BAG_TYPE_BACKPACK] = {
-			rules = {},
+			rules = {
+				[1] = 
+				{
+					["priority"] = 100,
+					["name"] = "BoP Tradeable",
+				},
+				[2] = 
+				{
+					["priority"] = 100,
+					["name"] = "New",
+				},
+				[3] = 
+				{
+					["priority"] = 95,
+					["name"] = "Container",
+				},
+				[4] = 
+				{
+					["priority"] = 90,
+					["name"] = "Selling",
+				},
+				[5] = 
+				{
+					["priority"] = 85,
+					["name"] = "Low Level",
+				},
+				[6] = 
+				{
+					["priority"] = 80,
+					["name"] = "Deconstruct",
+				},
+				[7] = 
+				{
+					["priority"] = 70,
+					["name"] = "BoE",
+				},
+				[8] = 
+				{
+					["priority"] = 60,
+					["name"] = "Researchable",
+				},
+				[9] = 
+				{
+					["priority"] = 50,
+					["name"] = "Equipping",
+				},
+				[10] = 
+				{
+					["priority"] = 49,
+					["name"] = "Set",
+				},
+				[11] = 
+				{
+					["priority"] = 48,
+					["name"] = "Weapon",
+				},
+				[12] = 
+				{
+					["priority"] = 47,
+					["name"] = "Poison",
+				},
+				[13] = 
+				{
+					["priority"] = 46,
+					["name"] = "Armor",
+				},
+				[14] = 
+				{
+					["priority"] = 45,
+					["name"] = "Necklace",
+				},
+				[15] = 
+				{
+					["priority"] = 45,
+					["name"] = "Ring",
+				},
+				[16] = 
+				{
+					["priority"] = 40,
+					["name"] = "Quickslots",
+				},
+				[17] = 
+				{
+					["priority"] = 35,
+					["name"] = "Consumables",
+				},
+				[18] = 
+				{
+					["priority"] = 35,
+					["name"] = "Glyphs & Gems",
+				},
+				[19] = 
+				{
+					["priority"] = 35,
+					["name"] = "Recipes & Motifs",
+				},
+				[20] = 
+				{
+					["priority"] = 35,
+					["name"] = "Treasure Maps",
+				},
+				[21] = 
+				{
+					["priority"] = 30,
+					["name"] = "Furnishing",
+				},
+				[22] = 
+				{
+					["priority"] = 20,
+					["name"] = "Stolen",
+				},
+				[23] = 
+				{
+					["priority"] = 10,
+					["name"] = "Alchemy",
+				},
+				[24] = 
+				{
+					["priority"] = 10,
+					["name"] = "Blacksmithing",
+				},
+				[25] = 
+				{
+					["priority"] = 10,
+					["name"] = "Clothing",
+				},
+				[26] = 
+				{
+					["priority"] = 10,
+					["name"] = "Enchanting",
+				},
+				[27] = 
+				{
+					["priority"] = 10,
+					["name"] = "Provisioning",
+				},
+				[28] = 
+				{
+					["priority"] = 10,
+					["name"] = "Trait/Style Gems",
+				},
+				[29] = 
+				{
+					["priority"] = 10,
+					["name"] = "Woodworking",
+				},
+			},
 		},
 		[AC_BAG_TYPE_BANK] = {
-			rules = {},
+			rules = {
+				[1] = 
+				{
+					["priority"] = 100,
+					["name"] = "BoP Tradeable",
+				},
+				[2] = 
+				{
+					["priority"] = 100,
+					["name"] = "New",
+				},
+				[3] = 
+				{
+					["priority"] = 95,
+					["name"] = "Container",
+				},
+				[4] = 
+				{
+					["priority"] = 90,
+					["name"] = "Selling",
+				},
+				[5] = 
+				{
+					["priority"] = 85,
+					["name"] = "Low Level",
+				},
+				[6] = 
+				{
+					["priority"] = 80,
+					["name"] = "Deconstruct",
+				},
+				[7] = 
+				{
+					["priority"] = 70,
+					["name"] = "BoE",
+				},
+				[8] = 
+				{
+					["priority"] = 60,
+					["name"] = "Researchable",
+				},
+				[9] = 
+				{
+					["priority"] = 50,
+					["name"] = "Equipping",
+				},
+				[10] = 
+				{
+					["priority"] = 49,
+					["name"] = "Set",
+				},
+				[11] = 
+				{
+					["priority"] = 48,
+					["name"] = "Weapon",
+				},
+				[12] = 
+				{
+					["priority"] = 47,
+					["name"] = "Poison",
+				},
+				[13] = 
+				{
+					["priority"] = 46,
+					["name"] = "Armor",
+				},
+				[14] = 
+				{
+					["priority"] = 45,
+					["name"] = "Necklace",
+				},
+				[15] = 
+				{
+					["priority"] = 45,
+					["name"] = "Ring",
+				},
+				[16] = 
+				{
+					["priority"] = 40,
+					["name"] = "Quickslots",
+				},
+				[17] = 
+				{
+					["priority"] = 35,
+					["name"] = "Consumables",
+				},
+				[18] = 
+				{
+					["priority"] = 35,
+					["name"] = "Glyphs & Gems",
+				},
+				[19] = 
+				{
+					["priority"] = 35,
+					["name"] = "Recipes & Motifs",
+				},
+				[20] = 
+				{
+					["priority"] = 35,
+					["name"] = "Treasure Maps",
+				},
+				[21] = 
+				{
+					["priority"] = 30,
+					["name"] = "Furnishing",
+				},
+				[22] = 
+				{
+					["priority"] = 20,
+					["name"] = "Stolen",
+				},
+				[23] = 
+				{
+					["priority"] = 10,
+					["name"] = "Alchemy",
+				},
+				[24] = 
+				{
+					["priority"] = 10,
+					["name"] = "Blacksmithing",
+				},
+				[25] = 
+				{
+					["priority"] = 10,
+					["name"] = "Clothing",
+				},
+				[26] = 
+				{
+					["priority"] = 10,
+					["name"] = "Enchanting",
+				},
+				[27] = 
+				{
+					["priority"] = 10,
+					["name"] = "Provisioning",
+				},
+				[28] = 
+				{
+					["priority"] = 10,
+					["name"] = "Trait/Style Gems",
+				},
+				[29] = 
+				{
+					["priority"] = 10,
+					["name"] = "Woodworking",
+				},
+			},
 		},
 	}, 
 	--account specific settings
