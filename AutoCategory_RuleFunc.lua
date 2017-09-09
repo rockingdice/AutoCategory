@@ -326,6 +326,18 @@ function AutoCategory.RuleFunc.IsBound( ... )
 	return isBound
 end
 
+function AutoCategory.RuleFunc.IsStolen( ... )
+	local fn = "isstolen"
+	
+	return IsItemStolen(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+end
+
+function AutoCategory.RuleFunc.IsBoPTradeable( ... )
+	local fn = "isboptradeable"
+	local result = IsItemBoPAndTradeable(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return result
+end
+
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
 
@@ -632,6 +644,10 @@ AutoCategory.Environment = {
 	isnew = AutoCategory.RuleFunc.IsNew,
 	
 	isbound = AutoCategory.RuleFunc.IsBound,
+	
+	isstolen = AutoCategory.RuleFunc.IsStolen,
+	
+	isboptradeable = AutoCategory.RuleFunc.IsBoPTradeable,
 	
 	boundtype = AutoCategory.RuleFunc.BoundType,
 	

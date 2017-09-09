@@ -377,6 +377,23 @@ function AutoCategory.AddonMenuInit()
 					getFunc = function() return AutoCategory.acctSavedVariables.accountWideSetting end,
 					setFunc = function(value) AutoCategory.acctSavedVariables.accountWideSetting = value
 						AutoCategory.UpdateCurrentSavedVars()
+						RefreshCache() 
+						
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_BAG", AC_BAG_TYPE_BACKPACK)
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_TAG", "")
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_TAG", "")
+						SelectDropDownItem("AC_DROPDOWN_EDITRULE_RULE", "")
+						
+						RefreshDropdownData()
+						
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_BAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
+						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
 					end,
 				},
 				{

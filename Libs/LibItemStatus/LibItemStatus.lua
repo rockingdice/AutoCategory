@@ -243,6 +243,7 @@ end
 
 --== API ==--
 function LibItemStatus:RefreshResearchData()
+	LibItemStatus:RefreshTCCQuestData()
 	LibItemStatus.ResearchTraits = {}  -- craftType / itemType / traitType
 	for i,craftType in pairs(LibItemStatus.CONST.CraftingSkillTypes) do
 		LibItemStatus.ResearchTraits[craftType] = {}
@@ -263,8 +264,7 @@ function LibItemStatus:RefreshResearchData()
 		end
 	end
   
-    CacheItemTraits() 
-	d("Refreshed All Items")
+    CacheItemTraits()  
 end
 
 
