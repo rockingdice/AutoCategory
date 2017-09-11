@@ -195,6 +195,11 @@ local function ItemToResearchLineIndex(itemType, armorType, weaponType, equipTyp
   return 0
 end
 
+local function getItemId(bagId, slotIndex)
+  local itemId = zo_getSafeId64Key(GetItemUniqueId(bagId, slotIndex))
+  return itemId
+end
+
 local function CacheItemTraits()
     local bagsToCheck = {
         [1] = BAG_BACKPACK,
@@ -234,12 +239,6 @@ local function CacheItemTraits()
       end
     end
 end
-
-local function getItemId(bagId, slotIndex)
-  local itemId = zo_getSafeId64Key(GetItemUniqueId(bagId, slotIndex))
-  return itemId
-end
-
 
 --== API ==--
 function LibItemStatus:RefreshResearchData()
