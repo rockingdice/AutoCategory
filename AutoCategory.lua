@@ -183,6 +183,7 @@ function AutoCategory.HookKeyboardMode()
           
     --Custom sort with group name
 	local function ZO_InventoryManager_ApplySort(self, inventoryType)
+	d("custom sort!")
 	    local inventory
 	    if inventoryType == INVENTORY_BANK then
 	        inventory = self.inventories[INVENTORY_BANK]
@@ -225,6 +226,7 @@ function AutoCategory.HookKeyboardMode()
 	end
 
 	local function ZO_InventoryManager_UpdateList(self, inventoryType, updateEvenIfHidden)
+	d("update list!")
 	    local inventory = self.inventories[inventoryType]
 
 	    --temp, need switch
@@ -297,6 +299,7 @@ function AutoCategory.HookKeyboardMode()
 	        self.isListDirty[inventoryType] = true
 	    end
 	end
+	--[[
 	local originalUpdateList = ZO_InventoryManager.UpdateList
 	local originalApplySort = ZO_InventoryManager.ApplySort
 	ZO_InventoryManager.UpdateList = function(...)
@@ -313,6 +316,70 @@ function AutoCategory.HookKeyboardMode()
 			ZO_InventoryManager_ApplySort(...)
 		end
 	end	
+	]]--
+	
+	local function prehookSort(self, inventoryType) 
+		local inventory
+	    if inventoryType == INVENTORY_BANK then
+	        inventory = self.inventories[INVENTORY_BANK]
+	    elseif inventoryType == INVENTORY_GUILD_BANK then
+	        inventory = self.inventories[INVENTORY_GUILD_BANK]
+	    elseif inventoryType == INVENTORY_CRAFT_BAG then
+	        inventory = self.inventories[INVENTORY_CRAFT_BAG]
+	    else
+	        -- Use normal inventory by default (instead of the quest item inventory for example)
+	        inventory = self.inventories[self.selectedTabType]
+	    end
+		
+		--change sort function
+		inventory.sortFn =  function(left, right)
+		    if right.sortPriorityName ~= left.sortPriorityName then
+		        return NilOrLessThan(left.sortPriorityName, right.sortPriorityName)
+		    end
+			if right.isHeader ~= left.isHeader then
+				return NilOrLessThan(right.isHeader, left.isHeader)
+			end
+		    return ZO_TableOrderingFunction(left.data, right.data, inventory.currentSortKey, sortKeys, inventory.currentSortOrder)
+		end
+
+	    local list = inventory.listView
+	    local scrollData = ZO_ScrollList_GetDataList(list)
+		for i, entry in ipairs(scrollData) do
+			local slotData = entry.data
+			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+			if not matched then
+				entry.bestItemTypeName = AC_UNGROUPED_NAME 
+				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
+			else
+				entry.bestItemTypeName = categoryName 
+				entry.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+			end
+		end
+		
+		--sort data to add header
+        table.sort(scrollData, inventory.sortFn) 
+		
+		-- add header data	    
+	    local lastBestItemCategoryName
+        local newScrollData = {}
+	    for i, entry in ipairs(scrollData) do 
+	    	if entry.typeId ~= 998 then
+		        if entry.bestItemTypeName ~= lastBestItemCategoryName then
+		            lastBestItemCategoryName = entry.bestItemTypeName
+					local headerEntry = ZO_ScrollList_CreateDataEntry(998, {bestItemTypeName = entry.bestItemTypeName, stackLaunderPrice = 0})
+					headerEntry.sortPriorityName = entry.sortPriorityName
+					headerEntry.isHeader = true
+					headerEntry.bestItemTypeName = entry.bestItemTypeName
+		            table.insert(newScrollData, headerEntry)
+		        end
+		        table.insert(newScrollData, entry)
+	    	end
+	    end
+	    list.data = newScrollData 
+	end
+	
+	ZO_PreHook(ZO_InventoryManager, "ApplySort", prehookSort)
+	
 end
 
 function AutoCategory.HookGamepadCraft()
@@ -420,14 +487,14 @@ function AutoCategory.LazyInit()
 		
 		AutoCategory.AddonMenuInit()
 		
-		AutoCategory.HookGamepadCraft()
-		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
-		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
+		--AutoCategory.HookGamepadCraft()
+		--AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
+		--AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
 
 		AutoCategory.HookKeyboardMode()
 
 		--capabilities with other add-ons
-		FixIakoniGearChanger()
+		--FixIakoniGearChanger()
 
 		AutoCategory.Inited = true
 	end
