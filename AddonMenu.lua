@@ -620,8 +620,16 @@ function AutoCategory.AddonMenuInit()
 					end,
 					disabled = function() return #dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues == 0 end,
 					width = "full",
+				}, 
+				{
+					type = "divider",
+				}, 
+				{			
+					type = "button",
+					name = "Need Help?",
+					func = function() RequestOpenUnsafeURL("https://github.com/rockingdice/AutoCategory/wiki/Become-veteran!") end,
+					width = "full",
 				},
-				
 		    },
 		},
 		{
