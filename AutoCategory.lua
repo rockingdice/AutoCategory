@@ -14,7 +14,7 @@ AutoCategory.RuleFunc = {}
 AutoCategory.Inited = false
 
 AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.02";
+AutoCategory.version = "1.03";
 AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"
@@ -122,51 +122,6 @@ local function NilOrLessThan(value1, value2)
 end
 
 
-local function FixIakoniGearChanger()
-	if GearChangerByIakoni then
-		local function GearChangerByIakoni_DoRefresh(list)
-			local a=GearChangerByIakoni.savedVariables.ArraySet
-			local b=GearChangerByIakoni.savedVariables.ArraySetSavedFlag
-
-			--loop through the currently shown inventory items
-			for _,v in pairs(list.activeControls) do
-				local bag = v.dataEntry.data.bagId
-				local slot = v.dataEntry.data.slotIndex
-				if bag ~= nil and slot ~= nil then
-					local itemID = Id64ToString(GetItemUniqueId(bag, slot))
-					local marker = v:GetNamedChild("GCBISet")
-					if not marker then
-						marker = GearChangerByIakoni.CreateControlMarker(v)
-					end
-					marker:SetHidden(true)
-					
-					local itemType = GetItemType(bag, slot)
-					
-					if itemType == ITEMTYPE_ARMOR or itemType == ITEMTYPE_WEAPON then
-						local founditem = false
-
-						for i=1, 10 do
-							if b[i] == 1 then --check only if the set is saved
-								for _,u in pairs(GearChangerByIakoni.WornArray) do
-									if itemID==a[i][u] then
-										marker:SetHidden(false)
-										founditem = true
-										break
-									end
-								end
-							end
-							
-							if founditem then
-								break
-							end
-						end
-					end
-				end 
-			end 
-		end
-		GearChangerByIakoni.DoRefresh = GearChangerByIakoni_DoRefresh
-	end
-end
 
 function AutoCategory.HookKeyboardMode()
 	--Add a new data type: row with header
@@ -345,19 +300,18 @@ function AutoCategory.LazyInit()
 		-- load our saved variables
 		AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
 		AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
-		--removeSameNamedCategory(AutoCategory.charSavedVariables.categorySettings)
-		--removeSameNamedCategory(AutoCategory.acctSavedVariables.categorySettings)
 		
 		AutoCategory.AddonMenuInit()
 		
-		--AutoCategory.HookGamepadCraft()
-		--AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
-		--AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
+		AutoCategory.HookGamepadCraft()
+		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
+		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
 
 		AutoCategory.HookKeyboardMode()
-
+		
 		--capabilities with other add-ons
-		--FixIakoniGearChanger()
+		IntegrateIakoniGearChanger()
+		IntegrateInventoryGridView()
 
 		AutoCategory.Inited = true
 	end
