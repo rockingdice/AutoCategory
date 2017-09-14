@@ -14,7 +14,7 @@ AutoCategory.RuleFunc = {}
 AutoCategory.Inited = false
 
 AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.03";
+AutoCategory.version = "1.04";
 AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"
@@ -264,6 +264,44 @@ function AutoCategory.HookGamepadCraft()
 	ZO_GamepadCraftingInventory.GetIndividualInventorySlotsAndAddToScrollData = ZO_GamepadCraftingInventory_GetIndividualInventorySlotsAndAddToScrollData
 end
 
+function AutoCategory.HookGamepadTradeInventory() 
+	local originalFunction = ZO_GamepadTradeWindow.InitializeInventoryList
+	
+	local function ZO_GamepadInventoryList_AddSlotDataToTable(self, slotsTable, inventoryType, slotIndex)
+		local itemFilterFunction = self.itemFilterFunction
+		local categorizationFunction = self.categorizationFunction or ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription
+		local slotData = SHARED_INVENTORY:GenerateSingleSlotData(inventoryType, slotIndex)
+		if slotData then
+			if (not itemFilterFunction) or itemFilterFunction(slotData) then
+				-- itemData is shared in several places and can write their own value of bestItemCategoryName.
+				-- We'll use bestGamepadItemCategoryName instead so there are no conflicts.
+				--slotData.bestGamepadItemCategoryName = categorizationFunction(slotData)
+				 
+				local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+				if not matched then
+					slotData.bestItemTypeName = AC_UNGROUPED_NAME
+					slotData.bestGamepadItemCategoryName = AC_UNGROUPED_NAME
+					slotData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
+				else
+					slotData.bestItemTypeName = categoryName
+					slotData.bestGamepadItemCategoryName = categoryName
+					slotData.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+				end
+
+				table.insert(slotsTable, slotData)
+			end
+		end
+	end
+	
+	
+	ZO_GamepadTradeWindow.InitializeInventoryList = function(self) 
+		originalFunction(self)
+		self.inventoryList.AddSlotDataToTable = ZO_GamepadInventoryList_AddSlotDataToTable
+		self.inventoryList.sortFunction = AutoCategory_ItemSortComparator
+	end
+	
+end
+
 function AutoCategory.HookGamepadStore(list)
 	--change item 
 	local originalUpdateFunc = list.updateFunc
@@ -306,6 +344,7 @@ function AutoCategory.LazyInit()
 		AutoCategory.HookGamepadCraft()
 		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
 		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
+		AutoCategory.HookGamepadTradeInventory() 
 
 		AutoCategory.HookKeyboardMode()
 		

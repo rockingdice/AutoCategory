@@ -2,7 +2,7 @@
 ## APIVersion: 100020
 ## Author: RockingDice
 ## Description: Type "/ac" 
-## Version: 1.03
+## Version: 1.04
 ## SavedVariables: AutoCategorySavedVars
 ## OptionalDependsOn: LibAddonMenu-2.0
 
