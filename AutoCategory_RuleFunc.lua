@@ -340,7 +340,8 @@ end
 
 function AutoCategory.RuleFunc.IsCrafted( ... )
 	local fn = "iscrafted"
-	local result = IsItemLinkCrafted(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local result = IsItemLinkCrafted(itemLink)
 	return result
 end
 
