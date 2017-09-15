@@ -119,9 +119,7 @@ local function NilOrLessThan(value1, value2)
     else
         return value1 < value2
     end
-end
-
-
+end 
 
 function AutoCategory.HookKeyboardMode()
 	--Add a new data type: row with header
@@ -157,7 +155,15 @@ function AutoCategory.HookKeyboardMode()
 			if right.isHeader ~= left.isHeader then
 				return NilOrLessThan(right.isHeader, left.isHeader)
 			end
-		    return ZO_TableOrderingFunction(left.data, right.data, inventory.currentSortKey, sortKeys, inventory.currentSortOrder)
+			--compatible with quality sort
+			if type(inventory.currentSortKey) == "function" then 
+				if inventory.currentSortOrder == ZO_SORT_ORDER_UP then
+					return inventory.currentSortKey(left.data, right.data)
+				else
+					return inventory.currentSortKey(right.data, left.data)
+				end
+			end
+			return ZO_TableOrderingFunction(left.data, right.data, inventory.currentSortKey, sortKeys, inventory.currentSortOrder)
 		end
 
 	    local list = inventory.listView
@@ -197,6 +203,7 @@ function AutoCategory.HookKeyboardMode()
 	end
 	
 	ZO_PreHook(ZO_InventoryManager, "ApplySort", prehookSort)
+    ZO_PreHook(PLAYER_INVENTORY, "ApplySort", prehookSort)
 	
 end
 
