@@ -521,7 +521,8 @@ function AutoCategory.RuleFunc.AutoSetName( ... )
 	if not hasSet then
 		return false
 	end
-	d("find set:" .. setName)
+	--fix german language issue
+	setName = string.gsub( setName , "%^.*", "")
 	AutoCategory.AdditionCategoryName = AutoCategory.AdditionCategoryName .. string.format(" (%s)", setName)
 	return true
 end
