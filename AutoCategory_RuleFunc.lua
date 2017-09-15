@@ -338,6 +338,12 @@ function AutoCategory.RuleFunc.IsBoPTradeable( ... )
 	return result
 end
 
+function AutoCategory.RuleFunc.IsCrafted( ... )
+	local fn = "iscrafted"
+	local result = IsItemLinkCrafted(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return result
+end
+
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
 
@@ -515,6 +521,7 @@ function AutoCategory.RuleFunc.AutoSetName( ... )
 	if not hasSet then
 		return false
 	end
+	d("find set:" .. setName)
 	AutoCategory.AdditionCategoryName = AutoCategory.AdditionCategoryName .. string.format(" (%s)", setName)
 	return true
 end
@@ -715,6 +722,8 @@ AutoCategory.Environment = {
 	isstolen = AutoCategory.RuleFunc.IsStolen,
 	
 	isboptradeable = AutoCategory.RuleFunc.IsBoPTradeable,
+	
+	iscrafted = AutoCategory.RuleFunc.IsCrafted,
 	
 	boundtype = AutoCategory.RuleFunc.BoundType,
 	
