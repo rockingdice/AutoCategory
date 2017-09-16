@@ -1,5 +1,6 @@
 local _
 local LAM = LibStub:GetLibrary("LibAddonMenu-2.0")
+local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
   
 --cache data for dropdown: 
 local cacheTags = {}
@@ -26,6 +27,12 @@ local dropdownData = {
 	["AC_DROPDOWN_EDITRULE_TAG"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
 	["AC_DROPDOWN_EDITRULE_RULE"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
 }
+
+local dropdownFontStyle	= {'none', 'outline', 'thin-outline', 'thick-outline', 'shadow', 'soft-shadow-thin', 'soft-shadow-thick'}
+local dropdownFontAlignment = {}
+dropdownFontAlignment.showNames = {'Left', 'Center', 'Right'}
+dropdownFontAlignment.values = {0, 1, 2} 
+
 
 --warning message
 local warningDuplicatedName = {
@@ -260,9 +267,7 @@ local function UpdateDropDownMenu(name)
 	local dropdownCtrl = WINDOW_MANAGER:GetControlByName(name, "")
 	local data = dropdownData[name]
 
-	dropdownCtrl:UpdateChoices(data.choices, data.choicesValues, data.choicesTooltips) 
-	--dropdownCtrl.data.choicesTooltips = nil
-	--dropdownCtrl:UpdateChoices(data.choices, data.choicesValues) 
+	dropdownCtrl:UpdateChoices(data.choices, data.choicesValues, data.choicesTooltips)  
 end
 
 local function RemoveDropDownItem(typeString, dataArray, removeItem, emptyCallback)
@@ -344,8 +349,17 @@ function AutoCategory.GetRuleByName(name)
 	end
 end
 
+function AutoCategory.RebuildSavedVars()
+--1.06--
+	if AutoCategory.acctSavedVariables.appearance == nil then
+		AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance 
+	end
+--end
+end
+
 function AutoCategory.AddonMenuInit()
 	AutoCategory.UpdateCurrentSavedVars() 
+	AutoCategory.RebuildSavedVars()
 	RefreshCache()  
 	RefreshDropdownData() 
  
@@ -803,7 +817,8 @@ function AutoCategory.AddonMenuInit()
 							return cacheRulesByName[ruleName].description
 						end
 						return "" 
-					end, setFunc = function(value) 
+					end, 
+					setFunc = function(value) 
 						cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].description = value 
 						RefreshCache()
 						RefreshDropdownData()
@@ -826,7 +841,8 @@ function AutoCategory.AddonMenuInit()
 							return cacheRulesByName[ruleName].rule
 						end
 						return "" 
-					end, setFunc = function(value) cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].rule = value end,
+					end, 
+					setFunc = function(value) cacheRulesByName[GetDropDownSelection("AC_DROPDOWN_EDITRULE_RULE")].rule = value end,
 					isMultiline = true,
 					isExtraWide = true,
 					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_TAG"].choicesValues == 0 end,
@@ -937,8 +953,85 @@ function AutoCategory.AddonMenuInit()
 					disabled = function() return #dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues	== 0 end,
 				},
 		    },
+			
 		},
-		
+		{
+				type = "submenu",
+				name = "|c0066FF[Appearance Setting]|r",
+				reference = "AC_SUBMENU_APPEARANCE_SETTING",
+				controls = { 
+					{
+						type = "description",
+						text = "Change the header text's appearance. Do not need to reload ui, you can just swap tabs to refresh them.", -- or string id or function returning a string						
+					},
+					{
+						type = "divider",
+					},
+					{
+						type = 'dropdown',
+						name = "Category Text Font",
+						choices = LMP:List('font'),
+						getFunc = function()
+							return AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_NAME"]
+						end,
+						setFunc = function(v)
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_NAME"] = v
+						end,
+						scrollable = 7,
+					},
+					{
+						type = 'dropdown',
+						name = "Category Text Color & Style",
+						choices = dropdownFontStyle,
+						getFunc = function()
+							return AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_STYLE"]
+						end,
+						setFunc = function(v)
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_STYLE"] = v
+						end,
+						scrollable = 7,
+					},
+					{
+						type = 'dropdown',
+						name = "Category Text Alignment",
+						choices = dropdownFontAlignment.showNames,
+						choicesValues = dropdownFontAlignment.values,
+						getFunc = function()
+							return AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_ALIGNMENT"]
+						end,
+						setFunc = function(v)
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_ALIGNMENT"] = v
+						end,
+						scrollable = 7,
+					},
+					{
+						type = 'colorpicker',
+						getFunc = function()
+							return unpack(AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_COLOR"])
+						end,
+						setFunc = function(r, g, b, a)
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_COLOR"][1] = r
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_COLOR"][2] = g
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_COLOR"][3] = b
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_COLOR"][4] = a 
+						end,
+						widgetRightAlign		= true,
+						widgetPositionAndResize	= -15,
+					},
+					{
+						type = 'slider',
+						name = "Category Text Font Size",
+						min = 8,
+						max = 32,
+						getFunc = function()
+							return AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_SIZE"]
+						end,
+						setFunc = function(v)
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_SIZE"] = v
+						end,
+					},
+				},
+			},
 	}
 	LAM:RegisterAddonPanel("AC_CATEGORY_SETTINGS", panelData)
 	LAM:RegisterOptionControls("AC_CATEGORY_SETTINGS", optionsTable)

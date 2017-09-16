@@ -4,6 +4,7 @@
 
 --load LibAddonsMenu-2.0
 local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0");
+local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
 
 ----------------------
 --INITIATE VARIABLES--
@@ -68,6 +69,7 @@ function AutoCategory.ResetToDefaults()
 	AutoCategory.acctSavedVariables.accountWideSetting = AutoCategory.defaultAcctSettings.accountWideSetting
 	AutoCategory.acctSavedVariables.rules = AutoCategory.defaultAcctSettings.rules
 	AutoCategory.acctSavedVariables.bags = AutoCategory.defaultAcctSettings.bags
+	AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance
 	AutoCategory.charSavedVariables.rules = AutoCategory.defaultSettings.rules
 	AutoCategory.charSavedVariables.bags = AutoCategory.defaultSettings.bags
 	
@@ -124,16 +126,19 @@ end
 function AutoCategory.HookKeyboardMode()
 	--Add a new data type: row with header
 	local function AC_Setup_InventoryRowWithHeader(rowControl, slot, overrideOptions)
-		--PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listSetupCallback(rowControl:GetNamedChild("InventoryItemRow"), slot, overrideOptions)
-		--PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listSetupCallback(rowControl, slot, overrideOptions)
 		--set header
-		rowControl:GetNamedChild("HeaderName"):SetText(slot.bestItemTypeName)
+		local headerLabel = rowControl:GetNamedChild("HeaderName")
+		headerLabel:SetText(slot.bestItemTypeName)
+		local appearance = AutoCategory.acctSavedVariables.appearance
+		headerLabel:SetHorizontalAlignment(appearance["CATEGORY_FONT_ALIGNMENT"])
+		headerLabel:SetFont(string.format('%s|%d|%s', LMP:Fetch('font', appearance["CATEGORY_FONT_NAME"]), appearance["CATEGORY_FONT_SIZE"], appearance["CATEGORY_FONT_STYLE"]))
+		headerLabel:SetColor(appearance["CATEGORY_FONT_COLOR"][1], appearance["CATEGORY_FONT_COLOR"][2], appearance["CATEGORY_FONT_COLOR"][3], appearance["CATEGORY_FONT_COLOR"][4])
 	end
-	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_GuildBankBackpack, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", 40, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_GuildBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
           
 	local function prehookSort(self, inventoryType) 
 		local inventory

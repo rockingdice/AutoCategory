@@ -630,5 +630,18 @@ AutoCategory.defaultAcctSettings = {
 		},
 	}, 
 	--account specific settings
-	accountWideSetting = true
+	accountWideSetting = true,
+	appearance = {
+		["CATEGORY_FONT_NAME"] = "Univers 67",
+		["CATEGORY_FONT_STYLE"] = "soft-shadow-thin",
+		["CATEGORY_FONT_COLOR"] = 
+		{
+			[1] = 1,
+			[2] = 1,
+			[3] = 1,
+			[4] = 1,
+		},
+		["CATEGORY_FONT_SIZE"] = 18,
+		["CATEGORY_FONT_ALIGNMENT"] = 1,
+	},
 }
