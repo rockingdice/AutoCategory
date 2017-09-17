@@ -15,7 +15,7 @@ AutoCategory.RuleFunc = {}
 AutoCategory.Inited = false
 
 AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.06";
+AutoCategory.version = "1.07";
 AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"
