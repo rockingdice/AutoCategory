@@ -1,6 +1,10 @@
 AC_BAG_TYPE_BACKPACK = 1
 AC_BAG_TYPE_BANK = 2
 AC_BAG_TYPE_GUILDBANK = 3
+ 
+local L = function ( loc_key ) 
+	return GetString( loc_key )
+end
 
 AutoCategory = {}
 AutoCategory.defaultSettings = {
@@ -19,314 +23,314 @@ AutoCategory.defaultAcctSettings = {
 		[1] = 
 		{
 			["rule"] = "type(\"armor\") and not equiptype(\"neck\") and not equiptype(\"ring\")",
-			["tag"] = "Gears",
-			["name"] = "Armor",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_ARMOR),
 			["damaged"] = false,
 			["description"] = "",
 		},
 		[2] = 
 		{
 			["rule"] = "boundtype(\"on_equip\") and not isbound() and not keepresearch()",
-			["tag"] = "Gears",
-			["name"] = "BoE",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_BOE),
 			["damaged"] = false,
-			["description"] = "BoE gears for selling",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_BOE_DESC),
 		},
 		[3] = 
 		{
 			["rule"] = "isboptradeable()",
-			["tag"] = "Gears",
-			["name"] = "BoP Tradeable",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_BOP_TRADEABLE),
 			["damaged"] = false,
-			["description"] = "Gears are tradeable within a limited time",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_BOP_TRADEABLE_DESC),
 		},
 		[4] = 
 		{
 			["rule"] = "traitstring(\"intricate\")",
-			["tag"] = "Gears",
-			["name"] = "Deconstruct",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_DECONSTRUCT),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_DECONSTRUCT_DESC),
 		},
 		[5] = 
 		{
 			["rule"] = "isequipping()",
-			["tag"] = "Gears",
-			["name"] = "Equipping",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_EQUIPPING),
 			["damaged"] = false,
-			["description"] = "Currently equipping gears (Gamepad Only)",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_EQUIPPING_DESC),
 		},
 		[6] = 
 		{
 			["rule"] = "cp() < 160 and type(\"armor\", \"weapon\")",
-			["tag"] = "Gears",
-			["name"] = "Low Level",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_LOW_LEVEL),
 			["damaged"] = false,
-			["description"] = "Gears below cp 160",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_LOW_LEVEL_DESC),
 		},
 		[7] = 
 		{
 			["rule"] = "equiptype(\"neck\")",
-			["tag"] = "Gears",
-			["name"] = "Necklace",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_NECKLACE),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_NECKLACE_DESC),
 		},
 		[8] = 
 		{
 			["rule"] = "keepresearch()",
-			["tag"] = "Gears",
-			["name"] = "Researchable",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_RESEARCHABLE),
 			["damaged"] = false,
-			["description"] = "Gears that keep for research purpose, only keep the low quality, low level one.",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_RESEARCHABLE_DESC),
 		},
 		[9] = 
 		{
 			["rule"] = "equiptype(\"ring\")",
-			["tag"] = "Gears",
-			["name"] = "Ring",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_RING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_RING_DESC),
 		},
 		[10] = 
 		{
 			["rule"] = "autoset()",
-			["tag"] = "Gears",
-			["name"] = "Set",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_SET),
 			["damaged"] = false,
-			["description"] = "Auto categorize set gears",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_SET_DESC),
 		},
 		[11] = 
 		{
 			["rule"] = "type(\"weapon\")",
-			["tag"] = "Gears",
-			["name"] = "Weapon",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GEARS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_WEAPON),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_WEAPON_DESC),
 		},
 		[12] = 
 		{
 			["rule"] = "type(\"food\", \"drink\", \"potion\")",
-			["tag"] = "General Items",
-			["name"] = "Consumables",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_CONSUMABLES),
 			["damaged"] = false,
-			["description"] = "Food, Drink, Potion",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_CONSUMABLES_DESC),
 		},
 		[13] = 
 		{
 			["rule"] = "type(\"container\")",
-			["tag"] = "General Items",
-			["name"] = "Container",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_CONTAINER),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_CONTAINER_DESC),
 		},
 		[14] = 
 		{
 			["rule"] = "filtertype(\"furnishing\")",
-			["tag"] = "General Items",
-			["name"] = "Furnishing",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FURNISHING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FURNISHING_DESC),
 		},
 		[15] = 
 		{
 			["rule"] = "type(\"soul_gem\", \"glyph_armor\", \"glyph_jewelry\", \"glyph_weapon\")",
-			["tag"] = "General Items",
-			["name"] = "Glyphs & Gems",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_GLYPHS_AND_GEMS),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_GLYPHS_AND_GEMS_DESC),
 		},
 		[16] = 
 		{
 			["rule"] = "isnew()",
-			["tag"] = "General Items",
-			["name"] = "New",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_NEW),
 			["damaged"] = false,
-			["description"] = "New Items receive recently.",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_NEW_DESC),
 		},
 		[17] = 
 		{
 			["rule"] = "type(\"poison\")",
-			["tag"] = "General Items",
-			["name"] = "Poison",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_POISON),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_POISON_DESC),
 		},
 		[18] = 
 		{
 			["rule"] = "isinquickslot()",
-			["tag"] = "General Items",
-			["name"] = "Quickslots",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_QUICKSLOTS),
 			["damaged"] = false,
-			["description"] = "equipped in quickslots",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_QUICKSLOTS_DESC),
 		},
 		[19] = 
 		{
 			["rule"] = "type(\"recipe\",\"racial_style_motif\") or sptype(\"trophy_recipe_fragment\")",
-			["tag"] = "General Items",
-			["name"] = "Recipes & Motifs",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_RECIPES_AND_MOTIFS),
 			["damaged"] = false,
-			["description"] = "All recipes, motifs and recipe fragments.",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_RECIPES_AND_MOTIFS_DESC),
 		},
 		[20] = 
 		{
 			["rule"] = "traitstring(\"ornate\") or sptype(\"collectible_monster_trophy\") or type(\"trash\")",
-			["tag"] = "General Items",
-			["name"] = "Selling",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_SELLING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_SELLING_DESC),
 		},
 		[21] = 
 		{
 			["rule"] = "isstolen()",
-			["tag"] = "General Items",
-			["name"] = "Stolen",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_STOLEN),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_STOLEN_DESC),
 		},
 		[22] = 
 		{
 			["rule"] = "sptype(\"trophy_survey_report\", \"trophy_treasure_map\")",
-			["tag"] = "General Items",
-			["name"] = "Treasure Maps",
+			["tag"] = L(SI_AC_DEFAULT_TAG_GENERAL_ITEMS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_TREASURE_MAPS),
 			["damaged"] = false,
-			["description"] = "Treasure maps and survey reports",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_TREASURE_MAPS_DESC),
 		},
 		[23] = 
 		{
 			["rule"] = "setindex(1)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#1",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_1),
 			["damaged"] = false,
-			["description"] = "#1 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_1_DESC),
 		},
 		[24] = 
 		{
 			["rule"] = "setindex(2)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#2",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_2),
 			["damaged"] = false,
-			["description"] = "#2 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_2_DESC),
 		},
 		[25] = 
 		{
 			["rule"] = "setindex(3)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#3",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_3),
 			["damaged"] = false,
-			["description"] = "#3 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_3_DESC),
 		},
 		[26] = 
 		{
 			["rule"] = "setindex(4)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#4",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_4),
 			["damaged"] = false,
-			["description"] = "#4 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_4_DESC),
 		},
 		[27] = 
 		{
 			["rule"] = "setindex(5)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#5",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_5),
 			["damaged"] = false,
-			["description"] = "#5 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_5_DESC),
 		},
 		[28] = 
 		{
 			["rule"] = "setindex(6)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#6",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_6),
 			["damaged"] = false,
-			["description"] = "#6 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_6_DESC),
 		},
 		[29] = 
 		{
 			["rule"] = "setindex(7)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#7",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_7),
 			["damaged"] = false,
-			["description"] = "#7 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_7_DESC),
 		},
 		[30] = 
 		{
 			["rule"] = "setindex(8)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#8",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_8),
 			["damaged"] = false,
-			["description"] = "#8 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_8_DESC),
 		},
 		[31] = 
 		{
 			["rule"] = "setindex(9)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#9",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_9),
 			["damaged"] = false,
-			["description"] = "#9 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_9_DESC),
 		},
 		[32] = 
 		{
 			["rule"] = "setindex(10)",
-			["tag"] = "Iakoni's Gear Changer",
-			["name"] = "Set#10",
+			["tag"] = L(SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_10),
 			["damaged"] = false,
-			["description"] = "#10 Set from Iakoni's Gear Changer",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_IAKONI_SET_10_DESC),
 		},
 		[33] = 
 		{
 			["rule"] = "filtertype(\"alchemy\")",
-			["tag"] = "Materials",
-			["name"] = "Alchemy",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY_DESC),
 		},
 		[34] = 
 		{
 			["rule"] = "filtertype(\"blacksmithing\")",
-			["tag"] = "Materials",
-			["name"] = "Blacksmithing",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING_DESC),
 		},
 		[35] = 
 		{
 			["rule"] = "filtertype(\"clothing\")",
-			["tag"] = "Materials",
-			["name"] = "Clothing",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING_DESC),
 		},
 		[36] = 
 		{
 			["rule"] = "filtertype(\"enchanting\")",
-			["tag"] = "Materials",
-			["name"] = "Enchanting",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING_DESC),
 		},
 		[37] = 
 		{
 			["rule"] = "filtertype(\"provisioning\")",
-			["tag"] = "Materials",
-			["name"] = "Provisioning",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING_DESC),
 		},
 		[38] = 
 		{
 			["rule"] = "filtertype(\"trait_items\", \"style_materials\")",
-			["tag"] = "Materials",
-			["name"] = "Trait/Style Gems",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS_DESC),
 		},
 		[39] = 
 		{
 			["rule"] = "filtertype(\"woodworking\")",
-			["tag"] = "Materials",
-			["name"] = "Woodworking",
+			["tag"] = L(SI_AC_DEFAULT_TAG_MATERIALS),
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING),
 			["damaged"] = false,
-			["description"] = "",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING_DESC),
 		},
 	},
 	bags = {
@@ -335,147 +339,147 @@ AutoCategory.defaultAcctSettings = {
 				[1] = 
 				{
 					["priority"] = 100,
-					["name"] = "BoP Tradeable",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOP_TRADEABLE),
 				},
 				[2] = 
 				{
 					["priority"] = 100,
-					["name"] = "New",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NEW),
 				},
 				[3] = 
 				{
 					["priority"] = 95,
-					["name"] = "Container",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONTAINER),
 				},
 				[4] = 
 				{
 					["priority"] = 90,
-					["name"] = "Selling",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SELLING),
 				},
 				[5] = 
 				{
 					["priority"] = 85,
-					["name"] = "Low Level",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_LOW_LEVEL),
 				},
 				[6] = 
 				{
 					["priority"] = 80,
-					["name"] = "Deconstruct",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_DECONSTRUCT),
 				},
 				[7] = 
 				{
 					["priority"] = 70,
-					["name"] = "BoE",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOE),
 				},
 				[8] = 
 				{
 					["priority"] = 60,
-					["name"] = "Researchable",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RESEARCHABLE),
 				},
 				[9] = 
 				{
 					["priority"] = 50,
-					["name"] = "Equipping",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_EQUIPPING),
 				},
 				[10] = 
 				{
 					["priority"] = 49,
-					["name"] = "Set",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SET),
 				},
 				[11] = 
 				{
 					["priority"] = 48,
-					["name"] = "Weapon",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WEAPON),
 				},
 				[12] = 
 				{
 					["priority"] = 47,
-					["name"] = "Poison",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_POISON),
 				},
 				[13] = 
 				{
 					["priority"] = 46,
-					["name"] = "Armor",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ARMOR),
 				},
 				[14] = 
 				{
 					["priority"] = 45,
-					["name"] = "Necklace",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NECKLACE),
 				},
 				[15] = 
 				{
 					["priority"] = 45,
-					["name"] = "Ring",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RING),
 				},
 				[16] = 
 				{
 					["priority"] = 40,
-					["name"] = "Quickslots",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_QUICKSLOTS),
 				},
 				[17] = 
 				{
 					["priority"] = 35,
-					["name"] = "Consumables",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONSUMABLES),
 				},
 				[18] = 
 				{
 					["priority"] = 35,
-					["name"] = "Glyphs & Gems",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_GLYPHS_AND_GEMS),
 				},
 				[19] = 
 				{
 					["priority"] = 35,
-					["name"] = "Recipes & Motifs",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RECIPES_AND_MOTIFS),
 				},
 				[20] = 
 				{
 					["priority"] = 35,
-					["name"] = "Treasure Maps",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TREASURE_MAPS),
 				},
 				[21] = 
 				{
 					["priority"] = 30,
-					["name"] = "Furnishing",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_FURNISHING),
 				},
 				[22] = 
 				{
 					["priority"] = 20,
-					["name"] = "Stolen",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_STOLEN),
 				},
 				[23] = 
 				{
 					["priority"] = 10,
-					["name"] = "Alchemy",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY),
 				},
 				[24] = 
 				{
 					["priority"] = 10,
-					["name"] = "Blacksmithing",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING),
 				},
 				[25] = 
 				{
 					["priority"] = 10,
-					["name"] = "Clothing",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING),
 				},
 				[26] = 
 				{
 					["priority"] = 10,
-					["name"] = "Enchanting",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING),
 				},
 				[27] = 
 				{
 					["priority"] = 10,
-					["name"] = "Provisioning",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING),
 				},
 				[28] = 
 				{
 					["priority"] = 10,
-					["name"] = "Trait/Style Gems",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS),
 				},
 				[29] = 
 				{
 					["priority"] = 10,
-					["name"] = "Woodworking",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING),
 				},
 			},
 		},
@@ -484,147 +488,147 @@ AutoCategory.defaultAcctSettings = {
 				[1] = 
 				{
 					["priority"] = 100,
-					["name"] = "BoP Tradeable",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOP_TRADEABLE),
 				},
 				[2] = 
 				{
 					["priority"] = 100,
-					["name"] = "New",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NEW),
 				},
 				[3] = 
 				{
 					["priority"] = 95,
-					["name"] = "Container",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONTAINER),
 				},
 				[4] = 
 				{
 					["priority"] = 90,
-					["name"] = "Selling",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SELLING),
 				},
 				[5] = 
 				{
 					["priority"] = 85,
-					["name"] = "Low Level",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_LOW_LEVEL),
 				},
 				[6] = 
 				{
 					["priority"] = 80,
-					["name"] = "Deconstruct",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_DECONSTRUCT),
 				},
 				[7] = 
 				{
 					["priority"] = 70,
-					["name"] = "BoE",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOE),
 				},
 				[8] = 
 				{
 					["priority"] = 60,
-					["name"] = "Researchable",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RESEARCHABLE),
 				},
 				[9] = 
 				{
 					["priority"] = 50,
-					["name"] = "Equipping",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_EQUIPPING),
 				},
 				[10] = 
 				{
 					["priority"] = 49,
-					["name"] = "Set",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SET),
 				},
 				[11] = 
 				{
 					["priority"] = 48,
-					["name"] = "Weapon",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WEAPON),
 				},
 				[12] = 
 				{
 					["priority"] = 47,
-					["name"] = "Poison",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_POISON),
 				},
 				[13] = 
 				{
 					["priority"] = 46,
-					["name"] = "Armor",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ARMOR),
 				},
 				[14] = 
 				{
 					["priority"] = 45,
-					["name"] = "Necklace",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NECKLACE),
 				},
 				[15] = 
 				{
 					["priority"] = 45,
-					["name"] = "Ring",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RING),
 				},
 				[16] = 
 				{
 					["priority"] = 40,
-					["name"] = "Quickslots",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_QUICKSLOTS),
 				},
 				[17] = 
 				{
 					["priority"] = 35,
-					["name"] = "Consumables",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONSUMABLES),
 				},
 				[18] = 
 				{
 					["priority"] = 35,
-					["name"] = "Glyphs & Gems",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_GLYPHS_AND_GEMS),
 				},
 				[19] = 
 				{
 					["priority"] = 35,
-					["name"] = "Recipes & Motifs",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RECIPES_AND_MOTIFS),
 				},
 				[20] = 
 				{
 					["priority"] = 35,
-					["name"] = "Treasure Maps",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TREASURE_MAPS),
 				},
 				[21] = 
 				{
 					["priority"] = 30,
-					["name"] = "Furnishing",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_FURNISHING),
 				},
 				[22] = 
 				{
 					["priority"] = 20,
-					["name"] = "Stolen",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_STOLEN),
 				},
 				[23] = 
 				{
 					["priority"] = 10,
-					["name"] = "Alchemy",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY),
 				},
 				[24] = 
 				{
 					["priority"] = 10,
-					["name"] = "Blacksmithing",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING),
 				},
 				[25] = 
 				{
 					["priority"] = 10,
-					["name"] = "Clothing",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING),
 				},
 				[26] = 
 				{
 					["priority"] = 10,
-					["name"] = "Enchanting",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING),
 				},
 				[27] = 
 				{
 					["priority"] = 10,
-					["name"] = "Provisioning",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING),
 				},
 				[28] = 
 				{
 					["priority"] = 10,
-					["name"] = "Trait/Style Gems",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS),
 				},
 				[29] = 
 				{
 					["priority"] = 10,
-					["name"] = "Woodworking",
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING),
 				},
 			},
 		},
