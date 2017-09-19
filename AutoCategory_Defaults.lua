@@ -314,7 +314,7 @@ AutoCategory.defaultAcctSettings = {
 		},
 		[38] = 
 		{
-			["rule"] = "filtertype(\"trait_items\", \"style_materials\", \"miscellaneous\")",
+			["rule"] = "filtertype(\"trait_items\", \"style_materials\")",
 			["tag"] = "Materials",
 			["name"] = "Trait/Style Gems",
 			["damaged"] = false,
