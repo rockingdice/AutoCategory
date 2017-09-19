@@ -20,8 +20,13 @@ AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"
 
-AC_UNGROUPED_NAME = "Others"
-AC_EMPTY_TAG_NAME = "<Empty>"
+AutoCategory.localizefunc = function ( loc_key ) 
+	return GetString( loc_key )
+end
+local L = AutoCategory.localizefunc
+
+AC_UNGROUPED_NAME = L(SI_AC_DEFAULT_NAME_CATEGORY_OTHER)
+AC_EMPTY_TAG_NAME = L(SI_AC_DEFAULT_NAME_EMPTY_TAG)
 
 
 key = ""
@@ -56,12 +61,10 @@ function AutoCategory.UpdateCurrentSavedVars()
 	AutoCategory.curSavedVars= {}
 	if not AutoCategory.acctSavedVariables.accountWideSetting  then
 		AutoCategory.curSavedVars.rules = AutoCategory.acctSavedVariables.rules
-		AutoCategory.curSavedVars.bags = AutoCategory.charSavedVariables.bags
-		d("Use Character setting")
+		AutoCategory.curSavedVars.bags = AutoCategory.charSavedVariables.bags 
 	else 
 		AutoCategory.curSavedVars.rules = AutoCategory.acctSavedVariables.rules
-		AutoCategory.curSavedVars.bags = AutoCategory.acctSavedVariables.bags 
-		d("Use Accountwide Setting")
+		AutoCategory.curSavedVars.bags = AutoCategory.acctSavedVariables.bags  
 	end
 end
 

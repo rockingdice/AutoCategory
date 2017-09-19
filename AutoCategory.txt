@@ -24,6 +24,7 @@ Libs/LibAddonMenu-2.0/controls/slider.lua
 Libs/LibAddonMenu-2.0/controls/texture.lua
 Libs/LibAddonMenu-2.0/controls/iconpicker.lua
 
+lang/$(language).lua
 AutoCategory_Integrations_Iakoni_Gear_Changer.lua
 AutoCategory_Defaults.lua
 AutoCategory.xml
