@@ -13,6 +13,7 @@ local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
 --create Addon UI table
 AutoCategory.RuleFunc = {}
 AutoCategory.Inited = false
+AutoCategory.Enabled = true
 
 AutoCategory.name = "AutoCategory";
 AutoCategory.version = "1.08";
@@ -158,18 +159,20 @@ function AutoCategory.HookKeyboardMode()
 		
 		--change sort function
 		inventory.sortFn =  function(left, right)
-		    if right.sortPriorityName ~= left.sortPriorityName then
-		        return NilOrLessThan(left.sortPriorityName, right.sortPriorityName)
-		    end
-			if right.isHeader ~= left.isHeader then
-				return NilOrLessThan(right.isHeader, left.isHeader)
-			end
-			--compatible with quality sort
-			if type(inventory.currentSortKey) == "function" then 
-				if inventory.currentSortOrder == ZO_SORT_ORDER_UP then
-					return inventory.currentSortKey(left.data, right.data)
-				else
-					return inventory.currentSortKey(right.data, left.data)
+			if AutoCategory.Enabled then
+				if right.sortPriorityName ~= left.sortPriorityName then
+					return NilOrLessThan(left.sortPriorityName, right.sortPriorityName)
+				end
+				if right.isHeader ~= left.isHeader then
+					return NilOrLessThan(right.isHeader, left.isHeader)
+				end
+				--compatible with quality sort
+				if type(inventory.currentSortKey) == "function" then 
+					if inventory.currentSortOrder == ZO_SORT_ORDER_UP then
+						return inventory.currentSortKey(left.data, right.data)
+					else
+						return inventory.currentSortKey(right.data, left.data)
+					end
 				end
 			end
 			return ZO_TableOrderingFunction(left.data, right.data, inventory.currentSortKey, sortKeys, inventory.currentSortOrder)
@@ -180,7 +183,7 @@ function AutoCategory.HookKeyboardMode()
 		for i, entry in ipairs(scrollData) do
 			local slotData = entry.data
 			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
-			if not matched then
+			if not matched or not AutoCategory.Enabled then
 				entry.bestItemTypeName = AC_UNGROUPED_NAME 
 				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 			else
@@ -347,6 +350,14 @@ function AutoCategory.HookGamepadStore(list)
 	end
 
 	list.sortFunc = AutoCategory_ItemSortComparator
+end
+
+
+function AutoCategory.ToggleCategorize()
+	AutoCategory.Enabled = not AutoCategory.Enabled
+	d("enabled: ", AutoCategory.Enabled)
+    ZO_ScrollList_RefreshVisible(ZO_PlayerInventoryBackpack)
+    ZO_ScrollList_RefreshVisible(ZO_PlayerBankBackpack) 
 end
 
 function AutoCategory.LazyInit()

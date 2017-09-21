@@ -33,3 +33,4 @@ AutoCategory_Integrations_Inventory_Grid_View.lua
 AddonMenu.lua
 AutoCategory_RuleFunc.lua
 AutoCategory_API.lua
+Bindings.xml
