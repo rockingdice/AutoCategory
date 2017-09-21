@@ -151,13 +151,11 @@ local function CompareEntries(topEdge, compareData)
 end
 
 local SCROLL_LIST_UNIFORM = 1
-local function FindStartPoint(self, topEdge)
-    if(self.mode == SCROLL_LIST_UNIFORM) then
-        return zo_floor(topEdge / self.controlHeight)+1
-    else
-        local found, insertPoint = zo_binarysearch(topEdge, self.data, CompareEntries)
-        return insertPoint
-    end
+local function FindStartPoint(self, topEdge) 
+------------------------modified begin--------------------------
+	local found, insertPoint = zo_binarysearch(topEdge, self.data, CompareEntries)
+	return insertPoint 
+------------------------modified end----------------------------
 end
 
 
@@ -174,197 +172,20 @@ end
  
 ------------------------modified begin--------------------------
 
-local consideredMap = {}
-local function IGV_ScrollList_UpdateScroll_Grid(self) 
-    local windowHeight = ZO_ScrollList_GetHeight(self)
-   
-    --Added------------------------------------------------------------------
-    local scrollableDistance = 0
-    local foundSelected = false
-	local currentY = 0
-	local lastIndex = 1
-    local gridIconSize = settings.GetGridIconSize()
-    local contentsWidth = self.contents:GetWidth()
-    local contentsWidthMinusPadding = contentsWidth - LEFT_PADDING
-    local itemsPerRow = zo_floor(contentsWidthMinusPadding / gridIconSize)
-    local gridSpacing = .5
-	local totalControlWidth = gridIconSize + gridSpacing
-	for i = 1,#self.data do
-		local currentData = self.data[i]
-		if currentData.isHeader then
-			--Y add header's height
-			if i ~= 1 then
-				--next row
-				currentY = currentY + totalControlWidth *  (zo_floor((i - 1 - lastIndex) / itemsPerRow)  + 1)
-			end
-			lastIndex = i + 1 
-			currentData.top = currentY	
-			currentData.bottom = currentY + 40
-			currentData.left = LEFT_PADDING
-			currentY = currentY + 40
-		else 
-			currentData.top = zo_floor((i - lastIndex) / itemsPerRow) * totalControlWidth + currentY
-			--d(currentData.top)
-			currentData.bottom = currentData.top + totalControlWidth
-			currentData.left = (i - lastIndex) % itemsPerRow * totalControlWidth + LEFT_PADDING 
-		end 
-	end
-	currentY = currentY + totalControlWidth *  (zo_floor((#self.data - 1 - lastIndex) / itemsPerRow)  + 1)
-	scrollableDistance = currentY - windowHeight
-
-    ResizeScrollBar(self, scrollableDistance)
-    ----------------------------------------------------------------------------
-
-    local controlHeight = self.controlHeight
-    local activeControls = self.activeControls
-    local offset = self.offset
-
-    UpdateScrollFade(self.useFadeGradient, self.contents, self.scrollbar, offset)
-	
-    --remove active controls that are now hidden
-    local i = 1
-    local numActive = #activeControls
-    while(i <= numActive) do
-        local currentDataEntry = activeControls[i].dataEntry
-
-        if(currentDataEntry.bottom < offset or currentDataEntry.top > offset + windowHeight) then
-            FreeActiveScrollListControl(self, i)
-            numActive = numActive - 1
-        else
-            i = i + 1
+local function CheckRunHandler(self, handlerName)
+    local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+    if(mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl:IsChildOf(self)) then
+        local handler = mouseOverControl:GetHandler(handlerName)
+        if(handler) then
+            handler(mouseOverControl)
         end
-
-        consideredMap[currentDataEntry] = true
-    end
-
-    --add revealed controls
-    local firstInViewIndex = FindStartPoint(self, offset)
-
-    local data = self.data
-    local dataTypes = self.dataTypes
-    local visibleData = self.visibleData
-    local mode = self.mode
-
-    local i = firstInViewIndex
-    local visibleDataIndex = visibleData[i]
-    local dataEntry = data[visibleDataIndex]
-    local bottomEdge = offset + windowHeight
-
-    --Modified------------------------------------------------------------------
-    local controlTop, controlLeft
-
-    if dataEntry then
-        --removed isUniform check because we're assuming always uniform
-        controlTop = dataEntry.top
-		controlLeft = dataEntry.left
-    end
-    ----------------------------------------------------------------------------
-    while(dataEntry and controlTop <= bottomEdge) do
-        if(not consideredMap[dataEntry]) then
-            local dataType = dataTypes[dataEntry.typeId]
-            local controlPool = dataType.pool
-            local control, key = controlPool:AcquireObject()
-
-            control:SetHidden(false)
-            control.dataEntry = dataEntry
-            control.key = key
-            control.index = visibleDataIndex
-            --Added-------------------------------------------------------------
-            control.isGrid = false
-            --------------------------------------------------------------------
-            if(dataType.setupCallback) then
-                dataType.setupCallback(control, dataEntry.data, self)
-            end
-            table.insert(activeControls, control)
-            consideredMap[dataEntry] = true
-
-            if(AreDataEqualSelections(self, dataEntry.data, self.selectedData)) then
-                SelectControl(self, control, ANIMATE_INSTANTLY)
-            end
-
-            --even uniform active controls need to know their position to determine if they are still active
-			--Modified-------------------------------------------------------------- 
-		 
-			------------------------------------------------------------------------
-        end
-        i = i + 1
-        visibleDataIndex = visibleData[i]
-        dataEntry = data[visibleDataIndex]
-        --Modified--------------------------------------------------------------
-        if(dataEntry) then
-            --removed isUniform check because we're assuming always uniform
-            controlTop = dataEntry.top
-			controlLeft = dataEntry.left
-        end
-        ------------------------------------------------------------------------
-    end
-
-    --update positions
-    local contents = self.contents
-    local numActive = #activeControls
-
-    for i = 1, numActive do
-        local currentControl = activeControls[i]
-        local currentData = currentControl.dataEntry
-        local controlOffset = currentData.top - offset
-        --Added-----------------------------------------------------------------
-        local controlOffsetX = currentData.left
-        ------------------------------------------------------------------------
-        currentControl:ClearAnchors()
-        --Modified--------------------------------------------------------------
-        currentControl:SetAnchor(TOPLEFT, contents, TOPLEFT, controlOffsetX, controlOffset)
-        --removed other anchor because this will no longer stretch across the contents pane
-        ------------------------------------------------------------------------
-    end
-
-    --reset considered
-    for k,v in pairs(consideredMap) do
-        consideredMap[k] = nil
-    end
-end
-  
-
-function adapter_ScrollController(self)
-    if self == IGV.currentScrollList and settings.IsGrid(IGV.currentIGVId) then
-        freeActiveScrollListControls(self)
-        IGV_ScrollList_UpdateScroll_Grid(self)
-        util.ReshapeSlots()
-
-        return true
-    else
-        return false
     end
 end
 
-
-function adapter_ToggleGrid()
-    local IGVId = IGV.currentIGVId
-    local scrollList = IGV.currentScrollList
-
-    if not scrollList then return end
-
-    settings.ToggleGrid(IGVId)
-    local isGrid = settings.IsGrid(IGVId)
-
-    ZO_ScrollList_ResetToTop(scrollList)
-
-    util.ReshapeSlots()
-    freeActiveScrollListControls(scrollList)
-	ZO_ScrollList_Commit(scrollList)
-    ZO_ScrollList_UpdateScroll(scrollList)
-
-    if isGrid then
-        util.ReshapeSlots()
-    else
-        ResizeScrollBar(scrollList, (#scrollList.data * scrollList.controlHeight) - ZO_ScrollList_GetHeight(scrollList))
-    end
-
-    ZO_ScrollList_RefreshVisible(scrollList)
-    util.ReshapeSlots()
+local needRefreshControls = true
+local function IGV_ScrollList_Commit_Grid(self) 
+	needRefreshControls = true
 end
-
-
--------------------------------------------------------------
 
 local function AddColor(control)
     if not control.dataEntry then return end
@@ -384,15 +205,19 @@ local function AddColor(control)
 end
 
 local oldSetHidden
-local function ReshapeSlot(control, isGrid, width, height)
-    if control == nil then return end
-	if control.dataEntry == nil or control.dataEntry.isHeader then return end
+local function ReshapeSlot(control, isGrid, width, height, index)
+    if control == nil then 	 
+		return 
+	end
+	if control.dataEntry == nil or control.dataEntry.isHeader then  
+		return 
+	end
 	if height == nil then height = 52 end
 
+	--d("reshape: ".. index .. " width: ".. width .. " height: " .. height)
     local ICON_MULT = 0.77
     local textureSet = IGV.settings.GetTextureSet()
-
-    if control.isGrid ~= isGrid then
+	--if control.isGrid ~= isGrid then
         control.isGrid = isGrid
 
         local bg = control:GetNamedChild("Bg")
@@ -409,10 +234,8 @@ local function ReshapeSlot(control, isGrid, width, height)
             if not oldSetHidden then oldSetHidden = sell.SetHidden end
 
             sell.SetHidden = function(sell, shouldHide)
-                if isGrid and shouldHide then
-                    oldSetHidden(sell, shouldHide)
-                elseif isGrid then
-                    return
+                if isGrid then
+                    oldSetHidden(sell, true)
                 else
                     oldSetHidden(sell, shouldHide)
                 end
@@ -433,12 +256,15 @@ local function ReshapeSlot(control, isGrid, width, height)
             button:SetDimensions(height * ICON_MULT, height * ICON_MULT)
         end
 
-        if new then new:ClearAnchors() end
-		
-		--disable status' mouse callback
-		new:SetMouseEnabled(false)
-		new:GetNamedChild("Texture"):SetMouseEnabled(false)
-
+        if new then 
+			new:ClearAnchors() 
+			--disable status' mouse callback
+			new:SetMouseEnabled(false)
+			if new:GetNamedChild("Texture") then
+				new:GetNamedChild("Texture"):SetMouseEnabled(false)
+			end
+		end
+		 
         control:SetDimensions(width, height)
 
         if isGrid == true and new ~= nil then
@@ -477,9 +303,11 @@ local function ReshapeSlot(control, isGrid, width, height)
             outline:SetHidden(true)
 
             if highlight then
-                highlight:SetTexture(LIST_SLOT_HOVER)
-                highlight:SetColor(1, 1, 1, 0)
-                highlight:SetTextureCoords(0, 1, 0, .625)
+				if highlight.SetTexture then
+					highlight:SetTexture(LIST_SLOT_HOVER)
+					highlight:SetColor(1, 1, 1, 0)
+					highlight:SetTextureCoords(0, 1, 0, .625)
+				end
             end
 
             if bg then
@@ -488,64 +316,305 @@ local function ReshapeSlot(control, isGrid, width, height)
                 bg:SetColor(1, 1, 1, 1)
             end
         end
-    end
+	--end
 end
 
-function util_ReshapeSlots()
-    local scrollList = IGV.currentScrollList
-    if not scrollList then return end
-    local parent = scrollList.contents
-    local numControls = parent:GetNumChildren()
-    local gridIconSize = IGV.settings.GetGridIconSize()
-    local IGVId = IGV.currentIGVId
-    local isGrid = IGV.settings.IsGrid(IGVId)
+local consideredMap = {}
+local function IGV_ScrollList_UpdateScroll_Grid(self) 
 
+    local windowHeight = ZO_ScrollList_GetHeight(self)
+    --Added------------------------------------------------------------------
+    local IGVId = IGV.currentIGVId
+    local isGrid = settings.IsGrid(IGVId) 
+    local gridIconSize = IGV.settings.GetGridIconSize()
     local width, height
 
     if isGrid then
         width = gridIconSize
         height = gridIconSize
     else
-        width = scrollList:GetWidth()
-	scrollList.controlHeight = 52
-        height = scrollList.controlHeight
+        width = self.contents:GetWidth()
+        height = 52
+    end
+	
+	if needRefreshControls then
+		--d("refreshed")
+		--check if need update controls
+		needRefreshControls = false
+		local scrollableDistance = 0
+		local foundSelected = false
+		local currentY = 0
+		local lastIndex = 1
+		local gridIconSize = settings.GetGridIconSize()
+		local contentsWidth = self.contents:GetWidth()
+		local contentsWidthMinusPadding = contentsWidth - LEFT_PADDING
+		local itemsPerRow = zo_floor(contentsWidthMinusPadding / gridIconSize)
+		local gridSpacing = .5
+		local totalControlWidth = gridIconSize + gridSpacing
+		if isGrid then
+			--make sure visible data is empty
+			self.visibleData = {}
+			for i = 1,#self.data do
+				local currentData = self.data[i]
+				if currentData.isHeader then
+					--Y add header's height
+					if i ~= 1 then
+						--next row
+						currentY = currentY + totalControlWidth *  (zo_floor((i - 1 - lastIndex) / itemsPerRow)  + 1)
+					end
+					lastIndex = i + 1 
+					currentData.top = currentY	
+					currentData.bottom = currentY + 40
+					currentData.left = LEFT_PADDING
+					currentY = currentY + 40
+				else 
+					currentData.top = zo_floor((i - lastIndex) / itemsPerRow) * totalControlWidth + currentY
+					--d(currentData.top)
+					currentData.bottom = currentData.top + totalControlWidth
+					currentData.left = (i - lastIndex) % itemsPerRow * totalControlWidth + LEFT_PADDING 
+				end 
+				table.insert(self.visibleData, i)
+				
+				if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
+					foundSelected = true
+					ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+				end
+			end
+			currentY = currentY + totalControlWidth *  (zo_floor((#self.data - 1 - lastIndex) / itemsPerRow)  + 1)
+			scrollableDistance = currentY - windowHeight 
+		else
+			local currentY = 0
+			for i, currentData in ipairs(self.data) do
+				currentData.top = currentY
+				currentData.left = LEFT_PADDING
+				currentY = currentY + self.dataTypes[currentData.typeId].height
+				currentData.bottom = currentY
+				table.insert(self.visibleData, i)
+				
+				if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
+					foundSelected = true
+					ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+				end
+			end
+			scrollableDistance = currentY - windowHeight 
+		end
+
+		ResizeScrollBar(self, scrollableDistance)
+	end
+    ----------------------------------------------------------------------------
+
+   
+
+    local controlHeight = self.controlHeight
+    local activeControls = self.activeControls
+    local offset = self.offset
+
+	
+    UpdateScrollFade(self.useFadeGradient, self.contents, self.scrollbar, offset)
+    
+    --remove active controls that are now hidden
+    local activeIndex = 1
+    local numActive = #activeControls
+    while activeIndex <= numActive do
+        local currentDataEntry = activeControls[activeIndex].dataEntry
+
+        if currentDataEntry.bottom < offset or currentDataEntry.top > offset + windowHeight then
+            FreeActiveScrollListControl(self, activeIndex)
+            numActive = numActive - 1
+        else
+			--d("reshaped by existing: " .. activeIndex)
+			--ReshapeSlot(activeControls[activeIndex], isGrid, width, height, activeIndex)
+            activeIndex = activeIndex + 1
+        end
+        consideredMap[currentDataEntry] = true
+    end
+        
+    --add revealed controls
+    local firstInViewIndex = FindStartPoint(self, offset)
+   
+    local data = self.data
+    local visibleData = self.visibleData
+    local mode = self.mode
+    
+    local nextCandidateIndex = firstInViewIndex
+    local visibleDataIndex = visibleData[nextCandidateIndex]
+    local dataEntry = data[visibleDataIndex]
+    local bottomEdge = offset + windowHeight
+
+    --Modified------------------------------------------------------------------
+    local controlTop = 0
+	local controlLeft = 0
+    local uniformControlHeight = self.uniformControlHeight or 52
+    if dataEntry then
+		if isGrid then 
+			controlTop = dataEntry.top
+			controlLeft = dataEntry.left
+		else
+			if mode == SCROLL_LIST_UNIFORM then
+				controlTop = (nextCandidateIndex - 1) * uniformControlHeight 
+			else
+				controlTop = dataEntry.top
+			end
+		end
+    end
+    ----------------------------------------------------------------------------
+    while dataEntry and controlTop <= bottomEdge do
+        if not consideredMap[dataEntry] then
+            local dataType = self.dataTypes[dataEntry.typeId]
+            local controlPool = dataType.pool
+
+            if controlPool then
+                local control, key = controlPool:AcquireObject()
+                local setupCallback = dataType.setupCallback
+            
+                control:SetHidden(false)
+                control.dataEntry = dataEntry
+                control.key = key
+                control.index = visibleDataIndex
+				--Added-------------------------------------------------------------  
+				--d("reshape by add: " .. nextCandidateIndex)
+				ReshapeSlot(control, isGrid, width, height, nextCandidateIndex)
+				--------------------------------------------------------------------
+                if setupCallback then
+                    setupCallback(control, dataEntry.data, self)
+                end
+				table.insert(activeControls, control)
+				consideredMap[dataEntry] = true
+
+                if AreDataEqualSelections(self, dataEntry.data, self.selectedData) then
+                SelectControl(self, control, ANIMATE_INSTANTLY)
+                end
+            end
+
+            --even uniform active controls need to know their position to determine if they are still active
+			--Modified-------------------------------------------------------------- 
+		    if self.mode == SCROLL_LIST_UNIFORM and isGrid then
+                dataEntry.top = controlTop
+                dataEntry.bottom = controlTop + uniformControlHeight
+            end
+			------------------------------------------------------------------------
+        end
+        nextCandidateIndex = nextCandidateIndex + 1
+        visibleDataIndex = visibleData[nextCandidateIndex]
+        dataEntry = data[visibleDataIndex]
+        --Modified--------------------------------------------------------------
+        if dataEntry then
+			if isGrid then 
+				--removed isUniform check because we're assuming always uniform
+				controlTop = dataEntry.top
+				controlLeft = dataEntry.left
+			else 
+				if mode == SCROLL_LIST_UNIFORM then
+					controlTop = (nextCandidateIndex - 1) * uniformControlHeight 
+				else
+					controlTop = dataEntry.top
+				end
+			end
+        end
+        ------------------------------------------------------------------------
     end
 
-    --CRAFT_BAG, QUICKSLOT, and BUY_BACK don't have the same child element pattern, have to start at 1 instead of 2
-    if IGVId == 4 or IGVId == 5 or IGVId == 7 then
-        for i = 1, numControls do
-            ReshapeSlot(parent:GetChild(i), isGrid, width, height)
-        end
+    --update positions
+    local contents = self.contents
+    local numNowActive = #activeControls
+    for activeControlIndex = 1, numNowActive do
+        local currentControl = activeControls[activeControlIndex]
+        local currentData = currentControl.dataEntry
+        --Modified--------------------------------------------------------------
+		if isGrid then
+            local yOffset = currentData.top - offset
+            local xOffset = currentData.left
+            currentControl:ClearAnchors()
 
-        for i = 1, numControls do
-            parent:GetChild(i).isGrid = isGrid
-        end
+            currentControl:SetAnchor(TOPLEFT, contents, TOPLEFT, xOffset, yOffset)
+        else
+		    if self.mode == SCROLL_LIST_OPERATIONS then
+				local currentOperation = GetDataTypeInfo(self, currentData.typeId)
+				currentOperation:AddToScrollContents(self.contents, currentControl, currentData.left, currentData.top, offset)
+			else
+				local yOffset = currentData.top - offset
+				local xOffset = currentData.left
+				currentControl:ClearAnchors()
 
-        if scrollList.dataTypes[1] then
-            for _, v in pairs(scrollList.dataTypes[1].pool["m_Free"]) do
-                ReshapeSlot(v, isGrid, width, height)
-            end
-        end
-
-        if scrollList.dataTypes[2] then
-            for _, v in pairs(scrollList.dataTypes[2].pool["m_Free"]) do
-                ReshapeSlot(v, isGrid, width, height)
-            end
-        end
-    else
-        for i = 2, numControls do
-            ReshapeSlot(parent:GetChild(i), isGrid, width, height)
-        end
-
-        for i = 2, numControls do
-            parent:GetChild(i).isGrid = isGrid
-        end
-
-        for _, v in pairs(scrollList.dataTypes[1].pool["m_Free"]) do
-            ReshapeSlot(v, isGrid, width, height)
-        end
+				currentControl:SetAnchor(TOPLEFT, contents, TOPLEFT, xOffset, yOffset)
+				currentControl:SetAnchor(TOPRIGHT, contents, TOPRIGHT, xOffset, yOffset)
+			end
+		end
+        ------------------------------------------------------------------------
+    end
+    
+    --reset considered
+    for k,v in pairs(consideredMap) do
+        consideredMap[k] = nil
     end
 end
+
+  
+
+function adapter_ScrollController(self)
+    if self == IGV.currentScrollList and settings.IsGrid(IGV.currentIGVId) then
+        IGV_ScrollList_UpdateScroll_Grid(self)
+
+        return true
+    else  
+        IGV_ScrollList_UpdateScroll_Grid(self)
+        return true
+    end
+end 
+
+function adapter_Commit(self)
+    IGV_ScrollList_Commit_Grid(self) 
+	return false
+end
+  
+function adapter_RefreshVisible(self, data, overrideSetupCallback) 
+    local IGVId = IGV.currentIGVId
+    local isGrid = settings.IsGrid(IGVId)
+    local gridIconSize = IGV.settings.GetGridIconSize()
+    local width, height
+
+    if isGrid then
+        width = gridIconSize
+        height = gridIconSize
+    else
+        width = self:GetWidth() 
+        height = 52
+    end
+	
+	
+    for i = 1, #self.activeControls do
+        local control = self.activeControls[i]
+        local dataEntry = control.dataEntry
+        if not data or data == dataEntry.data then 
+			--d("reshape by refresh visible: ".. i)
+            ReshapeSlot(control, isGrid, width, height, i)
+        end
+    end
+	
+	return true
+end
+
+function adapter_ToggleGrid()
+    local IGVId = IGV.currentIGVId
+    local scrollList = IGV.currentScrollList
+
+    if not scrollList then return end
+
+    settings.ToggleGrid(IGVId)
+    local isGrid = settings.IsGrid(IGVId)
+
+    ZO_ScrollList_ResetToTop(scrollList) 
+	ZO_ScrollList_Commit(scrollList) 
+    ZO_ScrollList_RefreshVisible(scrollList) 
+end
+
+
+-------------------------------------------------------------
+
+
+function util_ReshapeSlots()
+end
+ 
 
 ---------------------------------------------------------------------------
 local integrated = false
@@ -567,6 +636,17 @@ function IntegrateInventoryGridView()
 			
 			--fix prehook  	
 			ZO_PreHook("ZO_ScrollList_UpdateScroll", adapter_ScrollController)
+			 
+			--hook into scroll list updates
+			ZO_PreHook("ZO_ScrollList_Commit", adapter_Commit)
+			
+			local original = ZO_ScrollList_RefreshVisible
+			local function hookFunction( ... )
+				original( ... )
+				adapter_RefreshVisible( ... )
+				return true
+			end
+			ZO_PreHook("ZO_ScrollList_RefreshVisible", hookFunction)
 		end
 	end, 10) 
 end 
