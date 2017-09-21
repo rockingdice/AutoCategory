@@ -357,6 +357,11 @@ end
 
 function AutoCategory.ToggleCategorize()
 	AutoCategory.Enabled = not AutoCategory.Enabled 
+	if AutoCategory.Enabled then
+		d("Auto Category: Enabled.")
+	else
+		d("Auto Category: Disabled.")
+	end
 	if not ZO_PlayerInventory:IsHidden() then
 		PLAYER_INVENTORY:UpdateList(INVENTORY_BACKPACK)
 		PLAYER_INVENTORY:UpdateList(INVENTORY_QUEST_ITEM)
