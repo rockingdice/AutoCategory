@@ -329,7 +329,7 @@ end
 local function CreateNewBagRuleEntry(name)
 	local entry = {
 		name = name,
-		priority = 0,
+		priority = 100,
 	}
 	return entry	
 end
