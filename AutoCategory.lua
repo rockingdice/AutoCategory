@@ -158,7 +158,7 @@ function AutoCategory.HookKeyboardMode()
 	    end
 		
 		--change sort function
-		inventory.sortFn =  function(left, right)
+		inventory.sortFn =  function(left, right) 
 			if AutoCategory.Enabled then
 				if right.sortPriorityName ~= left.sortPriorityName then
 					return NilOrLessThan(left.sortPriorityName, right.sortPriorityName)
@@ -200,14 +200,16 @@ function AutoCategory.HookKeyboardMode()
         local newScrollData = {}
 	    for i, entry in ipairs(scrollData) do 
 	    	if entry.typeId ~= 998 then
-		        if entry.bestItemTypeName ~= lastBestItemCategoryName then
-		            lastBestItemCategoryName = entry.bestItemTypeName
-					local headerEntry = ZO_ScrollList_CreateDataEntry(998, {bestItemTypeName = entry.bestItemTypeName, stackLaunderPrice = 0})
-					headerEntry.sortPriorityName = entry.sortPriorityName
-					headerEntry.isHeader = true
-					headerEntry.bestItemTypeName = entry.bestItemTypeName
-		            table.insert(newScrollData, headerEntry)
-		        end
+				if AutoCategory.Enabled then					
+					if entry.bestItemTypeName ~= lastBestItemCategoryName then
+						lastBestItemCategoryName = entry.bestItemTypeName
+						local headerEntry = ZO_ScrollList_CreateDataEntry(998, {bestItemTypeName = entry.bestItemTypeName, stackLaunderPrice = 0})
+						headerEntry.sortPriorityName = entry.sortPriorityName
+						headerEntry.isHeader = true
+						headerEntry.bestItemTypeName = entry.bestItemTypeName
+						table.insert(newScrollData, headerEntry)
+					end
+				end
 		        table.insert(newScrollData, entry)
 	    	end
 	    end
@@ -354,10 +356,17 @@ end
 
 
 function AutoCategory.ToggleCategorize()
-	AutoCategory.Enabled = not AutoCategory.Enabled
-	d("enabled: ", AutoCategory.Enabled)
-    ZO_ScrollList_RefreshVisible(ZO_PlayerInventoryBackpack)
-    ZO_ScrollList_RefreshVisible(ZO_PlayerBankBackpack) 
+	AutoCategory.Enabled = not AutoCategory.Enabled 
+	if not ZO_PlayerInventory:IsHidden() then
+		PLAYER_INVENTORY:UpdateList(INVENTORY_BACKPACK)
+		PLAYER_INVENTORY:UpdateList(INVENTORY_QUEST_ITEM)
+	elseif not ZO_CraftBag:IsHidden() then
+		PLAYER_INVENTORY:UpdateList(INVENTORY_CRAFT_BAG)
+	elseif not ZO_GuildBank:IsHidden() then
+		PLAYER_INVENTORY:UpdateList(INVENTORY_GUILD_BANK)
+	elseif not ZO_PlayerBank:IsHidden() then
+		PLAYER_INVENTORY:UpdateList(INVENTORY_BANK)
+	end
 end
 
 function AutoCategory.LazyInit()
