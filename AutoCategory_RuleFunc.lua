@@ -1,5 +1,5 @@
 --============Rule Function==============--
-
+ 
 local LibItemStatus = LibStub:GetLibrary("LibItemStatus")
 function AutoCategory.RuleFunc.SpecializedItemType( ... )
 	local fn = "type"
@@ -477,6 +477,7 @@ function AutoCategory.RuleFunc.KeepForResearch( ... )
 	return itemFlagStatus == LibItemStatus.CONST.ItemFlags.ITEM_FLAG_TRAIT_RESEARABLE
 end
 
+
 function AutoCategory.RuleFunc.SetName( ... )
 	local fn = "set"
 	local ac = select( '#', ... )
@@ -582,7 +583,7 @@ function AutoCategory.RuleFunc.TraitType( ... )
 					["weapon_training"] = ITEM_TRAIT_TYPE_WEAPON_TRAINING,
 				}
 			local v = itemTypeMap[string.lower( arg )]
-			if v and v == equipType then
+			if v and v == traitType then
 				return true
 			end
 		else
@@ -693,6 +694,66 @@ function AutoCategory.RuleFunc.InSet( ... )
 	return #setIndices ~= 0
 end
 
+function AutoCategory.RuleFunc.IsMarked( ... )
+	local fn = "ismarked"
+	if FCOIS == nil then
+		return false
+	end
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	local checkIconIds = {}
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		 
+		if type( arg ) == "number" then
+			table.insert(checkIconIds, arg)
+		elseif type( arg ) == "string" then 
+			local itemTypeMap = {
+				["lock"] = FCOIS_CON_ICON_LOCK,
+				["gear_1"] = FCOIS_CON_ICON_GEAR_1,
+				["research"] = FCOIS_CON_ICON_RESEARCH,
+				["gear_2"] = FCOIS_CON_ICON_GEAR_2,
+				["sell"] = FCOIS_CON_ICON_SELL,
+				["gear_3"] = FCOIS_CON_ICON_GEAR_3,
+				["gear_4"] = FCOIS_CON_ICON_GEAR_4,
+				["gear_5"] = FCOIS_CON_ICON_GEAR_5,
+				["deconstruction"] = FCOIS_CON_ICON_DECONSTRUCTION,
+				["improvement"] = FCOIS_CON_ICON_IMPROVEMENT,
+				["sell_at_guildstore"] = FCOIS_CON_ICON_SELL_AT_GUILDSTORE,
+				["intricate"] = FCOIS_CON_ICON_INTRICATE,
+				["dynamic_1"] = FCOIS_CON_ICON_DYNAMIC_1,
+				["dynamic_2"] = FCOIS_CON_ICON_DYNAMIC_2,
+				["dynamic_3"] = FCOIS_CON_ICON_DYNAMIC_3,
+				["dynamic_4"] = FCOIS_CON_ICON_DYNAMIC_4,
+				["dynamic_5"] = FCOIS_CON_ICON_DYNAMIC_5,
+				["dynamic_6"] = FCOIS_CON_ICON_DYNAMIC_6,
+				["dynamic_7"] = FCOIS_CON_ICON_DYNAMIC_7,
+				["dynamic_8"] = FCOIS_CON_ICON_DYNAMIC_8,
+				["dynamic_9"] = FCOIS_CON_ICON_DYNAMIC_9,
+				["dynamic_10"] = FCOIS_CON_ICON_DYNAMIC_10,
+				}
+			local v = itemTypeMap[string.lower( arg )]
+			if v then
+				table.insert(checkIconIds, v)
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+	end
+	if #checkIconIds > 0 then
+		return FCOIS.IsMarked(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex, checkIconIds)
+	else
+		return FCOIS.IsMarked(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex, -1)
+	end
+end
+
 function AutoCategory.RuleFunc.IsEquipping( ... )
 	local fn = "isequipping"
 	return AutoCategory.checkingItemBagId == BAG_WORN
@@ -749,4 +810,8 @@ AutoCategory.Environment = {
 	setindex = AutoCategory.RuleFunc.SetIndex,
 
 	inset = AutoCategory.RuleFunc.InSet,
+	
+	-- FCO Item Saver
+	ismarked = AutoCategory.RuleFunc.IsMarked,
+	
 }

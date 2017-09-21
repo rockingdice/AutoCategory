@@ -332,6 +332,182 @@ AutoCategory.defaultAcctSettings = {
 			["damaged"] = false,
 			["description"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING_DESC),
 		},
+		[40] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"deconstruction\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DECONSTRUCTION_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DECONSTRUCTION_MARK),
+		},
+		[41] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"dynamic_1\")",
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_1),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_1_DESC),
+		},
+		[42] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_2),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_2_DESC),
+			["rule"] = "ismarked(\"dynamic_2\")",
+			["description"] = "",
+		},
+		[43] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_3),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_3_DESC),
+			["rule"] = "ismarked(\"dynamic_3\")",
+			["description"] = "",
+		},
+		[44] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_4),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_4_DESC),
+			["rule"] = "ismarked(\"dynamic_4\")",
+			["description"] = "",
+		},
+		[45] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_5),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_5_DESC),
+			["rule"] = "ismarked(\"dynamic_5\")",
+			["description"] = "",
+		},
+		[46] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_6),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_6_DESC),
+			["rule"] = "ismarked(\"dynamic_6\")",
+			["description"] = "",
+		},
+		[47] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_7),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_7_DESC),
+			["rule"] = "ismarked(\"dynamic_7\")",
+			["description"] = "",
+		},
+		[48] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_8),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_8_DESC),
+			["rule"] = "ismarked(\"dynamic_8\")",
+			["description"] = "",
+		},
+		[49] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_9),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_9_DESC),
+			["rule"] = "ismarked(\"dynamic_9\")",
+			["description"] = "",
+		},
+		[50] = 
+		{
+			["tag"] = "FCOIS",
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_10),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_10_DESC),
+			["rule"] = "ismarked(\"dynamic_10\")",
+			["description"] = "",
+		},
+		[51] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"gear_1\")",
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_1),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_1_DESC),
+		},
+		[52] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"gear_2\")", 
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_2),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_2_DESC),
+		},
+		[53] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"gear_3\")", 
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_3),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_3_DESC),
+		},
+		[54] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"gear_4\")", 
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_4),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_4_DESC),
+		},
+		[55] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"gear_5\")", 
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_5),
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_5_DESC),
+		},
+		[56] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"improvement\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_IMPROVEMENT_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_IMPROVEMENT_MARK),
+		},
+		[57] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"intricate\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_INTRICATE_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_INTRICATE_MARK),
+		},
+		[58] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"research\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_RESEARCH_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_RESEARCH_MARK),
+		},
+		[59] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"sell_at_guildstore\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_AT_GUILDSTORE_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_AT_GUILDSTORE_MARK),
+		},
+		[60] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"sell\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK),
+		},
+		[61] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked(\"lock\")",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_LOCK_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_LOCK_MARK),
+		},
 	},
 	bags = {
 		[AC_BAG_TYPE_BACKPACK] = {
