@@ -151,11 +151,15 @@ local function CompareEntries(topEdge, compareData)
 end
 
 local SCROLL_LIST_UNIFORM = 1
-local function FindStartPoint(self, topEdge) 
-------------------------modified begin--------------------------
-	local found, insertPoint = zo_binarysearch(topEdge, self.data, CompareEntries)
-	return insertPoint 
-------------------------modified end----------------------------
+local function FindStartPoint(self, topEdge, isGrid)  
+	------------------------modified begin--------------------------
+	if not isGrid and self.mode == SCROLL_LIST_UNIFORM then
+	------------------------modified end---------------------------- 
+        return zo_floor(topEdge / self.uniformControlHeight) + 1
+	else
+		local found, insertPoint = zo_binarysearch(topEdge, self.data, CompareEntries)
+		return insertPoint 
+    end
 end
 
 
@@ -234,8 +238,10 @@ local function ReshapeSlot(control, isGrid, width, height, index)
             if not oldSetHidden then oldSetHidden = sell.SetHidden end
 
             sell.SetHidden = function(sell, shouldHide)
-                if isGrid then
-                    oldSetHidden(sell, true)
+                if isGrid and shouldHide then
+                    oldSetHidden(sell, shouldHide)
+                elseif isGrid then
+                    return
                 else
                     oldSetHidden(sell, shouldHide)
                 end
@@ -258,13 +264,14 @@ local function ReshapeSlot(control, isGrid, width, height, index)
 
         if new then 
 			new:ClearAnchors() 
-			--disable status' mouse callback
-			new:SetMouseEnabled(false)
-			if new:GetNamedChild("Texture") then
-				new:GetNamedChild("Texture"):SetMouseEnabled(false)
-			end
 		end
 		 
+		--disable status' mouse callback
+		new:SetMouseEnabled(false)
+		if new:GetNamedChild("Texture") then
+			new:GetNamedChild("Texture"):SetMouseEnabled(false)
+		end
+		
         control:SetDimensions(width, height)
 
         if isGrid == true and new ~= nil then
@@ -303,11 +310,9 @@ local function ReshapeSlot(control, isGrid, width, height, index)
             outline:SetHidden(true)
 
             if highlight then
-				if highlight.SetTexture then
-					highlight:SetTexture(LIST_SLOT_HOVER)
-					highlight:SetColor(1, 1, 1, 0)
-					highlight:SetTextureCoords(0, 1, 0, .625)
-				end
+                highlight:SetTexture(LIST_SLOT_HOVER)
+                highlight:SetColor(1, 1, 1, 0)
+                highlight:SetTextureCoords(0, 1, 0, .625)
             end
 
             if bg then
@@ -318,6 +323,7 @@ local function ReshapeSlot(control, isGrid, width, height, index)
         end
 	--end
 end
+ 
 
 local consideredMap = {}
 local function IGV_ScrollList_UpdateScroll_Grid(self) 
@@ -328,6 +334,10 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
     local isGrid = settings.IsGrid(IGVId) 
     local gridIconSize = IGV.settings.GetGridIconSize()
     local width, height
+	if self.uniformControlHeight == nil then 
+		self.uniformControlHeight = 52
+	end
+    local uniformControlHeight = self.uniformControlHeight
 
     if isGrid then
         width = gridIconSize
@@ -338,7 +348,7 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
     end
 	
 	if needRefreshControls then
-		--d("refreshed")
+		d("refreshed")
 		--check if need update controls
 		needRefreshControls = false
 		local scrollableDistance = 0
@@ -430,7 +440,7 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
     end
         
     --add revealed controls
-    local firstInViewIndex = FindStartPoint(self, offset)
+    local firstInViewIndex = FindStartPoint(self, offset, isGrid)
    
     local data = self.data
     local visibleData = self.visibleData
@@ -444,7 +454,6 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
     --Modified------------------------------------------------------------------
     local controlTop = 0
 	local controlLeft = 0
-    local uniformControlHeight = self.uniformControlHeight or 52
     if dataEntry then
 		if isGrid then 
 			controlTop = dataEntry.top
@@ -471,24 +480,25 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
                 control.dataEntry = dataEntry
                 control.key = key
                 control.index = visibleDataIndex
+                if setupCallback then
+                    setupCallback(control, dataEntry.data, self)
+                end
 				--Added-------------------------------------------------------------  
 				--d("reshape by add: " .. nextCandidateIndex)
 				ReshapeSlot(control, isGrid, width, height, nextCandidateIndex)
 				--------------------------------------------------------------------
-                if setupCallback then
-                    setupCallback(control, dataEntry.data, self)
-                end
 				table.insert(activeControls, control)
 				consideredMap[dataEntry] = true
 
-                if AreDataEqualSelections(self, dataEntry.data, self.selectedData) then
-                SelectControl(self, control, ANIMATE_INSTANTLY)
-                end
+				if(AreDataEqualSelections(self, dataEntry.data, self.selectedData)) then
+					d("selected")
+					SelectControl(self, control, ANIMATE_INSTANTLY)
+				end
             end
 
             --even uniform active controls need to know their position to determine if they are still active
 			--Modified-------------------------------------------------------------- 
-		    if self.mode == SCROLL_LIST_UNIFORM and isGrid then
+		    if self.mode == SCROLL_LIST_UNIFORM and not isGrid then
                 dataEntry.top = controlTop
                 dataEntry.bottom = controlTop + uniformControlHeight
             end
@@ -552,19 +562,33 @@ end
   
 
 function adapter_ScrollController(self)
-    if self == IGV.currentScrollList and settings.IsGrid(IGV.currentIGVId) then
+	d("update: " .. self:GetName())
+	if IGV.currentScrollList then
+		d("currentlist: " .. IGV.currentScrollList:GetName())
+	end
+    if self == IGV.currentScrollList then
+		--if list is able to switch grid, update it no matter if it's in grid mode
         IGV_ScrollList_UpdateScroll_Grid(self)
-
         return true
     else  
-        IGV_ScrollList_UpdateScroll_Grid(self)
-        return true
+        return false
     end
 end 
 
 function adapter_Commit(self)
-    IGV_ScrollList_Commit_Grid(self) 
-	return false
+	d("commit: " .. self:GetName())
+	if IGV.currentScrollList then
+		d("currentlist: " .. IGV.currentScrollList:GetName())
+	end
+    if self.IGVId then 
+		IGV.currentIGVId = self.IGVId
+		IGV.currentScrollList = self
+		--if list is able to switch grid, update it no matter if it's in grid mode
+		IGV_ScrollList_Commit_Grid(self) 
+        return false
+    else  
+        return false
+    end 
 end
   
 function adapter_RefreshVisible(self, data, overrideSetupCallback) 
