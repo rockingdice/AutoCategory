@@ -146,11 +146,6 @@ SafeAddString(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS_DESC, "", 1)
 SafeAddString(SI_AC_DEFAULT_CATEGORY_WOODWORKING, "Drechsler", 1) 
 SafeAddString(SI_AC_DEFAULT_CATEGORY_WOODWORKING_DESC, "", 1)
 
---No need to translate anymore as the texts got read from FCOIS already in filename lang/all.lua.
---One could use these values here as backup but should also add the FCOIS.GetIcontext(icon constant) then, in order
---to read the texts from the addon and only use translated German strings behind the "or" then
---[[ 
---FCOItemSaver
 SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_DECONSTRUCTION_MARK, "Verwerten", 1)
 SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_DECONSTRUCTION_MARK_DESC, "", 1)
 SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_1, "Dynamisch 1", 1)
@@ -195,4 +190,3 @@ SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_AT_GUILDSTORE_MARK, "Verkauf im 
 SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_AT_GUILDSTORE_MARK_DESC, "", 1)
 SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK, "Verkauf", 1)
 SafeAddString(SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK_DESC, "", 1)
-]]
