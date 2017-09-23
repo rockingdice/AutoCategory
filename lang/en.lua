@@ -1,4 +1,5 @@
-
+--Empty file. All texts got translated already in filename "all.lua"
+--[[
 ZO_CreateStringId("SI_AC_BAGTYPE_SHOWNAME_BACKPACK","Backpack")
 ZO_CreateStringId("SI_AC_BAGTYPE_SHOWNAME_BANK","Bank")
 ZO_CreateStringId("SI_AC_BAGTYPE_TOOLTIP_BACKPACK","Backpack")
@@ -191,3 +192,4 @@ ZO_CreateStringId("SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_AT_GUILDSTORE_MARK_DESC", "
 ZO_CreateStringId("SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK", "Sell Mark") 
 ZO_CreateStringId("SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK_DESC", "") 
 ZO_CreateStringId("SI_BINDING_NAME_TOGGLE_AUTO_CATEGORY", "Toggle Auto Category")
+]]
