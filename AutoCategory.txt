@@ -4,7 +4,7 @@
 ## Description: Type "/ac" 
 ## Version: 1.08
 ## SavedVariables: AutoCategorySavedVars
-## OptionalDependsOn: LibAddonMenu-2.0
+## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver
 
 Libs/LibStub/LibStub.lua
 Libs/LibMediaProvider-1.0/LibMediaProvider-1.0.lua
@@ -24,6 +24,7 @@ Libs/LibAddonMenu-2.0/controls/slider.lua
 Libs/LibAddonMenu-2.0/controls/texture.lua
 Libs/LibAddonMenu-2.0/controls/iconpicker.lua
 
+lang/all.lua
 lang/$(language).lua
 AutoCategory_Integrations_Iakoni_Gear_Changer.lua
 AutoCategory_Defaults.lua
