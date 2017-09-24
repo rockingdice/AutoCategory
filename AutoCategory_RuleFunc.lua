@@ -1,6 +1,7 @@
 --============Rule Function==============--
  
 local LibItemStatus = LibStub:GetLibrary("LibItemStatus")
+local L = AutoCategory.localizefunc
 function AutoCategory.RuleFunc.SpecializedItemType( ... )
 	local fn = "type"
 	local ac = select( '#', ... )
@@ -694,16 +695,52 @@ function AutoCategory.RuleFunc.InSet( ... )
 	return #setIndices ~= 0
 end
 
+local defaultIdTextId
+local function GetFCOISIconText( iconId )
+	if not defaultIdTextId then
+		defaultIdTextId = { 
+			[FCOIS_CON_ICON_LOCK] = SI_AC_DEFAULT_CATEGORY_FCOIS_LOCK_MARK,
+			[FCOIS_CON_ICON_GEAR_1] = SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_1,
+			[FCOIS_CON_ICON_RESEARCH] = SI_AC_DEFAULT_CATEGORY_FCOIS_RESEARCH_MARK,
+			[FCOIS_CON_ICON_GEAR_2] = SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_2,
+			[FCOIS_CON_ICON_SELL] = SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_MARK,
+			[FCOIS_CON_ICON_GEAR_3] = SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_3,
+			[FCOIS_CON_ICON_GEAR_4] = SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_4,
+			[FCOIS_CON_ICON_GEAR_5] = SI_AC_DEFAULT_CATEGORY_FCOIS_GEAR_5,
+			[FCOIS_CON_ICON_DECONSTRUCTION] = SI_AC_DEFAULT_CATEGORY_FCOIS_DECONSTRUCTION_MARK,
+			[FCOIS_CON_ICON_IMPROVEMENT] = SI_AC_DEFAULT_CATEGORY_FCOIS_IMPROVEMENT_MARK,
+			[FCOIS_CON_ICON_SELL_AT_GUILDSTORE] = SI_AC_DEFAULT_CATEGORY_FCOIS_SELL_AT_GUILDSTORE_MARK,
+			[FCOIS_CON_ICON_INTRICATE] = SI_AC_DEFAULT_CATEGORY_FCOIS_INTRICATE_MARK,
+			[FCOIS_CON_ICON_DYNAMIC_1] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_1,
+			[FCOIS_CON_ICON_DYNAMIC_2] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_2,
+			[FCOIS_CON_ICON_DYNAMIC_3] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_3,
+			[FCOIS_CON_ICON_DYNAMIC_4] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_4,
+			[FCOIS_CON_ICON_DYNAMIC_5] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_5,
+			[FCOIS_CON_ICON_DYNAMIC_6] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_6,
+			[FCOIS_CON_ICON_DYNAMIC_7] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_7,
+			[FCOIS_CON_ICON_DYNAMIC_8] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_8,
+			[FCOIS_CON_ICON_DYNAMIC_9] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_9,
+			[FCOIS_CON_ICON_DYNAMIC_10] = SI_AC_DEFAULT_CATEGORY_FCOIS_DYNAMIC_10,
+		}
+	end
+	local stringId = defaultIdTextId[iconId]
+	if stringId ~= nil then
+		local iconText = FCOIS.GetIconText( iconId )
+		if iconText ~= nil then
+			return iconText 
+		end
+	end
+	return ""
+end
+
 function AutoCategory.RuleFunc.IsMarked( ... )
 	local fn = "ismarked"
 	if FCOIS == nil then
 		return false
 	end
-	local ac = select( '#', ... )
-	if ac == 0 then
-		error( string.format("error: %s(): require arguments." , fn))
-	end
+	local ac = select( '#', ... ) 
 	local checkIconIds = {}
+	local additionalName = ""
 	for ax = 1, ac do
 		
 		local arg = select( ax, ... )
@@ -747,6 +784,23 @@ function AutoCategory.RuleFunc.IsMarked( ... )
 			error( string.format("error: %s(): argument is error." , fn ) )
 		end
 	end
+	if #checkIconIds ~= 0 then  
+		for i = 1, #checkIconIds do
+			local v = checkIconIds[i]
+			local iconText = GetFCOISIconText(v)
+			if iconText and iconText ~= "" then
+				additionalName = additionalName .. iconText
+				if i ~= #checkIconIds then
+					additionalName = additionalName .. ", "
+				end
+			end
+		end
+	end
+	
+	if additionalName ~= "" then
+		AutoCategory.AdditionCategoryName = AutoCategory.AdditionCategoryName .. string.format(" (%s)", additionalName)
+	end
+	
 	if #checkIconIds > 0 then
 		return FCOIS.IsMarked(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex, checkIconIds)
 	else
@@ -813,5 +867,4 @@ AutoCategory.Environment = {
 	
 	-- FCO Item Saver
 	ismarked = AutoCategory.RuleFunc.IsMarked,
-	
 }
