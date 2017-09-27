@@ -595,6 +595,97 @@ function AutoCategory.RuleFunc.TraitType( ... )
 	return false
 end
 
+function AutoCategory.RuleFunc.ArmorType( ... )
+	local fn = "armortype"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local armorType = GetItemArmorType(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+   
+		if type( arg ) == "number" then
+			if arg == armorType then
+				return true
+			end
+		elseif type( arg ) == "string" then 
+			local itemTypeMap = {
+					["heavy"] = ARMORTYPE_HEAVY,
+					["light"] = ARMORTYPE_LIGHT,
+					["medium"] = ARMORTYPE_MEDIUM,
+					["none"] = ARMORTYPE_NONE,
+				}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == armorType then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+	end
+	
+	return false
+end
+
+function AutoCategory.RuleFunc.WeaponType( ... )
+	local fn = "weapontype"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		
+		local weaponType = GetItemWeaponType(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+   
+		if type( arg ) == "number" then
+			if arg == weaponType then
+				return true
+			end
+		elseif type( arg ) == "string" then 
+			local itemTypeMap = { 
+					["axe"] = WEAPONTYPE_AXE,
+					["bow"] = WEAPONTYPE_BOW,
+					["dagger"] = WEAPONTYPE_DAGGER,
+					["fire_staff"] = WEAPONTYPE_FIRE_STAFF,
+					["frost_staff"] = WEAPONTYPE_FROST_STAFF,
+					["hammer"] = WEAPONTYPE_HAMMER,
+					["healing_staff"] = WEAPONTYPE_HEALING_STAFF,
+					["lightning_staff"] = WEAPONTYPE_LIGHTNING_STAFF,
+					["none"] = WEAPONTYPE_NONE,
+					["rune"] = WEAPONTYPE_RUNE,
+					["shield"] = WEAPONTYPE_SHIELD,
+					["sword"] = WEAPONTYPE_SWORD,
+					["two_handed_axe"] = WEAPONTYPE_TWO_HANDED_AXE,
+					["two_handed_hammer"] = WEAPONTYPE_TWO_HANDED_HAMMER,
+					["two_handed_sword"] = WEAPONTYPE_TWO_HANDED_SWORD,
+				}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == weaponType then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+	end
+	
+	return false
+end
+
 function AutoCategory.RuleFunc.TraitString( ... )
 	local fn = "traitstring"
 	local ac = select( '#', ... )
@@ -831,6 +922,10 @@ AutoCategory.Environment = {
 	filtertype = AutoCategory.RuleFunc.FilterType,
 	
 	traittype = AutoCategory.RuleFunc.TraitType,
+	
+	armortype = AutoCategory.RuleFunc.ArmorType,
+	
+	weapontype = AutoCategory.RuleFunc.WeaponType,
 
 	isnew = AutoCategory.RuleFunc.IsNew,
 	

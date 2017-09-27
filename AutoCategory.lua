@@ -111,6 +111,7 @@ local sortKeys =
     statusSortOrder = { tiebreaker = "age", isNumeric = true},
     age = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true},
     statValue = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+    traitInformationSortOrder = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
 }
 
 local function AutoCategory_ItemSortComparator(left, right)
