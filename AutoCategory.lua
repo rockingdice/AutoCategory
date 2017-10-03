@@ -16,7 +16,7 @@ AutoCategory.Inited = false
 AutoCategory.Enabled = true
 
 AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.08";
+AutoCategory.version = "1.10";
 AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"
@@ -142,8 +142,10 @@ function AutoCategory.HookKeyboardMode()
 	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
 	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
 	ZO_ScrollList_AddDataType(ZO_GuildBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-          
+	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset) 
+    ZO_ScrollList_AddDataType(SMITHING.deconstructionPanel.inventory.list, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(SMITHING.improvementPanel.inventory.list, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
+	
 	local function prehookSort(self, inventoryType) 
 		local inventory
 	    if inventoryType == INVENTORY_BANK then
@@ -219,6 +221,67 @@ function AutoCategory.HookKeyboardMode()
 	ZO_PreHook(ZO_InventoryManager, "ApplySort", prehookSort)
     ZO_PreHook(PLAYER_INVENTORY, "ApplySort", prehookSort)
 	
+	local function prehookCraftSort(self)
+		--change sort function
+		self.sortFunction = function(left, right) 
+			if AutoCategory.Enabled then
+				if right.sortPriorityName ~= left.sortPriorityName then
+					return NilOrLessThan(left.sortPriorityName, right.sortPriorityName)
+				end
+				if right.isHeader ~= left.isHeader then
+					return NilOrLessThan(right.isHeader, left.isHeader)
+				end
+				--compatible with quality sort
+				if type(self.sortKey) == "function" then 
+					if self.sortOrder == ZO_SORT_ORDER_UP then
+						return self.sortKey(left.data, right.data)
+					else
+						return self.sortKey(right.data, left.data)
+					end
+				end
+			end
+			return ZO_TableOrderingFunction(left.data, right.data, self.sortKey, sortKeys, self.sortOrder)
+		end
+
+		--add header data
+	    local scrollData = ZO_ScrollList_GetDataList(self.list)
+		for i, entry in ipairs(scrollData) do
+			local slotData = entry.data
+			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+			if not matched or not AutoCategory.Enabled then
+				entry.bestItemTypeName = AC_UNGROUPED_NAME 
+				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
+			else
+				entry.bestItemTypeName = categoryName 
+				entry.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+			end
+		end
+		
+		--sort data to add header
+        table.sort(scrollData, self.sortFunction)
+		
+		-- add header data	    
+	    local lastBestItemCategoryName
+        local newScrollData = {}
+	    for i, entry in ipairs(scrollData) do 
+	    	if entry.typeId ~= 998 then
+				if AutoCategory.Enabled then					
+					if entry.bestItemTypeName ~= lastBestItemCategoryName then
+						lastBestItemCategoryName = entry.bestItemTypeName
+						local headerEntry = ZO_ScrollList_CreateDataEntry(998, {bestItemTypeName = entry.bestItemTypeName, stackLaunderPrice = 0})
+						headerEntry.sortPriorityName = entry.sortPriorityName
+						headerEntry.isHeader = true
+						headerEntry.bestItemTypeName = entry.bestItemTypeName
+						table.insert(newScrollData, headerEntry)
+					end
+				end
+		        table.insert(newScrollData, entry)
+	    	end
+	    end
+	    self.list.data = newScrollData 
+	end
+    ZO_PreHook(SMITHING.deconstructionPanel.inventory, "SortData", prehookCraftSort)
+    ZO_PreHook(SMITHING.improvementPanel.inventory, "SortData", prehookCraftSort)
 end
 
 function AutoCategory.HookGamepadCraft()
