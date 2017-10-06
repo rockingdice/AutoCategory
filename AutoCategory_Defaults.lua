@@ -508,6 +508,14 @@ AutoCategory.defaultAcctSettings = {
 			["damaged"] = false,
 			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_LOCK_MARK),
 		},
+		[62] = 
+		{
+			["tag"] = "FCOIS",
+			["rule"] = "ismarked()",
+			["description"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_ALL_MARK_DESC),
+			["damaged"] = false,
+			["name"] = L(SI_AC_DEFAULT_CATEGORY_FCOIS_ALL_MARK),
+		},
 	},
 	bags = {
 		[AC_BAG_TYPE_BACKPACK] = {
