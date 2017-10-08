@@ -286,67 +286,54 @@ function AutoCategory.HookKeyboardMode()
 end
 
 function AutoCategory.HookGamepadCraft()
-	local function ZO_GamepadCraftingInventory_GetIndividualInventorySlotsAndAddToScrollData(self, predicate, filterFunction, filterType, data, useWornBag)
-	    local bagsToUse = useWornBag and ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN or ZO_ALL_CRAFTING_INVENTORY_BAGS_WITHOUT_WORN
-	    local list = SHARED_INVENTORY:GenerateFullSlotData(predicate, unpack(bagsToUse))
+--API 100021
+	local function ZO_GamepadCraftingInventory_AddFilteredDataToList(self, filteredDataTable)
+		table.sort(filteredDataTable, AutoCategory_ItemSortComparator)
 
-	    ZO_ClearTable(self.itemCounts)
+		local lastBestItemCategoryName
+		for i, itemData in ipairs(filteredDataTable) do
+			if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
+				lastBestItemCategoryName = itemData.bestItemCategoryName
+				itemData:SetHeader(zo_strformat(SI_GAMEPAD_CRAFTING_INVENTORY_HEADER, lastBestItemCategoryName))
+			end
 
-	    local filteredDataTable = {}
-	    for i, slotData in ipairs(list) do
-	        local bagId = slotData.bagId
-	        local slotIndex = slotData.slotIndex
-	        if not filterFunction or filterFunction(bagId, slotIndex, filterType) then
-	            local itemName = GetItemName(bagId, slotIndex)
-	            local icon = GetItemInfo(bagId, slotIndex)
-	            local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)
-	            local customSortData = self.customDataSortFunction and self.customDataSortFunction(bagId, slotIndex) or 0
+			local template = self:GetListEntryTemplate(itemData)
 
-	            local data = ZO_GamepadEntryData:New(name)
-	            data:InitializeCraftingInventoryVisualData(slotData.bagId, slotData.slotIndex, slotData.stackCount, customSortData, slotData)
-	            -- if slotData.bagId == BAG_WORN then
-	            --     data.bestItemCategoryName = zo_strformat(GetString(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM), data.bestItemCategoryName)
-	            -- end
-
-				local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
-				if not matched then
-		            data.bestItemTypeName = AC_UNGROUPED_NAME
-		            data.bestItemCategoryName = AC_UNGROUPED_NAME
-		            data.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
-				else
-					data.bestItemTypeName = categoryName
-					data.bestItemCategoryName = categoryName
-					data.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
-				end
-
-	            ZO_InventorySlot_SetType(data, self.baseSlotType)
-	            filteredDataTable[#filteredDataTable + 1] = data
-
-	            if self.customExtraDataFunction then
-	                self.customExtraDataFunction(bagId, slotIndex, filteredDataTable[#filteredDataTable])
-	            end
-	        end
-	        self.itemCounts[i] = slotData.stackCount
-	    end
-
-	    table.sort(filteredDataTable, AutoCategory_ItemSortComparator)
-
-	    local lastBestItemCategoryName
-	    for i, itemData in ipairs(filteredDataTable) do
-	        if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
-	            lastBestItemCategoryName = itemData.bestItemCategoryName
-	            itemData:SetHeader(zo_strformat(SI_GAMEPAD_CRAFTING_INVENTORY_HEADER, lastBestItemCategoryName))
-	        end
-
-	        local template = self:GetListEntryTemplate(itemData)
-
-	        self.list:AddEntry(template, itemData)
-	    end
-
-	    return list
+			self.list:AddEntry(template, itemData)
+		end
 	end
+	ZO_GamepadCraftingInventory.AddFilteredDataToList = ZO_GamepadCraftingInventory_AddFilteredDataToList
+	
+	function ZO_GamepadCraftingInventory_GenerateCraftingInventoryEntryData(self, bagId, slotIndex, stackCount, slotData)
+		local itemName = GetItemName(bagId, slotIndex)
+		local icon = GetItemInfo(bagId, slotIndex)
+		local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)
+		local customSortData = self.customDataSortFunction and self.customDataSortFunction(bagId, slotIndex) or 0
 
-	ZO_GamepadCraftingInventory.GetIndividualInventorySlotsAndAddToScrollData = ZO_GamepadCraftingInventory_GetIndividualInventorySlotsAndAddToScrollData
+		local newData = ZO_GamepadEntryData:New(name)
+		newData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, self.customBestItemCategoryNameFunction, slotData)
+		--Auto Category Modify
+		local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+		if not matched then
+			newData.bestItemTypeName = AC_UNGROUPED_NAME
+			newData.bestItemCategoryName = AC_UNGROUPED_NAME
+			newData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
+		else
+			newData.bestItemTypeName = categoryName
+			newData.bestItemCategoryName = categoryName
+			newData.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+		end
+		--end
+		ZO_InventorySlot_SetType(newData, self.baseSlotType)
+
+		if self.customExtraDataFunction then
+			self.customExtraDataFunction(bagId, slotIndex, newData)
+		end
+
+		return newData
+	end
+	ZO_GamepadCraftingInventory.GenerateCraftingInventoryEntryData = ZO_GamepadCraftingInventory_GenerateCraftingInventoryEntryData
+--API 100021
 end
 
 function AutoCategory.HookGamepadTradeInventory() 
