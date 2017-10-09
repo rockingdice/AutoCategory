@@ -1,12 +1,5 @@
-AC_BAG_TYPE_BACKPACK = 1
-AC_BAG_TYPE_BANK = 2
-AC_BAG_TYPE_GUILDBANK = 3
- 
-local L = function ( loc_key ) 
-	return GetString( loc_key )
-end
 
-AutoCategory = {}
+local L = AutoCategory.localizefunc
 AutoCategory.defaultSettings = {
 	bags = {
 		[AC_BAG_TYPE_BACKPACK] = {

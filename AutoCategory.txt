@@ -2,9 +2,9 @@
 ## APIVersion: 100020
 ## Author: RockingDice
 ## Description: Type "/ac" 
-## Version: 1.10
+## Version: 1.11
 ## SavedVariables: AutoCategorySavedVars
-## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver
+## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver QuickMenu
 
 Libs/LibStub/LibStub.lua
 Libs/LibMediaProvider-1.0/LibMediaProvider-1.0.lua
@@ -26,12 +26,14 @@ Libs/LibAddonMenu-2.0/controls/iconpicker.lua
 
 lang/all.lua
 lang/$(language).lua
-AutoCategory_Integrations_Iakoni_Gear_Changer.lua
+AutoCategory_Global.lua
 AutoCategory_Defaults.lua
 AutoCategory.xml
 AutoCategory.lua
-AutoCategory_Integrations_Inventory_Grid_View.lua
 AddonMenu.lua
 AutoCategory_RuleFunc.lua
 AutoCategory_API.lua
+AutoCategory_Integrations_Iakoni_Gear_Changer.lua
+AutoCategory_Integrations_Inventory_Grid_View.lua
+AutoCategory_Integrations_QuickMenu.lua
 Bindings.xml

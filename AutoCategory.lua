@@ -8,22 +8,8 @@ local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
 
 ----------------------
 --INITIATE VARIABLES--
-----------------------
+---------------------- 
 
---create Addon UI table
-AutoCategory.RuleFunc = {}
-AutoCategory.Inited = false
-AutoCategory.Enabled = true
-
-AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.10";
-AutoCategory.settingName = "Auto Category"
-AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
-AutoCategory.author = "RockingDice"
-
-AutoCategory.localizefunc = function ( loc_key ) 
-	return GetString( loc_key )
-end
 local L = AutoCategory.localizefunc
 
 AC_UNGROUPED_NAME = L(SI_AC_DEFAULT_NAME_CATEGORY_OTHER)
@@ -451,6 +437,7 @@ function AutoCategory.LazyInit()
 		--capabilities with other add-ons
 		IntegrateIakoniGearChanger()
 		IntegrateInventoryGridView()
+		IntegrateQuickMenu()
 
 		AutoCategory.Inited = true
 	end
