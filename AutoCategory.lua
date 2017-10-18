@@ -272,7 +272,7 @@ function AutoCategory.HookKeyboardMode()
     ZO_PreHook(SMITHING.improvementPanel.inventory, "SortData", prehookCraftSort)
 end
 
-function AutoCategory.HookGamepadInventory(list)
+function AutoCategory.HookGamepadInventory()
 	function ZO_GamepadInventoryList_AddSlotDataToTable(self, slotsTable, inventoryType, slotIndex)
 		local itemFilterFunction = self.itemFilterFunction
 		local categorizationFunction = self.categorizationFunction or ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription
@@ -440,7 +440,7 @@ function AutoCategory.HookGamepadStore(list)
 end
 
 function AutoCategory.HookGamepadMode() 
-	AutoCategory.HookGamepadInventory(GAMEPAD_INVENTORY.craftBagList)
+	AutoCategory.HookGamepadInventory()
 	AutoCategory.HookGamepadCraftStation()
 	AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
 	AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
