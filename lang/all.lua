@@ -3,9 +3,15 @@
 local langStrings = {
  SI_AC_BAGTYPE_SHOWNAME_BACKPACK = "Backpack",
  SI_AC_BAGTYPE_SHOWNAME_BANK = "Bank",
+ SI_AC_BAGTYPE_SHOWNAME_GUILDBANK = "GuildBank",
+ SI_AC_BAGTYPE_SHOWNAME_CRAFTBAG = "Craft Bag",
+ SI_AC_BAGTYPE_SHOWNAME_CRAFTSTATION = "Craft Station",
  SI_AC_BAGTYPE_TOOLTIP_BACKPACK = "Backpack",
  SI_AC_BAGTYPE_TOOLTIP_BANK = "Bank",
-
+ SI_AC_BAGTYPE_TOOLTIP_GUILDBANK = "GuildBank",
+ SI_AC_BAGTYPE_TOOLTIP_CRAFTBAG = "Craft Bag",
+ SI_AC_BAGTYPE_TOOLTIP_CRAFTSTATION = "Craft Station", 
+ 
  SI_AC_ALIGNMENT_LEFT = "Left",
  SI_AC_ALIGNMENT_CENTER = "Center",
  SI_AC_ALIGNMENT_RIGHT = "Right",
@@ -38,6 +44,13 @@ local langStrings = {
  SI_AC_MENU_AC_BUTTON_ADD = "Add",
  SI_AC_MENU_AC_BUTTON_ADD_TOOLTIP = "Add selected category to the bag",
  SI_AC_MENU_AC_BUTTON_NEED_HELP = "Need Help?",
+ SI_AC_MENU_HEADER_IMPORT_BAG_SETTING = "Import Bag Setting",
+ SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG = "Import From Bag",
+ SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG_TOOLTIP = "Select a bag setting to import from.",
+ SI_AC_MENU_IBS_BUTTON_IMPORT = "Import",
+ SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP = "Import will overwrite current bag setting.",
+ 
+
  SI_AC_MENU_SUBMENU_CATEGORY_SETTING = "|c0066FF[Category Setting]|r",
  SI_AC_MENU_CS_DROPDOWN_TAG = "Tag",
  SI_AC_MENU_CS_DROPDOWN_TAG_TOOLTIP = "Tag the category and make them organized.",

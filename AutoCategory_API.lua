@@ -1,14 +1,22 @@
 --====API====--
-function AutoCategory:MatchCategoryRules( bagId, slotIndex )
+function AutoCategory:MatchCategoryRules( bagId, slotIndex, specialType )
 	AutoCategory.LazyInit()
 
 	self.checkingItemBagId = bagId
 	self.checkingItemSlotIndex = slotIndex
 	local bag_type_id
-	if bagId == BAG_BACKPACK or bagId == BAG_WORN then
-		bag_type_id = AC_BAG_TYPE_BACKPACK
-	elseif bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK then
-		bag_type_id = AC_BAG_TYPE_BANK
+	if specialType then
+		bag_type_id = specialType
+	else 
+		if bagId == BAG_BACKPACK or bagId == BAG_WORN then
+			bag_type_id = AC_BAG_TYPE_BACKPACK
+		elseif bagId == BAG_BANK or bagId == BAG_SUBSCRIBER_BANK then
+			bag_type_id = AC_BAG_TYPE_BANK
+		elseif bagId == BAG_VIRTUAL then
+			bag_type_id = AC_BAG_TYPE_CRAFTBAG
+		elseif bagId == BAG_GUILDBANK then
+			bag_type_id = AC_BAG_TYPE_GUILDBANK
+		end
 	end
 	if not bag_type_id then
 		return false, "", 0
