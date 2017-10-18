@@ -346,6 +346,19 @@ function AutoCategory.RuleFunc.IsCrafted( ... )
 	return result
 end
 
+function AutoCategory.RuleFunc.IsLearnable( ... )
+	local fn = "islearnable"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	
+    local itemType = GetItemLinkItemType(itemLink) --GetItemType(bagId, slotIndex) 
+    if itemType == ITEMTYPE_RECIPE then
+        return not IsItemLinkRecipeKnown(itemLink)
+    elseif IsItemLinkBook(itemLink) then
+        return not IsItemLinkBookKnown(itemLink)
+    end
+	return false
+end
+
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
 
@@ -470,6 +483,14 @@ function AutoCategory.RuleFunc.CPLevel( ... )
 	local fn = "cp"
 	local level = GetItemRequiredChampionPoints(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
 	return level
+end
+
+function AutoCategory.RuleFunc.SellPrice( ... )
+	local fn = "sellprice"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		
+	local _, sellPrice = GetItemLinkInfo(itemLink)
+	return sellPrice
 end
 
 
@@ -937,11 +958,15 @@ AutoCategory.Environment = {
 	
 	iscrafted = AutoCategory.RuleFunc.IsCrafted,
 	
+	islearnable = AutoCategory.RuleFunc.IsLearnable,
+	
 	boundtype = AutoCategory.RuleFunc.BoundType,
 	
 	level = AutoCategory.RuleFunc.Level,
 	
 	cp = AutoCategory.RuleFunc.CPLevel,
+	
+	sellprice = AutoCategory.RuleFunc.SellPrice,
 
 	set = AutoCategory.RuleFunc.SetName,
 
