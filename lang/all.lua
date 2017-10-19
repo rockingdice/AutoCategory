@@ -49,7 +49,9 @@ local langStrings = {
  SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG_TOOLTIP = "Select a bag setting to import from.",
  SI_AC_MENU_IBS_BUTTON_IMPORT = "Import",
  SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP = "Import will overwrite current bag setting.",
- 
+ SI_AC_MENU_HEADER_UNIFY_BAG_SETTINGS = "Unify All Bag Settings",
+ SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS = "Export to all bags",
+ SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS_TOOLTIP = "Will replace all the bag settings with current bag setting!",
 
  SI_AC_MENU_SUBMENU_CATEGORY_SETTING = "|c0066FF[Category Setting]|r",
  SI_AC_MENU_CS_DROPDOWN_TAG = "Tag",

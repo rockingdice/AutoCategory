@@ -359,6 +359,57 @@ function AutoCategory.RuleFunc.IsLearnable( ... )
 	return false
 end
 
+function AutoCategory.RuleFunc.Quality( ... )
+	local fn = "quality"  
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	local _, _, _, _, _, _, _, quality = GetItemInfo(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		 
+		if type( arg ) == "number" then
+			if arg == quality then
+				return true
+			end
+		elseif type( arg ) == "string" then
+			
+			local itemTypeMap = {
+				["arcane"] = ITEM_QUALITY_ARCANE,
+				["artifact"] = ITEM_QUALITY_ARTIFACT,
+				["legendary"] = ITEM_QUALITY_LEGENDARY,
+				["magic"] = ITEM_QUALITY_MAGIC,
+				["normal"] = ITEM_QUALITY_NORMAL,
+				["trash"] = ITEM_QUALITY_TRASH,
+								
+				["blue"] = ITEM_QUALITY_ARCANE,
+				["purple"] = ITEM_QUALITY_ARTIFACT,
+				["gold"] = ITEM_QUALITY_LEGENDARY,
+				["green"] = ITEM_QUALITY_MAGIC,
+				["white"] = ITEM_QUALITY_NORMAL,
+				["grey"] = ITEM_QUALITY_TRASH,
+			}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == quality then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		
+	end
+	
+	return false
+end
+
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
 
@@ -959,6 +1010,8 @@ AutoCategory.Environment = {
 	iscrafted = AutoCategory.RuleFunc.IsCrafted,
 	
 	islearnable = AutoCategory.RuleFunc.IsLearnable,
+	
+	quality = AutoCategory.RuleFunc.Quality,
 	
 	boundtype = AutoCategory.RuleFunc.BoundType,
 	

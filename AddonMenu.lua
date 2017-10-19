@@ -58,6 +58,21 @@ local warningDuplicatedName = {
 	warningMessage = nil,
 }
 
+local function deepcopy(orig)
+	local orig_type = type(orig)
+	local copy
+	if orig_type == 'table' then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[deepcopy(orig_key)] = deepcopy(orig_value)
+		end
+		setmetatable(copy, deepcopy(getmetatable(orig)))
+	else -- number, string, boolean, etc
+		copy = orig
+	end
+	return copy
+end
+
 local function UpdateDuplicateNameWarning()
 	local control = WINDOW_MANAGER:GetControlByName("AC_EDITBOX_EDITRULE_NAME", "")
 	if control then
@@ -659,6 +674,32 @@ function AutoCategory.AddonMenuInit()
 				}, 
 				{
 					type = "header",
+					name = L(SI_AC_MENU_HEADER_UNIFY_BAG_SETTINGS),
+					width = "full",
+				},
+				{
+					type = "button",
+					name = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS),
+					tooltip = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS_TOOLTIP),
+					func = function() 
+						local selectedBag = AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")]
+						for i = 1, 5 do
+							AutoCategory.curSavedVars.bags[i] = deepcopy(selectedBag)
+						end
+						 
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+						--reset add rule's selection, since all data will be changed.
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						 
+						RefreshCache()
+						RefreshDropdownData() 
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+					end, 
+					width = "full",
+				},				
+				{
+					type = "header",
 					name = L(SI_AC_MENU_HEADER_IMPORT_BAG_SETTING),
 					width = "full",
 				},
@@ -677,7 +718,7 @@ function AutoCategory.AddonMenuInit()
 					setFunc = function(value) 	
 						SelectDropDownItem("AC_DROPDOWN_IMPORTBAG_BAG", value)  
 					end, 
-					width = "half",
+					width = "full",
 					reference = "AC_DROPDOWN_IMPORTBAG_BAG"
 				},
 				{
@@ -685,7 +726,8 @@ function AutoCategory.AddonMenuInit()
 					name = L(SI_AC_MENU_IBS_BUTTON_IMPORT),
 					tooltip = L(SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP),
 					func = function() 
-						AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")] = AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")]
+
+						AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")] = deepcopy( AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")] )
 						 
 						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
 						--reset add rule's selection, since all data will be changed.
@@ -699,8 +741,8 @@ function AutoCategory.AddonMenuInit()
 					disabled = function()
 						return GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") == GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
 					end,
-					width = "half",
-				},
+					width = "full",
+				},				
 				{
 					type = "divider",
 				}, 
