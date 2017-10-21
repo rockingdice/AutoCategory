@@ -410,6 +410,13 @@ function AutoCategory.RuleFunc.Quality( ... )
 	return false
 end
 
+function AutoCategory.RuleFunc.GetQuality()
+	local fn = "getquality"
+	
+	local _, _, _, _, _, _, _, quality = GetItemInfo(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return quality
+end
+
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
 
@@ -1012,6 +1019,8 @@ AutoCategory.Environment = {
 	islearnable = AutoCategory.RuleFunc.IsLearnable,
 	
 	quality = AutoCategory.RuleFunc.Quality,
+	
+	getquality = AutoCategory.RuleFunc.GetQuality,
 	
 	boundtype = AutoCategory.RuleFunc.BoundType,
 	
