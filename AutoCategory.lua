@@ -334,15 +334,17 @@ function AutoCategory.HookGamepadCraftStation()
 		local newData = ZO_GamepadEntryData:New(name)
 		newData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, self.customBestItemCategoryNameFunction, slotData)
 		--Auto Category Modify
-		local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
-		if not matched then
-			newData.bestItemTypeName = AC_UNGROUPED_NAME
-			newData.bestItemCategoryName = AC_UNGROUPED_NAME
-			newData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
-		else
-			newData.bestItemTypeName = categoryName
-			newData.bestItemCategoryName = categoryName
-			newData.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+		if slotData then
+			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
+			if not matched then
+				newData.bestItemTypeName = AC_UNGROUPED_NAME
+				newData.bestItemCategoryName = AC_UNGROUPED_NAME
+				newData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
+			else
+				newData.bestItemTypeName = categoryName
+				newData.bestItemCategoryName = categoryName
+				newData.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+			end
 		end
 		--end
 		ZO_InventorySlot_SetType(newData, self.baseSlotType)
