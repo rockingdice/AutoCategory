@@ -235,7 +235,7 @@ function AutoCategory.HookKeyboardMode()
 	    local scrollData = ZO_ScrollList_GetDataList(self.list)
 		for i, entry in ipairs(scrollData) do
 			local slotData = entry.data
-			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
 			if not matched or not AutoCategory.Enabled then
 				entry.bestItemTypeName = AC_UNGROUPED_NAME 
 				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
@@ -329,7 +329,7 @@ function AutoCategory.HookGamepadCraftStation()
 	            --     data.bestItemCategoryName = zo_strformat(GetString(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM), data.bestItemCategoryName)
 	            -- end
 
-				local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+				local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
 				if not matched then
 		            data.bestItemTypeName = AC_UNGROUPED_NAME
 		            data.bestItemCategoryName = AC_UNGROUPED_NAME
