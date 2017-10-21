@@ -1,18 +1,20 @@
-AC_BAG_TYPE_BACKPACK = 1
-AC_BAG_TYPE_BANK = 2
-AC_BAG_TYPE_GUILDBANK = 3
- 
-local L = function ( loc_key ) 
-	return GetString( loc_key )
-end
 
-AutoCategory = {}
+local L = AutoCategory.localizefunc
 AutoCategory.defaultSettings = {
 	bags = {
 		[AC_BAG_TYPE_BACKPACK] = {
 			rules = {},
 		},
 		[AC_BAG_TYPE_BANK] = {
+			rules = {},
+		},
+		[AC_BAG_TYPE_GUILDBANK] = {
+			rules = {},
+		},
+		[AC_BAG_TYPE_CRAFTBAG] = {
+			rules = {},
+		},
+		[AC_BAG_TYPE_CRAFTSTATION] = {
 			rules = {},
 		},
 	}, 
@@ -668,6 +670,343 @@ AutoCategory.defaultAcctSettings = {
 			},
 		},
 		[AC_BAG_TYPE_BANK] = {
+			rules = {
+				[1] = 
+				{
+					["priority"] = 100,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOP_TRADEABLE),
+				},
+				[2] = 
+				{
+					["priority"] = 100,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NEW),
+				},
+				[3] = 
+				{
+					["priority"] = 95,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONTAINER),
+				},
+				[4] = 
+				{
+					["priority"] = 90,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SELLING),
+				},
+				[5] = 
+				{
+					["priority"] = 85,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_LOW_LEVEL),
+				},
+				[6] = 
+				{
+					["priority"] = 80,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_DECONSTRUCT),
+				},
+				[7] = 
+				{
+					["priority"] = 70,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOE),
+				},
+				[8] = 
+				{
+					["priority"] = 60,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RESEARCHABLE),
+				},
+				[9] = 
+				{
+					["priority"] = 50,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_EQUIPPING),
+				},
+				[10] = 
+				{
+					["priority"] = 49,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SET),
+				},
+				[11] = 
+				{
+					["priority"] = 48,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WEAPON),
+				},
+				[12] = 
+				{
+					["priority"] = 47,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_POISON),
+				},
+				[13] = 
+				{
+					["priority"] = 46,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ARMOR),
+				},
+				[14] = 
+				{
+					["priority"] = 45,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NECKLACE),
+				},
+				[15] = 
+				{
+					["priority"] = 45,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RING),
+				},
+				[16] = 
+				{
+					["priority"] = 40,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_QUICKSLOTS),
+				},
+				[17] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONSUMABLES),
+				},
+				[18] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_GLYPHS_AND_GEMS),
+				},
+				[19] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RECIPES_AND_MOTIFS),
+				},
+				[20] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TREASURE_MAPS),
+				},
+				[21] = 
+				{
+					["priority"] = 30,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_FURNISHING),
+				},
+				[22] = 
+				{
+					["priority"] = 20,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_STOLEN),
+				},
+				[23] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY),
+				},
+				[24] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING),
+				},
+				[25] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING),
+				},
+				[26] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING),
+				},
+				[27] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING),
+				},
+				[28] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS),
+				},
+				[29] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING),
+				},
+			},
+		},
+		[AC_BAG_TYPE_GUILDBANK] = {
+			rules = {
+				[1] = 
+				{
+					["priority"] = 100,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOP_TRADEABLE),
+				},
+				[2] = 
+				{
+					["priority"] = 100,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NEW),
+				},
+				[3] = 
+				{
+					["priority"] = 95,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONTAINER),
+				},
+				[4] = 
+				{
+					["priority"] = 90,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SELLING),
+				},
+				[5] = 
+				{
+					["priority"] = 85,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_LOW_LEVEL),
+				},
+				[6] = 
+				{
+					["priority"] = 80,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_DECONSTRUCT),
+				},
+				[7] = 
+				{
+					["priority"] = 70,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BOE),
+				},
+				[8] = 
+				{
+					["priority"] = 60,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RESEARCHABLE),
+				},
+				[9] = 
+				{
+					["priority"] = 50,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_EQUIPPING),
+				},
+				[10] = 
+				{
+					["priority"] = 49,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_SET),
+				},
+				[11] = 
+				{
+					["priority"] = 48,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WEAPON),
+				},
+				[12] = 
+				{
+					["priority"] = 47,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_POISON),
+				},
+				[13] = 
+				{
+					["priority"] = 46,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ARMOR),
+				},
+				[14] = 
+				{
+					["priority"] = 45,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_NECKLACE),
+				},
+				[15] = 
+				{
+					["priority"] = 45,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RING),
+				},
+				[16] = 
+				{
+					["priority"] = 40,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_QUICKSLOTS),
+				},
+				[17] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CONSUMABLES),
+				},
+				[18] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_GLYPHS_AND_GEMS),
+				},
+				[19] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_RECIPES_AND_MOTIFS),
+				},
+				[20] = 
+				{
+					["priority"] = 35,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TREASURE_MAPS),
+				},
+				[21] = 
+				{
+					["priority"] = 30,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_FURNISHING),
+				},
+				[22] = 
+				{
+					["priority"] = 20,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_STOLEN),
+				},
+				[23] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY),
+				},
+				[24] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING),
+				},
+				[25] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING),
+				},
+				[26] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING),
+				},
+				[27] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING),
+				},
+				[28] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS),
+				},
+				[29] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING),
+				},
+			},
+		},
+		[AC_BAG_TYPE_CRAFTBAG] = {
+			rules = {
+				[1] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_BLACKSMITHING),
+				},
+				[2] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_CLOTHING),
+				},
+				[3] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_WOODWORKING),
+				},
+				[4] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ALCHEMY),
+				},
+				[5] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_ENCHANTING),
+				},
+				[6] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_PROVISIONING),
+				},
+				[7] = 
+				{
+					["priority"] = 10,
+					["name"] = L(SI_AC_DEFAULT_CATEGORY_TRAIT_OR_STYLE_GEMS),
+				},
+			},
+		},
+		[AC_BAG_TYPE_CRAFTSTATION] = {
 			rules = {
 				[1] = 
 				{

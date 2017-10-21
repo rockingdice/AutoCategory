@@ -8,22 +8,8 @@ local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
 
 ----------------------
 --INITIATE VARIABLES--
-----------------------
+---------------------- 
 
---create Addon UI table
-AutoCategory.RuleFunc = {}
-AutoCategory.Inited = false
-AutoCategory.Enabled = true
-
-AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.10";
-AutoCategory.settingName = "Auto Category"
-AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
-AutoCategory.author = "RockingDice"
-
-AutoCategory.localizefunc = function ( loc_key ) 
-	return GetString( loc_key )
-end
 local L = AutoCategory.localizefunc
 
 AC_UNGROUPED_NAME = L(SI_AC_DEFAULT_NAME_CATEGORY_OTHER)
@@ -128,8 +114,8 @@ local function NilOrLessThan(value1, value2)
     end
 end 
 
-function AutoCategory.HookKeyboardMode()
-	--Add a new data type: row with header
+
+function AutoCategory.HookKeyboardMode() 
 	local function AC_Setup_InventoryRowWithHeader(rowControl, slot, overrideOptions)
 		--set header
 		local headerLabel = rowControl:GetNamedChild("HeaderName")
@@ -139,6 +125,7 @@ function AutoCategory.HookKeyboardMode()
 		headerLabel:SetFont(string.format('%s|%d|%s', LMP:Fetch('font', appearance["CATEGORY_FONT_NAME"]), appearance["CATEGORY_FONT_SIZE"], appearance["CATEGORY_FONT_STYLE"]))
 		headerLabel:SetColor(appearance["CATEGORY_FONT_COLOR"][1], appearance["CATEGORY_FONT_COLOR"][2], appearance["CATEGORY_FONT_COLOR"][3], appearance["CATEGORY_FONT_COLOR"][4])
 	end
+	--Add a new data type: row with header
 	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
 	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
 	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
@@ -248,7 +235,7 @@ function AutoCategory.HookKeyboardMode()
 	    local scrollData = ZO_ScrollList_GetDataList(self.list)
 		for i, entry in ipairs(scrollData) do
 			local slotData = entry.data
-			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
 			if not matched or not AutoCategory.Enabled then
 				entry.bestItemTypeName = AC_UNGROUPED_NAME 
 				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
@@ -285,7 +272,41 @@ function AutoCategory.HookKeyboardMode()
     ZO_PreHook(SMITHING.improvementPanel.inventory, "SortData", prehookCraftSort)
 end
 
-function AutoCategory.HookGamepadCraft()
+function AutoCategory.HookGamepadInventory()
+	function ZO_GamepadInventoryList_AddSlotDataToTable(self, slotsTable, inventoryType, slotIndex)
+		local itemFilterFunction = self.itemFilterFunction
+		local categorizationFunction = self.categorizationFunction or ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription
+		local slotData = SHARED_INVENTORY:GenerateSingleSlotData(inventoryType, slotIndex)
+		if slotData then
+		--[[
+			if (not itemFilterFunction) or itemFilterFunction(slotData) then
+				-- itemData is shared in several places and can write their own value of bestItemCategoryName.
+				-- We'll use bestGamepadItemCategoryName instead so there are no conflicts.
+				slotData.bestGamepadItemCategoryName = categorizationFunction(slotData)
+
+				table.insert(slotsTable, slotData)
+			end
+			]]
+			local itemData = slotData
+			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(itemData.bagId, itemData.slotIndex)
+			if not matched then
+	            itemData.bestItemTypeName = AC_UNGROUPED_NAME
+	            itemData.bestGamepadItemCategoryName = AC_UNGROUPED_NAME
+	            itemData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
+			else
+				itemData.bestItemTypeName = categoryName
+				itemData.bestGamepadItemCategoryName = categoryName
+				itemData.sortPriorityName = string.format("%03d%s", 100 - categoryPriority , categoryName) 
+			end
+				
+			table.insert(slotsTable, slotData)
+		end
+	end
+	ZO_GamepadInventoryList.AddSlotDataToTable = ZO_GamepadInventoryList_AddSlotDataToTable
+	ZO_GamepadInventoryList.sortFunction = AutoCategory_ItemSortComparator
+end
+ 
+function AutoCategory.HookGamepadCraftStation()
 --API 100021
 	local function ZO_GamepadCraftingInventory_AddFilteredDataToList(self, filteredDataTable)
 		table.sort(filteredDataTable, AutoCategory_ItemSortComparator)
@@ -296,7 +317,7 @@ function AutoCategory.HookGamepadCraft()
 				lastBestItemCategoryName = itemData.bestItemCategoryName
 				itemData:SetHeader(zo_strformat(SI_GAMEPAD_CRAFTING_INVENTORY_HEADER, lastBestItemCategoryName))
 			end
-
+			
 			local template = self:GetListEntryTemplate(itemData)
 
 			self.list:AddEntry(template, itemData)
@@ -313,7 +334,7 @@ function AutoCategory.HookGamepadCraft()
 		local newData = ZO_GamepadEntryData:New(name)
 		newData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, self.customBestItemCategoryNameFunction, slotData)
 		--Auto Category Modify
-		local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
+		local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
 		if not matched then
 			newData.bestItemTypeName = AC_UNGROUPED_NAME
 			newData.bestItemCategoryName = AC_UNGROUPED_NAME
@@ -405,6 +426,13 @@ function AutoCategory.HookGamepadStore(list)
 	list.sortFunc = AutoCategory_ItemSortComparator
 end
 
+function AutoCategory.HookGamepadMode() 
+	AutoCategory.HookGamepadInventory()
+	AutoCategory.HookGamepadCraftStation()
+	AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
+	AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
+	AutoCategory.HookGamepadTradeInventory() 
+end
 
 function AutoCategory.ToggleCategorize()
 	AutoCategory.Enabled = not AutoCategory.Enabled 
@@ -420,24 +448,45 @@ function AutoCategory.ToggleCategorize()
 	end
 end
 
+local function CheckVersionCompatible()
+	--v1.12, added bag setting for guildbank/craftbag/craftstation
+	local function RebuildBagSettingIfNeeded(setting, defaultSetting, bagId)
+		if not setting.bags[bagId] then
+			setting.bags[bagId] = defaultSetting.bags[bagId]
+		end
+	end
+	RebuildBagSettingIfNeeded(AutoCategory.charSavedVariables, AutoCategory.defaultSetting, AC_BAG_TYPE_GUILDBANK)
+	RebuildBagSettingIfNeeded(AutoCategory.charSavedVariables, AutoCategory.defaultSetting, AC_BAG_TYPE_CRAFTBAG)
+	RebuildBagSettingIfNeeded(AutoCategory.charSavedVariables, AutoCategory.defaultSetting, AC_BAG_TYPE_CRAFTSTATION)
+	
+	RebuildBagSettingIfNeeded(AutoCategory.acctSavedVariables, AutoCategory.defaultAcctSettings, AC_BAG_TYPE_GUILDBANK)
+	RebuildBagSettingIfNeeded(AutoCategory.acctSavedVariables, AutoCategory.defaultAcctSettings, AC_BAG_TYPE_CRAFTBAG)
+	RebuildBagSettingIfNeeded(AutoCategory.acctSavedVariables, AutoCategory.defaultAcctSettings, AC_BAG_TYPE_CRAFTSTATION)
+	--v1.12
+	
+	
+end
+
 function AutoCategory.LazyInit()
 	if not AutoCategory.Inited then
 		-- load our saved variables
 		AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
 		AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
 		
+		-- version compatible
+		CheckVersionCompatible()
+		
+		-- initialize
 		AutoCategory.AddonMenuInit()
 		
-		AutoCategory.HookGamepadCraft()
-		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_SELL].list)
-		AutoCategory.HookGamepadStore(STORE_WINDOW_GAMEPAD.components[ZO_MODE_STORE_BUY_BACK].list)
-		AutoCategory.HookGamepadTradeInventory() 
-
+		-- hooks
+		AutoCategory.HookGamepadMode()
 		AutoCategory.HookKeyboardMode()
 		
 		--capabilities with other add-ons
 		IntegrateIakoniGearChanger()
 		IntegrateInventoryGridView()
+		IntegrateQuickMenu()
 
 		AutoCategory.Inited = true
 	end

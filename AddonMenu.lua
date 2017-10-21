@@ -9,9 +9,24 @@ local cacheTags = {}
 cacheTags = {}
  
 local cacheBags = {}
-cacheBags.showNames = {[AC_BAG_TYPE_BACKPACK] = L(SI_AC_BAGTYPE_SHOWNAME_BACKPACK), [AC_BAG_TYPE_BANK] = L(SI_AC_BAGTYPE_SHOWNAME_BANK)}
-cacheBags.values = {AC_BAG_TYPE_BACKPACK, AC_BAG_TYPE_BANK}
-cacheBags.tooltips = {L(SI_AC_BAGTYPE_TOOLTIP_BACKPACK), L(SI_AC_BAGTYPE_TOOLTIP_BANK)}
+cacheBags.showNames = { [AC_BAG_TYPE_BACKPACK] = L(SI_AC_BAGTYPE_SHOWNAME_BACKPACK), 
+						[AC_BAG_TYPE_BANK] = L(SI_AC_BAGTYPE_SHOWNAME_BANK),
+						[AC_BAG_TYPE_GUILDBANK] = L(SI_AC_BAGTYPE_SHOWNAME_GUILDBANK),
+						[AC_BAG_TYPE_CRAFTBAG] = L(SI_AC_BAGTYPE_SHOWNAME_CRAFTBAG),
+						[AC_BAG_TYPE_CRAFTSTATION] = L(SI_AC_BAGTYPE_SHOWNAME_CRAFTSTATION), 
+						}
+cacheBags.values = {	AC_BAG_TYPE_BACKPACK, 
+						AC_BAG_TYPE_BANK, 
+						AC_BAG_TYPE_GUILDBANK, 
+						AC_BAG_TYPE_CRAFTBAG, 
+						AC_BAG_TYPE_CRAFTSTATION,
+						}
+cacheBags.tooltips = {  L(SI_AC_BAGTYPE_TOOLTIP_BACKPACK), 
+						L(SI_AC_BAGTYPE_TOOLTIP_BANK),
+						L(SI_AC_BAGTYPE_TOOLTIP_GUILDBANK),
+						L(SI_AC_BAGTYPE_TOOLTIP_CRAFTBAG),
+						L(SI_AC_BAGTYPE_TOOLTIP_CRAFTSTATION),
+						}
 
 local cacheRulesByTag = {}
 local cacheRulesByBag = {}
@@ -28,6 +43,8 @@ local dropdownData = {
 	["AC_DROPDOWN_ADDCATEGORY_RULE"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
 	["AC_DROPDOWN_EDITRULE_TAG"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
 	["AC_DROPDOWN_EDITRULE_RULE"] = {indexValue = "", choices = {}, choicesValues = {}, choicesTooltips = {}},
+	["AC_DROPDOWN_IMPORTBAG_BAG"] = {indexValue = AC_BAG_TYPE_BACKPACK, choices = {}, choicesValues = {}, choicesTooltips = {}},
+	
 }
 
 local dropdownFontStyle	= {'none', 'outline', 'thin-outline', 'thick-outline', 'shadow', 'soft-shadow-thin', 'soft-shadow-thick'}
@@ -40,6 +57,21 @@ dropdownFontAlignment.values = {0, 1, 2}
 local warningDuplicatedName = {
 	warningMessage = nil,
 }
+
+local function deepcopy(orig)
+	local orig_type = type(orig)
+	local copy
+	if orig_type == 'table' then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[deepcopy(orig_key)] = deepcopy(orig_value)
+		end
+		setmetatable(copy, deepcopy(getmetatable(orig)))
+	else -- number, string, boolean, etc
+		copy = orig
+	end
+	return copy
+end
 
 local function UpdateDuplicateNameWarning()
 	local control = WINDOW_MANAGER:GetControlByName("AC_EDITBOX_EDITRULE_NAME", "")
@@ -261,6 +293,9 @@ local function RefreshDropdownData()
 	dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesValues = dataCurrentRules_EditRule.values
 	dropdownData["AC_DROPDOWN_EDITRULE_RULE"].choicesTooltips = dataCurrentRules_EditRule.tooltips
 	
+	dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choices = cacheBags.showNames
+	dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesValues = cacheBags.values
+	dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesTooltips = cacheBags.tooltips
 end
  
 local function UpdateDropDownMenu(name)
@@ -637,6 +672,77 @@ function AutoCategory.AddonMenuInit()
 					disabled = function() return #dropdownData["AC_DROPDOWN_ADDCATEGORY_RULE"].choicesValues == 0 end,
 					width = "full",
 				}, 
+				{
+					type = "header",
+					name = L(SI_AC_MENU_HEADER_UNIFY_BAG_SETTINGS),
+					width = "full",
+				},
+				{
+					type = "button",
+					name = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS),
+					tooltip = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS_TOOLTIP),
+					func = function() 
+						local selectedBag = AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")]
+						for i = 1, 5 do
+							AutoCategory.curSavedVars.bags[i] = deepcopy(selectedBag)
+						end
+						 
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+						--reset add rule's selection, since all data will be changed.
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						 
+						RefreshCache()
+						RefreshDropdownData() 
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+					end, 
+					width = "full",
+				},				
+				{
+					type = "header",
+					name = L(SI_AC_MENU_HEADER_IMPORT_BAG_SETTING),
+					width = "full",
+				},
+				{
+					type = "dropdown",
+					name = L(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG),
+					scrollable = false,
+					tooltip = L(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG_TOOLTIP),
+					choices = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choices,
+					choicesValues = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesValues,
+					choicesTooltips = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesTooltips,
+					
+					getFunc = function()  
+						return GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
+					end,
+					setFunc = function(value) 	
+						SelectDropDownItem("AC_DROPDOWN_IMPORTBAG_BAG", value)  
+					end, 
+					width = "full",
+					reference = "AC_DROPDOWN_IMPORTBAG_BAG"
+				},
+				{
+					type = "button",
+					name = L(SI_AC_MENU_IBS_BUTTON_IMPORT),
+					tooltip = L(SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP),
+					func = function() 
+
+						AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")] = deepcopy( AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")] )
+						 
+						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+						--reset add rule's selection, since all data will be changed.
+						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+						 
+						RefreshCache()
+						RefreshDropdownData() 
+						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+					end,
+					disabled = function()
+						return GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") == GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
+					end,
+					width = "full",
+				},				
 				{
 					type = "divider",
 				}, 

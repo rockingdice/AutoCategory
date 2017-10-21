@@ -346,6 +346,77 @@ function AutoCategory.RuleFunc.IsCrafted( ... )
 	return result
 end
 
+function AutoCategory.RuleFunc.IsLearnable( ... )
+	local fn = "islearnable"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	
+    local itemType = GetItemLinkItemType(itemLink) --GetItemType(bagId, slotIndex) 
+    if itemType == ITEMTYPE_RECIPE then
+        return not IsItemLinkRecipeKnown(itemLink)
+    elseif IsItemLinkBook(itemLink) then
+        return not IsItemLinkBookKnown(itemLink)
+    end
+	return false
+end
+
+function AutoCategory.RuleFunc.Quality( ... )
+	local fn = "quality"  
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	local _, _, _, _, _, _, _, quality = GetItemInfo(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	
+	for ax = 1, ac do
+		
+		local arg = select( ax, ... )
+		
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		 
+		if type( arg ) == "number" then
+			if arg == quality then
+				return true
+			end
+		elseif type( arg ) == "string" then
+			
+			local itemTypeMap = {
+				["arcane"] = ITEM_QUALITY_ARCANE,
+				["artifact"] = ITEM_QUALITY_ARTIFACT,
+				["legendary"] = ITEM_QUALITY_LEGENDARY,
+				["magic"] = ITEM_QUALITY_MAGIC,
+				["normal"] = ITEM_QUALITY_NORMAL,
+				["trash"] = ITEM_QUALITY_TRASH,
+								
+				["blue"] = ITEM_QUALITY_ARCANE,
+				["purple"] = ITEM_QUALITY_ARTIFACT,
+				["gold"] = ITEM_QUALITY_LEGENDARY,
+				["green"] = ITEM_QUALITY_MAGIC,
+				["white"] = ITEM_QUALITY_NORMAL,
+				["grey"] = ITEM_QUALITY_TRASH,
+			}
+			local v = itemTypeMap[string.lower( arg )]
+			if v and v == quality then
+				return true
+			end
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		
+	end
+	
+	return false
+end
+
+function AutoCategory.RuleFunc.GetQuality()
+	local fn = "getquality"
+	
+	local _, _, _, _, _, _, _, quality = GetItemInfo(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return quality
+end
+
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
 
@@ -470,6 +541,14 @@ function AutoCategory.RuleFunc.CPLevel( ... )
 	local fn = "cp"
 	local level = GetItemRequiredChampionPoints(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
 	return level
+end
+
+function AutoCategory.RuleFunc.SellPrice( ... )
+	local fn = "sellprice"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		
+	local _, sellPrice = GetItemLinkInfo(itemLink)
+	return sellPrice
 end
 
 
@@ -937,11 +1016,19 @@ AutoCategory.Environment = {
 	
 	iscrafted = AutoCategory.RuleFunc.IsCrafted,
 	
+	islearnable = AutoCategory.RuleFunc.IsLearnable,
+	
+	quality = AutoCategory.RuleFunc.Quality,
+	
+	getquality = AutoCategory.RuleFunc.GetQuality,
+	
 	boundtype = AutoCategory.RuleFunc.BoundType,
 	
 	level = AutoCategory.RuleFunc.Level,
 	
 	cp = AutoCategory.RuleFunc.CPLevel,
+	
+	sellprice = AutoCategory.RuleFunc.SellPrice,
 
 	set = AutoCategory.RuleFunc.SetName,
 
