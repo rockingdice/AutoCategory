@@ -42,6 +42,16 @@ SafeAddString(SI_AC_MENU_AC_BUTTON_EDIT_TOOLTIP,"在分类设置中编辑这个�
 SafeAddString(SI_AC_MENU_AC_BUTTON_ADD,"添加分类", 1)
 SafeAddString(SI_AC_MENU_AC_BUTTON_ADD_TOOLTIP,"将选定的分类添加到背包中", 1)
 SafeAddString(SI_AC_MENU_AC_BUTTON_NEED_HELP,"需要帮助?", 1)
+
+SafeAddString(SI_AC_MENU_HEADER_IMPORT_BAG_SETTING, "导入背包配置", 1)
+SafeAddString(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG, "从背包导入", 1)
+SafeAddString(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG_TOOLTIP, "请选择一个背包来导入配置。", 1)
+SafeAddString(SI_AC_MENU_IBS_BUTTON_IMPORT, "导入", 1)
+SafeAddString(SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP, "导入会覆盖当前背包的配置。", 1)
+SafeAddString(SI_AC_MENU_HEADER_UNIFY_BAG_SETTINGS, "统一使用当前背包配置", 1)
+SafeAddString(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS, "导出到所有的背包", 1)
+SafeAddString(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS_TOOLTIP, "将会用当前背包的配置替换所有的背包!", 1)
+
 SafeAddString(SI_AC_MENU_SUBMENU_CATEGORY_SETTING,"|c0066FF[分类设置]|r", 1)
 SafeAddString(SI_AC_MENU_CS_DROPDOWN_TAG,"选择标签", 1)
 SafeAddString(SI_AC_MENU_CS_DROPDOWN_TAG_TOOLTIP,"为分类添加标签以方便搜索", 1)
