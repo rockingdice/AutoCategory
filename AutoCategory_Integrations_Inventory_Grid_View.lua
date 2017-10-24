@@ -184,6 +184,12 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
 	local currentY = 0
 	local lastIndex = 1
     local gridIconSize = settings.GetGridIconSize()
+    local isGrid = settings.IsGrid(IGVId)
+	if isGrid then
+		self.controlHeight = gridIconSize
+	else
+		self.controlHeight = 52
+	end
     local contentsWidth = self.contents:GetWidth()
     local contentsWidthMinusPadding = contentsWidth - LEFT_PADDING
     local itemsPerRow = zo_floor(contentsWidthMinusPadding / gridIconSize)
@@ -402,7 +408,7 @@ local function ReshapeSlot(control, isGrid, width, height)
         local button = control:GetNamedChild("Button")
         local name = control:GetNamedChild("Name")
         local sell = control:GetNamedChild("SellPrice")
-        local stat = control:GetNamedChild("StatValue")
+        --local stat = control:GetNamedChild("StatValue")
 
         --make sure sell price label stays shown/hidden
         if sell then
@@ -448,7 +454,7 @@ local function ReshapeSlot(control, isGrid, width, height)
             new:SetDrawTier(2)
 
             name:SetHidden(true)
-            stat:SetHidden(true)
+            --stat:SetHidden(true)
 
             highlight:SetTexture(textureSet.HOVER)
             highlight:SetTextureCoords(0, 1, 0, 1)
@@ -473,7 +479,7 @@ local function ReshapeSlot(control, isGrid, width, height)
             if new then new:SetAnchor(CENTER, control, TOPLEFT, 20, 27) end
 
             if name then name:SetHidden(false) end
-            if stat then stat:SetHidden(false) end
+            --if stat then stat:SetHidden(false) end
             outline:SetHidden(true)
 
             if highlight then
@@ -507,7 +513,6 @@ function util_ReshapeSlots()
         height = gridIconSize
     else
         width = scrollList:GetWidth()
-	scrollList.controlHeight = 52
         height = scrollList.controlHeight
     end
 
