@@ -419,7 +419,9 @@ end
 
 function AutoCategory.RuleFunc.IsNew( ... )
 	local fn = "isnew"
-
+	if not AutoCategory.checkingItemBagId then
+		return false
+	end
 	return SHARED_INVENTORY:IsItemNew(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
 end
 
