@@ -551,6 +551,12 @@ function AutoCategory.RuleFunc.SellPrice( ... )
 	return sellPrice
 end
 
+function AutoCategory.RuleFunc.StackSize( ... )
+	local fn = "stacksize"
+	local stackSize = GetSlotStackSize(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	  
+	return stackSize
+end
 
 function AutoCategory.RuleFunc.KeepForResearch( ... )
 	local itemFlagStatus = LibItemStatus:GetItemFlagStatus(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
@@ -865,6 +871,52 @@ function AutoCategory.RuleFunc.InSet( ... )
 	return #setIndices ~= 0
 end
 
+function AutoCategory.RuleFunc.AlphaGear( ... ) 
+	if not AG then
+		return false
+	end
+	local fn = "alphagear"
+	local ac = select( '#', ... )
+	if ac == 0 then
+		error( string.format("error: %s(): require arguments." , fn))
+	end
+	
+	local uid = Id64ToString(GetItemUniqueId(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex))
+	if not uid then return false end
+	for nr = 1, 16 do
+	end
+	
+	
+	for ax = 1, ac do 
+		local arg = select( ax, ... )
+		local comIndex = -1
+		if not arg then
+			error( string.format("error: %s():  argument is nil." , fn))
+		end
+		if type( arg ) == "number" then
+			comIndex = arg
+		elseif type( arg ) == "string" then
+			comIndex = tonumber(arg)
+		else
+			error( string.format("error: %s(): argument is error." , fn ) )
+		end
+		
+		local nr = comIndex
+		if AG.setdata[nr].Set.gear > 0 then
+			for slot = 1,14 do
+				if AG.setdata[AG.setdata[nr].Set.gear].Gear[slot].id == uid then
+					local setName = AG.setdata[nr].Set.text[1]
+					AutoCategory.AdditionCategoryName = AutoCategory.AdditionCategoryName .. string.format(" (%s)", setName)
+	
+					return true
+				end
+			end
+		end 
+	end
+	
+	return false 
+end
+
 local defaultIdTextId
 local function GetFCOISIconText( iconId )
 	if not defaultIdTextId then
@@ -989,6 +1041,55 @@ function AutoCategory.RuleFunc.IsInQuickslot( ... )
 	return slotIndex ~= nil
 end
 
+function AutoCategory.RuleFunc.GetPriceTTC( ... )
+	local fn = "getpricettc"
+	if TamrielTradeCentre then
+		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		local priceInfo = TamrielTradeCentrePrice:GetPriceInfo(itemLink)
+		if priceInfo then 
+			local ac = select( '#', ... ) 
+			if ac == 0 then
+				--get suggested price
+				if priceInfo.SuggestedPrice then
+					return priceInfo.SuggestedPrice
+				end
+			else
+				local arg = select( 1, ... )
+				if type( arg ) == "string" then
+					if arg == "average" then
+						if priceInfo.Avg then
+							return priceInfo.Avg
+						end
+					elseif arg == "suggested" then
+						if priceInfo.SuggestedPrice then
+							return priceInfo.SuggestedPrice
+						end
+					elseif arg == "both" then
+						if priceInfo.SuggestedPrice then
+							return priceInfo.SuggestedPrice
+						elseif priceInfo.Avg then
+							return priceInfo.Avg
+						end
+					end
+				end
+			end 
+		end
+	end
+	return 0 
+end
+
+function AutoCategory.RuleFunc.GetPriceMM( ... )
+	local fn = "getpricemm"
+	if MasterMerchant then
+		local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+		local mmData = MasterMerchant:itemStats(itemLink, false)
+        if (mmData.avgPrice ~= nil) then
+            return mmData.avgPrice
+        end
+	end
+	return 0 
+end
+
 AutoCategory.Environment = {
 	-- rule functions
 	
@@ -1029,6 +1130,8 @@ AutoCategory.Environment = {
 	cp = AutoCategory.RuleFunc.CPLevel,
 	
 	sellprice = AutoCategory.RuleFunc.SellPrice,
+	
+	stacksize = AutoCategory.RuleFunc.StackSize,
 
 	set = AutoCategory.RuleFunc.SetName,
 
@@ -1047,6 +1150,16 @@ AutoCategory.Environment = {
 
 	inset = AutoCategory.RuleFunc.InSet,
 	
+	-- Alpha Gear
+	alphagear = AutoCategory.RuleFunc.AlphaGear,
+	
 	-- FCO Item Saver
 	ismarked = AutoCategory.RuleFunc.IsMarked,
+	
+	-- Tamriel Trade Centre
+	getpricettc = AutoCategory.RuleFunc.GetPriceTTC,
+	
+	-- Master Merchant
+	getpricemm = AutoCategory.RuleFunc.GetPriceMM,
+
 }
