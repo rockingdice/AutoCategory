@@ -472,8 +472,28 @@ end
 function AutoCategory.LazyInit()
 	if not AutoCategory.Inited then
 		-- load our saved variables
-		AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultSettings)
-		AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, AutoCategory.defaultAcctSettings)
+		AutoCategory.charSavedVariables = ZO_SavedVars:New('AutoCategorySavedVars', 1.1, nil, nil)
+		AutoCategory.acctSavedVariables = ZO_SavedVars:NewAccountWide('AutoCategorySavedVars', 1.1, nil, nil)
+		 
+		local function isTableEmpty(table)
+			if next(table) == nil then
+				return true
+			end
+			if table.bags == nil then 
+				return true
+			end
+			return false
+		end
+		if isTableEmpty(AutoCategory.charSavedVariables) then
+			AutoCategory.charSavedVariables.rules = AutoCategory.defaultSettings.rules
+			AutoCategory.charSavedVariables.bags = AutoCategory.defaultSettings.bags
+		end
+		if isTableEmpty(AutoCategory.acctSavedVariables) then 
+			AutoCategory.acctSavedVariables.accountWideSetting = AutoCategory.defaultAcctSettings.accountWideSetting
+			AutoCategory.acctSavedVariables.rules = AutoCategory.defaultAcctSettings.rules
+			AutoCategory.acctSavedVariables.bags = AutoCategory.defaultAcctSettings.bags
+			AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance		
+		end 
 		
 		-- version compatible
 		CheckVersionCompatible()
