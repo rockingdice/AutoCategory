@@ -23,6 +23,7 @@ local langStrings = {
  SI_AC_WARNING_CATEGORY_MISSING = "This category is missing, please make sure the category with this name exist.",
  SI_AC_WARNING_CATEGORY_NAME_EMPTY = "Category name cannot be empty.",
  SI_AC_WARNING_CATEGORY_NAME_DUPLICATED = "Name '%s' is duplicated, you can try '%s'.",
+ SI_AC_WARNING_NEED_RELOAD_UI = "Need Reload UI",
 
  SI_AC_MENU_SUBMENU_BAG_SETTING = "|c0066FF[Bag Setting]|r",
  SI_AC_MENU_BS_CHECKBOX_ACCOUNT_WIDE_SETTING = "Account Wide Setting",
@@ -80,7 +81,14 @@ local langStrings = {
  SI_AC_MENU_EC_DROPDOWN_CATEGORY_TEXT_ALIGNMENT = "Category Text Alignment",
  SI_AC_MENU_EC_DROPDOWN_CATEGORY_TEXT_COLOR = "Category Text Color",
  SI_AC_MENU_EC_DROPDOWN_CATEGORY_TEXT_FONT_SIZE = "Category Text Font Size",
-
+ SI_AC_MENU_EC_EDITBOX_CATEGORY_UNGROUPED_TITLE = "Ungrouped Category Name",
+ SI_AC_MENU_EC_EDITBOX_CATEGORY_UNGROUPED_TITLE_TOOLTIP = "If no category is matched, the item will be put in this category.",
+ SI_AC_MENU_EC_SLIDER_CATEGORY_HEADER_HEIGHT = "Category Header Height",
+ SI_AC_MENU_EC_BUTTON_RELOAD_UI = "Reload UI",
+ SI_AC_MENU_SUBMENU_GENERAL_SETTING = "|c0066FF[General Setting]|r",
+ SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE = "Show Message When Toggle",
+ SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE_TOOLTIP = "Will show a message in chat when toggling this add-on.",
+ 
  SI_AC_DEFAULT_TAG_GEARS= "Gears",
  SI_AC_DEFAULT_TAG_GENERAL_ITEMS= "General Items",
  SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER= "Iakoni's Gear Changer",
@@ -211,6 +219,8 @@ local langStrings = {
  SI_AC_DEFAULT_CATEGORY_FCOIS_ALL_MARK_DESC= "",
 
  SI_BINDING_NAME_TOGGLE_AUTO_CATEGORY= "Toggle Auto Category",
+ SI_MESSAGE_TOGGLE_AUTO_CATEGORY_ON="Auto Category: ON",
+ SI_MESSAGE_TOGGLE_AUTO_CATEGORY_OFF="Auto Category: OFF",
 }
 
 --Loop over all texts that need to be translated, add them as ZOs translated text so the function GetString() can read them

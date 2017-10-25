@@ -15,7 +15,7 @@
         </Control>
 
         <Control name="AC_InventoryItemRowHeader" mouseEnabled="false" tier="MEDIUM" layer="CONTROLS" virtual="true">
-            <Dimensions x="529" y="52"/>
+            <Dimensions x="520" y="52"/>
             <Controls>
                 <Label name="$(parent)HeaderName" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                     <AnchorFill />

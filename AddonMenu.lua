@@ -4,6 +4,7 @@ local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
   
 local L = AutoCategory.localizefunc
 
+local needReloadUI = false
 --cache data for dropdown: 
 local cacheTags = {}
 cacheTags = {}
@@ -1139,7 +1140,58 @@ function AutoCategory.AddonMenuInit()
 							AutoCategory.acctSavedVariables.appearance["CATEGORY_FONT_SIZE"] = v
 						end,
 					},
+					{
+						type = "editbox",
+						name = L(SI_AC_MENU_EC_EDITBOX_CATEGORY_UNGROUPED_TITLE),
+						tooltip = L(SI_AC_MENU_EC_EDITBOX_CATEGORY_UNGROUPED_TITLE_TOOLTIP),
+						getFunc = function() 
+							return AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
+						end, 
+						setFunc = function(value) AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"] = value end,  
+						width = "full",
+					},
+					{
+						type = 'slider',
+						name = L(SI_AC_MENU_EC_SLIDER_CATEGORY_HEADER_HEIGHT),
+						min = 1,
+						max = 100,
+						getFunc = function()
+							return AutoCategory.acctSavedVariables.appearance["CATEGORY_HEADER_HEIGHT"]
+						end,
+						setFunc = function(v)
+							AutoCategory.acctSavedVariables.appearance["CATEGORY_HEADER_HEIGHT"] = v
+							needReloadUI = true
+						end,
+						warning = L(SI_AC_WARNING_NEED_RELOAD_UI),
+					},
+					{
+						type = "button",
+						name = L(SI_AC_MENU_EC_BUTTON_RELOAD_UI),
+						disabled = function() 
+							return not needReloadUI
+						end,
+						func = function()
+							ReloadUI()
+						end,
+						width = "full",
+					},
 				},
+			},
+			{
+				type = "submenu",
+				name = L(SI_AC_MENU_SUBMENU_GENERAL_SETTING),
+				reference = "AC_MENU_SUBMENU_GENERAL_SETTING",
+				controls = { 
+					{
+						type = "checkbox",
+						name = L(SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE),
+						tooltip = L(SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE_TOOLTIP),
+						getFunc = function() return AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] end,
+						setFunc = function(value) AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] = value
+							
+						end,
+					},
+				}
 			},
 	}
 	LAM:RegisterAddonPanel("AC_CATEGORY_SETTINGS", panelData)

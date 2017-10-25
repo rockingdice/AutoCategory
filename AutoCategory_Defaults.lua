@@ -1170,5 +1170,10 @@ AutoCategory.defaultAcctSettings = {
 		},
 		["CATEGORY_FONT_SIZE"] = 18,
 		["CATEGORY_FONT_ALIGNMENT"] = 1,
+		["CATEGORY_OTHER_TEXT"] = L(SI_AC_DEFAULT_NAME_CATEGORY_OTHER),
+		["CATEGORY_HEADER_HEIGHT"] = 52, 
+	},
+	general = {
+		["SHOW_MESSAGE_WHEN_TOGGLE"] = false,
 	},
 }

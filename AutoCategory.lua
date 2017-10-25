@@ -12,7 +12,6 @@ local LMP = LibStub:GetLibrary("LibMediaProvider-1.0")
 
 local L = AutoCategory.localizefunc
 
-AC_UNGROUPED_NAME = L(SI_AC_DEFAULT_NAME_CATEGORY_OTHER)
 AC_EMPTY_TAG_NAME = L(SI_AC_DEFAULT_NAME_EMPTY_TAG)
 
 
@@ -124,15 +123,17 @@ function AutoCategory.HookKeyboardMode()
 		headerLabel:SetHorizontalAlignment(appearance["CATEGORY_FONT_ALIGNMENT"])
 		headerLabel:SetFont(string.format('%s|%d|%s', LMP:Fetch('font', appearance["CATEGORY_FONT_NAME"]), appearance["CATEGORY_FONT_SIZE"], appearance["CATEGORY_FONT_STYLE"]))
 		headerLabel:SetColor(appearance["CATEGORY_FONT_COLOR"][1], appearance["CATEGORY_FONT_COLOR"][2], appearance["CATEGORY_FONT_COLOR"][3], appearance["CATEGORY_FONT_COLOR"][4])
+		rowControl:SetHeight(AutoCategory.acctSavedVariables.appearance["CATEGORY_HEADER_HEIGHT"])
 	end
 	--Add a new data type: row with header
-	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_GuildBankBackpack, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset) 
-    ZO_ScrollList_AddDataType(SMITHING.deconstructionPanel.inventory.list, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
-	ZO_ScrollList_AddDataType(SMITHING.improvementPanel.inventory.list, 998, "AC_InventoryItemRowHeader", 52, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
+	local rowHeight = AutoCategory.acctSavedVariables.appearance["CATEGORY_HEADER_HEIGHT"]
+	ZO_ScrollList_AddDataType(ZO_PlayerInventoryList, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_CraftBagList, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerBankBackpack, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_GuildBankBackpack, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_BACKPACK].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset) 
+    ZO_ScrollList_AddDataType(SMITHING.deconstructionPanel.inventory.list, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
+	ZO_ScrollList_AddDataType(SMITHING.improvementPanel.inventory.list, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
 	
 	local function prehookSort(self, inventoryType) 
 		local inventory
@@ -174,7 +175,7 @@ function AutoCategory.HookKeyboardMode()
 			local slotData = entry.data
 			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
 			if not matched or not AutoCategory.Enabled then
-				entry.bestItemTypeName = AC_UNGROUPED_NAME 
+				entry.bestItemTypeName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"] 
 				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 			else
 				entry.bestItemTypeName = categoryName 
@@ -237,7 +238,7 @@ function AutoCategory.HookKeyboardMode()
 			local slotData = entry.data
 			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
 			if not matched or not AutoCategory.Enabled then
-				entry.bestItemTypeName = AC_UNGROUPED_NAME 
+				entry.bestItemTypeName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"] 
 				entry.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 			else
 				entry.bestItemTypeName = categoryName 
@@ -290,8 +291,8 @@ function AutoCategory.HookGamepadInventory()
 			local itemData = slotData
 			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(itemData.bagId, itemData.slotIndex)
 			if not matched then
-	            itemData.bestItemTypeName = AC_UNGROUPED_NAME
-	            itemData.bestGamepadItemCategoryName = AC_UNGROUPED_NAME
+	            itemData.bestItemTypeName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
+	            itemData.bestGamepadItemCategoryName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
 	            itemData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 			else
 				itemData.bestItemTypeName = categoryName
@@ -337,8 +338,8 @@ function AutoCategory.HookGamepadCraftStation()
 		if slotData then
 			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex, AC_BAG_TYPE_CRAFTSTATION)
 			if not matched then
-				newData.bestItemTypeName = AC_UNGROUPED_NAME
-				newData.bestItemCategoryName = AC_UNGROUPED_NAME
+				newData.bestItemTypeName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
+				newData.bestItemCategoryName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
 				newData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 			else
 				newData.bestItemTypeName = categoryName
@@ -374,8 +375,8 @@ function AutoCategory.HookGamepadTradeInventory()
 				 
 				local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(slotData.bagId, slotData.slotIndex)
 				if not matched then
-					slotData.bestItemTypeName = AC_UNGROUPED_NAME
-					slotData.bestGamepadItemCategoryName = AC_UNGROUPED_NAME
+					slotData.bestItemTypeName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
+					slotData.bestGamepadItemCategoryName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
 					slotData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 				else
 					slotData.bestItemTypeName = categoryName
@@ -410,8 +411,8 @@ function AutoCategory.HookGamepadStore(list)
 
 			local matched, categoryName, categoryPriority = AutoCategory:MatchCategoryRules(itemData.bagId, itemData.slotIndex)
 			if not matched then
-	            itemData.bestItemTypeName = AC_UNGROUPED_NAME
-	            itemData.bestGamepadItemCategoryName = AC_UNGROUPED_NAME
+	            itemData.bestItemTypeName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
+	            itemData.bestGamepadItemCategoryName = AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"]
 	            itemData.sortPriorityName = string.format("%03d%s", 999 , categoryName) 
 			else
 				itemData.bestItemTypeName = categoryName
@@ -438,6 +439,13 @@ end
 
 function AutoCategory.ToggleCategorize()
 	AutoCategory.Enabled = not AutoCategory.Enabled 
+	if AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] then
+		if AutoCategory.Enabled then
+			d(L(SI_MESSAGE_TOGGLE_AUTO_CATEGORY_ON))
+		else
+			d(L(SI_MESSAGE_TOGGLE_AUTO_CATEGORY_OFF))
+		end
+	end
 	if not ZO_PlayerInventory:IsHidden() then
 		PLAYER_INVENTORY:UpdateList(INVENTORY_BACKPACK)
 		PLAYER_INVENTORY:UpdateList(INVENTORY_QUEST_ITEM)
@@ -466,7 +474,16 @@ local function CheckVersionCompatible()
 	RebuildBagSettingIfNeeded(AutoCategory.acctSavedVariables, AutoCategory.defaultAcctSettings, AC_BAG_TYPE_CRAFTSTATION)
 	--v1.12
 	
-	
+	--v1.15, added some options to modify headers appearance, and general settings
+	if not AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"] then
+		AutoCategory.acctSavedVariables.appearance["CATEGORY_OTHER_TEXT"] = L(SI_AC_DEFAULT_NAME_CATEGORY_OTHER)
+		AutoCategory.acctSavedVariables.appearance["CATEGORY_HEADER_HEIGHT"] = 52 
+	end
+	if not AutoCategory.acctSavedVariables.general then
+		AutoCategory.acctSavedVariables.general = {}
+		AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] = false
+	end
+	--v1.15
 end
 
 function AutoCategory.LazyInit()

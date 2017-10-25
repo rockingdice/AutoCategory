@@ -195,6 +195,7 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
     local itemsPerRow = zo_floor(contentsWidthMinusPadding / gridIconSize)
     local gridSpacing = .5
 	local totalControlWidth = gridIconSize + gridSpacing
+	local headerRowHeight = AutoCategory.acctSavedVariables.appearance["CATEGORY_HEADER_HEIGHT"]
 	for i = 1,#self.data do
 		local currentData = self.data[i]
 		if currentData.isHeader then
@@ -205,9 +206,9 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
 			end
 			lastIndex = i + 1 
 			currentData.top = currentY	
-			currentData.bottom = currentY + 40
+			currentData.bottom = currentY + headerRowHeight
 			currentData.left = LEFT_PADDING
-			currentY = currentY + 40
+			currentY = currentY + headerRowHeight
 		else 
 			currentData.top = zo_floor((i - lastIndex) / itemsPerRow) * totalControlWidth + currentY
 			--d(currentData.top)
@@ -352,6 +353,12 @@ function adapter_ToggleGrid()
     settings.ToggleGrid(IGVId)
     local isGrid = settings.IsGrid(IGVId)
 
+	--change data.left 
+    for i = 1, #scrollList.data do				
+		local currentData = scrollList.data[i]
+		currentData.left = 0
+	end
+	
     ZO_ScrollList_ResetToTop(scrollList)
 
     util.ReshapeSlots()
@@ -362,11 +369,11 @@ function adapter_ToggleGrid()
     if isGrid then
         util.ReshapeSlots()
     else
-        ResizeScrollBar(scrollList, (#scrollList.data * scrollList.controlHeight) - ZO_ScrollList_GetHeight(scrollList))
+        --ResizeScrollBar(scrollList, (#scrollList.data * scrollList.controlHeight) - ZO_ScrollList_GetHeight(scrollList))
     end
 
     ZO_ScrollList_RefreshVisible(scrollList)
-    util.ReshapeSlots()
+    --util.ReshapeSlots()
 end
 
 
