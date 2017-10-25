@@ -2,9 +2,9 @@
 ## APIVersion: 100021
 ## Author: RockingDice
 ## Description: Type "/ac" 
-## Version: 1.14
+## Version: 1.15
 ## SavedVariables: AutoCategorySavedVars
-## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver QuickMenu
+## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver QuickMenu DoItAll
 
 Libs/LibStub/LibStub.lua
 Libs/LibMediaProvider-1.0/LibMediaProvider-1.0.lua

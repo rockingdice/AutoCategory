@@ -885,10 +885,7 @@ function AutoCategory.RuleFunc.AlphaGear( ... )
 	
 	local uid = Id64ToString(GetItemUniqueId(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex))
 	if not uid then return false end
-	for nr = 1, 16 do
-	end
-	
-	
+
 	for ax = 1, ac do 
 		local arg = select( ax, ... )
 		local comIndex = -1
