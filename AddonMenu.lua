@@ -442,8 +442,8 @@ function AutoCategory.AddonMenuInit()
 					type = "checkbox",
 					name = L(SI_AC_MENU_BS_CHECKBOX_ACCOUNT_WIDE_SETTING),
 					tooltip = L(SI_AC_MENU_BS_CHECKBOX_ACCOUNT_WIDE_SETTING_TOOLTIP),
-					getFunc = function() return AutoCategory.acctSavedVariables.accountWideSetting end,
-					setFunc = function(value) AutoCategory.acctSavedVariables.accountWideSetting = value
+					getFunc = function() return AutoCategory.charSavedVariables.accountWideSetting end,
+					setFunc = function(value) AutoCategory.charSavedVariables.accountWideSetting = value
 						AutoCategory.UpdateCurrentSavedVars()
 						RefreshCache() 
 						

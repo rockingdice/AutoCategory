@@ -45,7 +45,7 @@ end
  
 function AutoCategory.UpdateCurrentSavedVars()
 	AutoCategory.curSavedVars= {}
-	if not AutoCategory.acctSavedVariables.accountWideSetting  then
+	if not AutoCategory.charSavedVariables.accountWideSetting  then
 		AutoCategory.curSavedVars.rules = AutoCategory.acctSavedVariables.rules
 		AutoCategory.curSavedVars.bags = AutoCategory.charSavedVariables.bags 
 	else 
@@ -55,12 +55,12 @@ function AutoCategory.UpdateCurrentSavedVars()
 end
 
 function AutoCategory.ResetToDefaults()
-	AutoCategory.acctSavedVariables.accountWideSetting = AutoCategory.defaultAcctSettings.accountWideSetting
 	AutoCategory.acctSavedVariables.rules = AutoCategory.defaultAcctSettings.rules
 	AutoCategory.acctSavedVariables.bags = AutoCategory.defaultAcctSettings.bags
 	AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance
 	AutoCategory.charSavedVariables.rules = AutoCategory.defaultSettings.rules
 	AutoCategory.charSavedVariables.bags = AutoCategory.defaultSettings.bags
+	AutoCategory.charSavedVariables.accountWideSetting = AutoCategory.defaultSettings.accountWideSetting
 	
 end
 
@@ -484,6 +484,12 @@ local function CheckVersionCompatible()
 		AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] = false
 	end
 	--v1.15
+	
+	--v1.16, modify the account setting flag, move it to character
+	if AutoCategory.charSavedVariables.accountWideSetting == nil then
+		AutoCategory.charSavedVariables.accountWideSetting = true
+	end
+	--v1.16
 end
 
 function AutoCategory.LazyInit()
@@ -504,9 +510,9 @@ function AutoCategory.LazyInit()
 		if isTableEmpty(AutoCategory.charSavedVariables) then
 			AutoCategory.charSavedVariables.rules = AutoCategory.defaultSettings.rules
 			AutoCategory.charSavedVariables.bags = AutoCategory.defaultSettings.bags
+			AutoCategory.charSavedVariables.accountWideSetting = AutoCategory.defaultSettings.accountWideSetting
 		end
 		if isTableEmpty(AutoCategory.acctSavedVariables) then 
-			AutoCategory.acctSavedVariables.accountWideSetting = AutoCategory.defaultAcctSettings.accountWideSetting
 			AutoCategory.acctSavedVariables.rules = AutoCategory.defaultAcctSettings.rules
 			AutoCategory.acctSavedVariables.bags = AutoCategory.defaultAcctSettings.bags
 			AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance		

@@ -18,6 +18,7 @@ AutoCategory.defaultSettings = {
 			rules = {},
 		},
 	}, 
+	accountWideSetting = true,
 }
  
 AutoCategory.defaultAcctSettings = {
@@ -1156,8 +1157,6 @@ AutoCategory.defaultAcctSettings = {
 			},
 		},
 	}, 
-	--account specific settings
-	accountWideSetting = true,
 	appearance = {
 		["CATEGORY_FONT_NAME"] = "Univers 67",
 		["CATEGORY_FONT_STYLE"] = "soft-shadow-thin",

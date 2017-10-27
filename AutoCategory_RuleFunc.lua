@@ -1044,6 +1044,19 @@ function AutoCategory.RuleFunc.IsInQuickslot( ... )
 	return slotIndex ~= nil
 end
 
+function AutoCategory.RuleFunc.IsMonsterSet( ... )
+	local fn = "ismonsterset"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkSetInfo(itemLink)
+	if not hasSet then
+		return false
+	end
+	if maxEquipped == 2 then
+		return true
+	end
+	return false
+end
+
 function AutoCategory.RuleFunc.GetPriceTTC( ... )
 	local fn = "getpricettc"
 	if TamrielTradeCentre then
@@ -1147,6 +1160,8 @@ AutoCategory.Environment = {
 	isinbank = AutoCategory.RuleFunc.IsInBank,
 
 	isinquickslot = AutoCategory.RuleFunc.IsInQuickslot,
+	
+	ismonsterset = AutoCategory.RuleFunc.IsMonsterSet,
 	 
 	keepresearch = AutoCategory.RuleFunc.KeepForResearch,
 
