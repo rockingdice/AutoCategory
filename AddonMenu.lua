@@ -192,9 +192,16 @@ local function RefreshCache()
 				if tooltip == "" then
 					tooltip = rule.name
 				end 
-				table.insert(cacheRulesByBag[bagId].showNames, string.format("%s (%d)", ruleName, priority))
-				table.insert(cacheRulesByBag[bagId].values, ruleName)
-				table.insert(cacheRulesByBag[bagId].tooltips, tooltip)
+				if data.isHidden then
+					table.insert(cacheRulesByBag[bagId].showNames, string.format("|c626250%s (%d)|r", ruleName, priority))
+					table.insert(cacheRulesByBag[bagId].values, ruleName)
+					table.insert(cacheRulesByBag[bagId].tooltips, tooltip)
+				else 
+					table.insert(cacheRulesByBag[bagId].showNames, string.format("%s (%d)", ruleName, priority))
+					table.insert(cacheRulesByBag[bagId].values, ruleName)
+					table.insert(cacheRulesByBag[bagId].tooltips, tooltip)
+				end
+				
 			else
 				table.insert(cacheRulesByBag[bagId].showNames, string.format("|cFF4444(!)|r %s (%d)", ruleName, priority))				
 				table.insert(cacheRulesByBag[bagId].values, ruleName)
@@ -463,7 +470,7 @@ function AutoCategory.AddonMenuInit()
 						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_TAG")
 						UpdateDropDownMenu("AC_DROPDOWN_EDITRULE_RULE")
 					end,
-				},
+				},			
 				{
 					type = "divider",
 				},
@@ -545,6 +552,38 @@ function AutoCategory.AddonMenuInit()
 					end,
 					width = "full",
 				},
+				{
+					type = "checkbox",
+					name = L(SI_AC_MENU_BS_CHECKBOX_CATEGORY_HIDDEN),
+					tooltip = L(SI_AC_MENU_BS_CHECKBOX_CATEGORY_HIDDEN_TOOLTIP),
+					getFunc = function()					
+						local bag = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
+						local rule = GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE")
+						if cacheBagEntriesByName[bag][rule] then
+							return cacheBagEntriesByName[bag][rule].isHidden
+						end
+						return 0
+					end,
+					setFunc = function(value)  
+						local bag = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")
+						local rule = GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE")
+						if cacheBagEntriesByName[bag][rule] then
+							cacheBagEntriesByName[bag][rule].isHidden = value 
+							RefreshCache()
+							RefreshDropdownData()
+							UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+						end
+					end,
+					disabled = function() 
+						if GetDropDownSelection("AC_DROPDOWN_EDITBAG_RULE") == "" then
+							return true
+						end 
+						if #dropdownData["AC_DROPDOWN_EDITBAG_RULE"].choicesValues == 0 then
+							return true
+						end
+						return false
+					end,
+				},	
 				{
 					type = "button",
 					name = L(SI_AC_MENU_BS_BUTTON_EDIT),
@@ -674,76 +713,100 @@ function AutoCategory.AddonMenuInit()
 					width = "full",
 				}, 
 				{
-					type = "header",
-					name = L(SI_AC_MENU_HEADER_UNIFY_BAG_SETTINGS),
-					width = "full",
-				},
+					type = "divider",
+				}, 
 				{
-					type = "button",
-					name = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS),
-					tooltip = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS_TOOLTIP),
-					func = function() 
-						local selectedBag = AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")]
-						for i = 1, 5 do
-							AutoCategory.curSavedVars.bags[i] = deepcopy(selectedBag)
-						end
-						 
-						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
-						--reset add rule's selection, since all data will be changed.
-						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
-						 
-						RefreshCache()
-						RefreshDropdownData() 
-						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
-						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
-					end, 
-					width = "full",
-				},				
-				{
-					type = "header",
-					name = L(SI_AC_MENU_HEADER_IMPORT_BAG_SETTING),
-					width = "full",
-				},
-				{
-					type = "dropdown",
-					name = L(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG),
-					scrollable = false,
-					tooltip = L(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG_TOOLTIP),
-					choices = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choices,
-					choicesValues = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesValues,
-					choicesTooltips = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesTooltips,
-					
-					getFunc = function()  
-						return GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
+					type = "checkbox",
+					name = L(SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN),
+					tooltip = L(SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN_TOOLTIP),
+					getFunc = function()					
+						local bag = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") 
+						return AutoCategory.curSavedVars.bags[bag].isUngroupedHidden
 					end,
-					setFunc = function(value) 	
-						SelectDropDownItem("AC_DROPDOWN_IMPORTBAG_BAG", value)  
-					end, 
-					width = "full",
-					reference = "AC_DROPDOWN_IMPORTBAG_BAG"
-				},
+					setFunc = function(value)  
+						local bag = GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") 
+						AutoCategory.curSavedVars.bags[bag].isUngroupedHidden = value
+					end,
+				},			
 				{
-					type = "button",
-					name = L(SI_AC_MENU_IBS_BUTTON_IMPORT),
-					tooltip = L(SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP),
-					func = function() 
+					type = "submenu",
+					name = L(SI_AC_MENU_SUBMENU_IMPORT_EXPORT),
+					reference = "SI_AC_MENU_SUBMENU_IMPORT_EXPORT",
+					controls = {
+						{
+							type = "header",
+							name = L(SI_AC_MENU_HEADER_UNIFY_BAG_SETTINGS),
+							width = "full",
+						},
+						{
+							type = "button",
+							name = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS),
+							tooltip = L(SI_AC_MENU_UBS_BUTTON_EXPORT_TO_ALL_BAGS_TOOLTIP),
+							func = function() 
+								local selectedBag = AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")]
+								for i = 1, 5 do
+									AutoCategory.curSavedVars.bags[i] = deepcopy(selectedBag)
+								end
+								 
+								SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+								--reset add rule's selection, since all data will be changed.
+								SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+								 
+								RefreshCache()
+								RefreshDropdownData() 
+								UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+								UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+							end, 
+							width = "full",
+						},				
+						
+						{
+							type = "header",
+							name = L(SI_AC_MENU_HEADER_IMPORT_BAG_SETTING),
+							width = "full",
+						},
+						{
+							type = "dropdown",
+							name = L(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG),
+							scrollable = false,
+							tooltip = L(SI_AC_MENU_IBS_DROPDOWN_IMPORT_FROM_BAG_TOOLTIP),
+							choices = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choices,
+							choicesValues = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesValues,
+							choicesTooltips = dropdownData["AC_DROPDOWN_IMPORTBAG_BAG"].choicesTooltips,
+							
+							getFunc = function()  
+								return GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
+							end,
+							setFunc = function(value) 	
+								SelectDropDownItem("AC_DROPDOWN_IMPORTBAG_BAG", value)  
+							end, 
+							width = "full",
+							reference = "AC_DROPDOWN_IMPORTBAG_BAG"
+						},
+						{
+							type = "button",
+							name = L(SI_AC_MENU_IBS_BUTTON_IMPORT),
+							tooltip = L(SI_AC_MENU_IBS_BUTTON_IMPORT_TOOLTIP),
+							func = function() 
 
-						AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")] = deepcopy( AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")] )
-						 
-						SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
-						--reset add rule's selection, since all data will be changed.
-						SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
-						 
-						RefreshCache()
-						RefreshDropdownData() 
-						UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
-						UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
-					end,
-					disabled = function()
-						return GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") == GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
-					end,
-					width = "full",
-				},				
+								AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG")] = deepcopy( AutoCategory.curSavedVars.bags[GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")] )
+								 
+								SelectDropDownItem("AC_DROPDOWN_EDITBAG_RULE", "")
+								--reset add rule's selection, since all data will be changed.
+								SelectDropDownItem("AC_DROPDOWN_ADDCATEGORY_RULE", "")
+								 
+								RefreshCache()
+								RefreshDropdownData() 
+								UpdateDropDownMenu("AC_DROPDOWN_EDITBAG_RULE")
+								UpdateDropDownMenu("AC_DROPDOWN_ADDCATEGORY_RULE")
+							end,
+							disabled = function()
+								return GetDropDownSelection("AC_DROPDOWN_EDITBAG_BAG") == GetDropDownSelection("AC_DROPDOWN_IMPORTBAG_BAG")
+							end,
+							width = "full",
+						},	 
+					},
+				}, 
 				{
 					type = "divider",
 				}, 
@@ -1176,18 +1239,27 @@ function AutoCategory.AddonMenuInit()
 						width = "full",
 					},
 				},
-			},
+			}, 
 			{
 				type = "submenu",
 				name = L(SI_AC_MENU_SUBMENU_GENERAL_SETTING),
 				reference = "AC_MENU_SUBMENU_GENERAL_SETTING",
-				controls = { 
+				controls = { 					
 					{
 						type = "checkbox",
 						name = L(SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE),
 						tooltip = L(SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE_TOOLTIP),
 						getFunc = function() return AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] end,
 						setFunc = function(value) AutoCategory.acctSavedVariables.general["SHOW_MESSAGE_WHEN_TOGGLE"] = value
+							
+						end,
+					},			
+					{
+						type = "checkbox",
+						name = L(SI_AC_MENU_GS_CHECKBOX_SHOW_CATEGORY_ITEM_COUNT),
+						tooltip = L(SI_AC_MENU_GS_CHECKBOX_SHOW_CATEGORY_ITEM_COUNT_TOOLTIP),
+						getFunc = function() return AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] end,
+						setFunc = function(value) AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] = value
 							
 						end,
 					},

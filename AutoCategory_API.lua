@@ -19,7 +19,7 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex, specialType )
 		end
 	end
 	if not bag_type_id then
-		return false, "", 0
+		return false, "", 0, nil, nil
 	end
 	local needCheck = false
 	local bag = AutoCategory.curSavedVars.bags[bag_type_id]
@@ -29,7 +29,7 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex, specialType )
 		if rule then
 			rule.damaged = false
 			if rule.rule == nil then
-				return false, "", 0
+				return false, "", 0, bag_type_id, entry.isHidden
 			end
 			local ruleCode, res = zo_loadstring( "return(" .. rule.rule ..")" )
 			if not ruleCode then
@@ -41,7 +41,7 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex, specialType )
 				local ok, res = pcall( ruleCode )
 				if ok then
 					if res == true then
-						return true, rule.name .. AutoCategory.AdditionCategoryName, entry.priority
+						return true, rule.name .. AutoCategory.AdditionCategoryName, entry.priority, bag_type_id, entry.isHidden
 					end 
 				else
 					d("Error2: " .. res)
@@ -49,10 +49,10 @@ function AutoCategory:MatchCategoryRules( bagId, slotIndex, specialType )
 				end
 			end
 			if rule.damaged then
-				return false, "", 0
+				return false, "", 0, bag_type_id, entry.isHidden
 			end
 		end
 	end
 	
-	return false, "", 0
-end
+	return false, "", 0, bag_type_id
+end 

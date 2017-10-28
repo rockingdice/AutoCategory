@@ -18,3 +18,4 @@ AutoCategory.author = "RockingDice"
 AutoCategory.localizefunc = function ( loc_key ) 
 	return GetString( loc_key )
 end
+AutoCategory.collapses = {}

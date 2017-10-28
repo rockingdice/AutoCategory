@@ -14,13 +14,36 @@
             </Controls>
         </Control>
 
-        <Control name="AC_InventoryItemRowHeader" mouseEnabled="false" tier="MEDIUM" layer="CONTROLS" virtual="true">
+        <Control name="AC_InventoryItemRowHeader" mouseEnabled="true" tier="MEDIUM" layer="CONTROLS" virtual="true">
             <Dimensions x="520" y="52"/>
+            <OnMouseEnter>
+                AC_ItemRowHeader_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                AC_ItemRowHeader_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                if(upInside) then
+					if button == MOUSE_BUTTON_INDEX_LEFT then
+						AC_ItemRowHeader_OnMouseClicked(self)
+					elseif button == MOUSE_BUTTON_INDEX_RIGHT then
+						AC_ItemRowHeader_OnShowContextMenu(self)
+					end
+                end
+            </OnMouseUp>
             <Controls>
                 <Label name="$(parent)HeaderName" font="ZoFontGameShadow" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" verticalAlignment="CENTER">
-                    <AnchorFill />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="60" offsetY="0" />
+					<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-10" offsetY="0" />
                 </Label>
-				
+				<Texture name="$(parent)CollapseMarkerBG" textureFile="EsoUI/Art/Buttons/plus_over.dds" hidden="true"> 
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="40" offsetY="0" />
+                </Texture>
+				<Texture name="$(parent)CollapseMarker" textureFile="EsoUI/Art/Buttons/plus_up.dds"> 
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="40" offsetY="0" />
+                </Texture>
                 <Control name="$(parent)Status" hidden="true">
                     <Controls> 
                         <Texture name="$(parent)Texture" inherits="ZO_MultiIcon"  hidden="true">

@@ -88,7 +88,14 @@ local langStrings = {
  SI_AC_MENU_SUBMENU_GENERAL_SETTING = "|c0066FF[General Setting]|r",
  SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE = "Show Message When Toggle",
  SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE_TOOLTIP = "Will show a message in chat when toggling this add-on.",
- 
+ SI_AC_MENU_SUBMENU_IMPORT_EXPORT = "|c0066FF[Import & Export]|r",
+ SI_AC_MENU_HEADER_ACCOUNT_WIDE_SETTING = "Account Wide Setting",
+ SI_AC_MENU_BS_CHECKBOX_CATEGORY_HIDDEN = "Hide Category",
+ SI_AC_MENU_BS_CHECKBOX_CATEGORY_HIDDEN_TOOLTIP = "Selected category and all items within the category will not appear in your bag if checked.",
+ SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN = "Hide Ungrouped Category",
+ SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN_TOOLTIP = "Check this will hide your ungrouped items which you cannot find them in current bag setting!",
+
+  
  SI_AC_DEFAULT_TAG_GEARS= "Gears",
  SI_AC_DEFAULT_TAG_GENERAL_ITEMS= "General Items",
  SI_AC_DEFAULT_TAG_IAKONI_GEAR_CHANGER= "Iakoni's Gear Changer",
@@ -221,6 +228,10 @@ local langStrings = {
  SI_BINDING_NAME_TOGGLE_AUTO_CATEGORY= "Toggle Auto Category",
  SI_MESSAGE_TOGGLE_AUTO_CATEGORY_ON="Auto Category: ON",
  SI_MESSAGE_TOGGLE_AUTO_CATEGORY_OFF="Auto Category: OFF",
+ SI_CONTEXT_MENU_EXPAND = "Expand",
+ SI_CONTEXT_MENU_COLLAPSE = "Collpase",
+ SI_CONTEXT_MENU_EXPAND_ALL = "Expand All",
+ SI_CONTEXT_MENU_COLLAPSE_ALL = "Collpase All",
 }
 
 --Loop over all texts that need to be translated, add them as ZOs translated text so the function GetString() can read them

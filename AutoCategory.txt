@@ -29,6 +29,7 @@ lang/$(language).lua
 AutoCategory_Global.lua
 AutoCategory_Defaults.lua
 AutoCategory.xml
+AutoCategory_Hooks.lua
 AutoCategory.lua
 AddonMenu.lua
 AutoCategory_RuleFunc.lua
