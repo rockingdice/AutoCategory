@@ -561,8 +561,8 @@ function AutoCategory.RuleFunc.StackSize( ... )
 end
 
 function AutoCategory.RuleFunc.KeepForResearch( ... )
-	local itemFlagStatus = LibItemStatus:GetItemFlagStatus(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
-	return itemFlagStatus == LibItemStatus.CONST.ItemFlags.ITEM_FLAG_TRAIT_RESEARABLE
+	local traitInformation = GetItemTraitInformation(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	return traitInformation == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED
 end
 
 
@@ -617,6 +617,26 @@ function AutoCategory.RuleFunc.AutoSetName( ... )
 	setName = string.gsub( setName , "%^.*", "")
 	AutoCategory.AdditionCategoryName = AutoCategory.AdditionCategoryName .. string.format(" (%s)", setName)
 	return true
+end
+
+function AutoCategory.RuleFunc.IsSet( ... )
+	local fn = "isset"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local hasSet, setName = GetItemLinkSetInfo(itemLink)
+	return hasSet
+end
+ 
+function AutoCategory.RuleFunc.IsMonsterSet( ... )
+	local fn = "ismonsterset"
+	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
+	local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkSetInfo(itemLink)
+	if not hasSet then
+		return false
+	end
+	if maxEquipped == 2 then
+		return true
+	end
+	return false
 end
 
 function AutoCategory.RuleFunc.TraitType( ... )
@@ -1046,19 +1066,6 @@ function AutoCategory.RuleFunc.IsInQuickslot( ... )
 	return slotIndex ~= nil
 end
 
-function AutoCategory.RuleFunc.IsMonsterSet( ... )
-	local fn = "ismonsterset"
-	local itemLink = GetItemLink(AutoCategory.checkingItemBagId, AutoCategory.checkingItemSlotIndex)
-	local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkSetInfo(itemLink)
-	if not hasSet then
-		return false
-	end
-	if maxEquipped == 2 then
-		return true
-	end
-	return false
-end
-
 function AutoCategory.RuleFunc.GetPriceTTC( ... )
 	local fn = "getpricettc"
 	if TamrielTradeCentre then
@@ -1154,6 +1161,10 @@ AutoCategory.Environment = {
 	set = AutoCategory.RuleFunc.SetName,
 
 	autoset = AutoCategory.RuleFunc.AutoSetName,
+	
+	isset = AutoCategory.RuleFunc.IsSet,
+	
+	ismonsterset = AutoCategory.RuleFunc.IsMonsterSet,
 
 	traitstring = AutoCategory.RuleFunc.TraitString,
 
@@ -1162,8 +1173,6 @@ AutoCategory.Environment = {
 	isinbank = AutoCategory.RuleFunc.IsInBank,
 
 	isinquickslot = AutoCategory.RuleFunc.IsInQuickslot,
-	
-	ismonsterset = AutoCategory.RuleFunc.IsMonsterSet,
 	 
 	keepresearch = AutoCategory.RuleFunc.KeepForResearch,
 
