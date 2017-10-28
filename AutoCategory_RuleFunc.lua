@@ -594,6 +594,8 @@ function AutoCategory.RuleFunc.SetName( ... )
 		else
 			error( string.format("error: %s(): argument is error." , fn ) )
 		end
+		--fix german language issue
+		setName = string.gsub( setName , "%^.*", "")
 		if string.find(setName, findString, 1 ,true) then
 			return true
 		end

@@ -485,10 +485,33 @@ local function CheckVersionCompatible()
 	end
 	--v1.15
 	
-	--v1.16, modify the account setting flag, move it to character
+	--v1.16 
+	--modify the account setting flag, move it to character
 	if AutoCategory.charSavedVariables.accountWideSetting == nil then
 		AutoCategory.charSavedVariables.accountWideSetting = true
 	end
+	
+	--remove duplicated categories in bag
+	local function removeDuplicatedCategories(setting)
+		for i = 1, #setting.bags do
+			local bag = setting.bags[i]
+			local keys = {}
+			--traverse from back to front to remove elements while iteration
+			for j = #bag.rules, 1, -1 do
+				local data = bag.rules[j]
+				if keys[data.name] ~= nil then
+					--remove duplicated category
+					table.remove(bag.rules, j)
+				else
+					--flag this category
+					keys[data.name] = true
+				end
+			end
+		end
+	end
+	
+	removeDuplicatedCategories(AutoCategory.charSavedVariables)
+	removeDuplicatedCategories(AutoCategory.acctSavedVariables)
 	--v1.16
 end
 
