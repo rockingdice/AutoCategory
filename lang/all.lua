@@ -231,9 +231,9 @@ local langStrings = {
  SI_MESSAGE_TOGGLE_AUTO_CATEGORY_ON="Auto Category: ON",
  SI_MESSAGE_TOGGLE_AUTO_CATEGORY_OFF="Auto Category: OFF",
  SI_CONTEXT_MENU_EXPAND = "Expand",
- SI_CONTEXT_MENU_COLLAPSE = "Collpase",
+ SI_CONTEXT_MENU_COLLAPSE = "Collapse",
  SI_CONTEXT_MENU_EXPAND_ALL = "Expand All",
- SI_CONTEXT_MENU_COLLAPSE_ALL = "Collpase All",
+ SI_CONTEXT_MENU_COLLAPSE_ALL = "Collapse All",
 }
 
 --Loop over all texts that need to be translated, add them as ZOs translated text so the function GetString() can read them
