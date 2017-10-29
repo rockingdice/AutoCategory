@@ -119,7 +119,7 @@ local function CheckVersionCompatible()
 	addHiddenFlagIfPossible(AutoCategory.acctSavedVariables)
 	
 	--added setting
-	if not AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] then 
+	if AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] == nil then 
 		AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] = true
 	end
 	--v1.16
