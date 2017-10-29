@@ -1174,5 +1174,6 @@ AutoCategory.defaultAcctSettings = {
 	},
 	general = {
 		["SHOW_MESSAGE_WHEN_TOGGLE"] = false,
+		["SHOW_CATEGORY_ITEM_COUNT"] = true, 
 	},
 }

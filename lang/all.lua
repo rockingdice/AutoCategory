@@ -88,12 +88,14 @@ local langStrings = {
  SI_AC_MENU_SUBMENU_GENERAL_SETTING = "|c0066FF[General Setting]|r",
  SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE = "Show Message When Toggle",
  SI_AC_MENU_GS_CHECKBOX_SHOW_MESSAGE_WHEN_TOGGLE_TOOLTIP = "Will show a message in chat when toggling this add-on.",
+ SI_AC_MENU_GS_CHECKBOX_SHOW_CATEGORY_ITEM_COUNT = "Show Category Items Count",
+ SI_AC_MENU_GS_CHECKBOX_SHOW_CATEGORY_ITEM_COUNT_TOOLTIP = "Add a number to show how many items in the category after the category's name", 
  SI_AC_MENU_SUBMENU_IMPORT_EXPORT = "|c0066FF[Import & Export]|r",
  SI_AC_MENU_HEADER_ACCOUNT_WIDE_SETTING = "Account Wide Setting",
  SI_AC_MENU_BS_CHECKBOX_CATEGORY_HIDDEN = "Hide Category",
  SI_AC_MENU_BS_CHECKBOX_CATEGORY_HIDDEN_TOOLTIP = "Selected category and all items within the category will not appear in your bag if checked.",
  SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN = "Hide Ungrouped Category",
- SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN_TOOLTIP = "Check this will hide your ungrouped items which you cannot find them in current bag setting!",
+ SI_AC_MENU_BS_CHECKBOX_UNGROUPED_CATEGORY_HIDDEN_TOOLTIP = "Check this will hide your ungrouped items, you cannot find them in current bag setting!",
 
   
  SI_AC_DEFAULT_TAG_GEARS= "Gears",

@@ -39,13 +39,13 @@ local function NilOrLessThan(value1, value2)
 end 
 
 local backupListData
-local dataCount = {}
+AutoCategory.dataCount = {}
 function AutoCategory.HookKeyboardMode() 
 	local function AC_Setup_InventoryRowWithHeader(rowControl, slot, overrideOptions)
 		--set header
 		local headerLabel = rowControl:GetNamedChild("HeaderName")
 		if AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] then
-			headerLabel:SetText(string.format('%s [%d]', slot.bestItemTypeName, slot.dataEntry.num))
+			headerLabel:SetText(string.format('%s |cFFE690[%d]|r', slot.bestItemTypeName, slot.dataEntry.num))
 		else
 			headerLabel:SetText(slot.bestItemTypeName)
 		end
@@ -76,24 +76,29 @@ function AutoCategory.HookKeyboardMode()
 	ZO_ScrollList_AddDataType(ZO_PlayerInventoryQuest, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, PLAYER_INVENTORY.inventories[INVENTORY_QUEST_ITEM].listHiddenCallback, nil, ZO_InventorySlot_OnPoolReset) 
     ZO_ScrollList_AddDataType(SMITHING.deconstructionPanel.inventory.list, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
 	ZO_ScrollList_AddDataType(SMITHING.improvementPanel.inventory.list, 998, "AC_InventoryItemRowHeader", rowHeight, AC_Setup_InventoryRowWithHeader, nil, nil, ZO_InventorySlot_OnPoolReset)
-	
+	local function resetCount(bagTypeId, name)
+		if AutoCategory.dataCount[bagTypeId] == nil then
+			AutoCategory.dataCount[bagTypeId] = {}
+		end
+		AutoCategory.dataCount[bagTypeId][name] = 0 
+	end
 	local function addCount(bagTypeId, name)
-		if dataCount[bagTypeId] == nil then
-			dataCount[bagTypeId] = {}
+		if AutoCategory.dataCount[bagTypeId] == nil then
+			AutoCategory.dataCount[bagTypeId] = {}
 		end
-		if dataCount[bagTypeId][name] == nil then
-			dataCount[bagTypeId][name] = 0
+		if AutoCategory.dataCount[bagTypeId][name] == nil then
+			AutoCategory.dataCount[bagTypeId][name] = 0
 		end
-		dataCount[bagTypeId][name] = dataCount[bagTypeId][name] + 1
+		AutoCategory.dataCount[bagTypeId][name] = AutoCategory.dataCount[bagTypeId][name] + 1
 	end
 	local function getCount(bagTypeId, name)
-		if dataCount[bagTypeId] == nil then
-			dataCount[bagTypeId] = {}
+		if AutoCategory.dataCount[bagTypeId] == nil then
+			AutoCategory.dataCount[bagTypeId] = {}
 		end
-		if dataCount[bagTypeId][name] == nil then
-			dataCount[bagTypeId][name] = 0
+		if AutoCategory.dataCount[bagTypeId][name] == nil then
+			AutoCategory.dataCount[bagTypeId][name] = 0
 		end
-		return dataCount[bagTypeId][name]
+		return AutoCategory.dataCount[bagTypeId][name]
 	end
 	local function prehookSort(self, inventoryType) 
 		local inventory
@@ -162,7 +167,6 @@ function AutoCategory.HookKeyboardMode()
 	    local lastBestItemCategoryName
         local newScrollData = {} 
 		local hiddenItem = false
-		local lastHeaderEntry = nil
 		local countItems = true
 	    for i, entry in ipairs(scrollData) do 
 			if AutoCategory.Enabled then					
@@ -179,12 +183,11 @@ function AutoCategory.HookKeyboardMode()
 					local num = getCount(entry.bagTypeId, entry.bestItemTypeName)
 					--d(headerEntry.bestItemTypeName, num)
 					headerEntry.num = num
-					lastHeaderEntry = headerEntry
 					if entry.isHeader then
 						countItems = false
 					else 
 						countItems = true
-						dataCount[entry.bagTypeId][entry.bestItemTypeName] = 0
+						resetCount(entry.bagTypeId, entry.bestItemTypeName)
 					end
 					if entry.isHidden then
 						--don't add header
@@ -268,8 +271,9 @@ function AutoCategory.HookKeyboardMode()
 	    local lastBestItemCategoryName
         local newScrollData = {}
 		local hiddenItem = false
-		local lastHeaderEntry = nil
 		local countItems = true
+		local lastHeaderEntry
+		d(#scrollData)
 	    for i, entry in ipairs(scrollData) do 
 			if AutoCategory.Enabled then					
 				if entry.bestItemTypeName ~= lastBestItemCategoryName then
@@ -282,15 +286,19 @@ function AutoCategory.HookKeyboardMode()
 					headerEntry.isHeader = true
 					headerEntry.bestItemTypeName = entry.bestItemTypeName
 					headerEntry.bagTypeId = entry.bagTypeId
-					local num = getCount(entry.bagTypeId, entry.bestItemTypeName)
-					--d(headerEntry.bestItemTypeName, num)
-					headerEntry.num = num or 0
+					--local num = getCount(entry.bagTypeId, entry.bestItemTypeName)
+					if lastHeaderEntry then 
+						lastHeaderEntry.num = getCount(lastHeaderEntry.bagTypeId, lastHeaderEntry.bestItemTypeName)
+					end
 					lastHeaderEntry = headerEntry
+					--headerEntry.num = num
+					
+					d(entry.bestItemTypeName, entry.isHeader)
 					if entry.isHeader then
 						countItems = false
 					else 
 						countItems = true
-						dataCount[entry.bagTypeId][entry.bestItemTypeName] = 0
+						resetCount(entry.bagTypeId, entry.bestItemTypeName)
 					end
 					if entry.isHidden then
 						--don't add header
@@ -309,10 +317,14 @@ function AutoCategory.HookKeyboardMode()
 					table.insert(newScrollData, entry)
 				end
 				if countItems then
+					d("count:" .. entry.bestItemTypeName)
 					addCount(entry.bagTypeId, entry.bestItemTypeName)
 				end
 	    	end
 	    end
+		if lastHeaderEntry then 
+			lastHeaderEntry.num = getCount(lastHeaderEntry.bagTypeId, lastHeaderEntry.bestItemTypeName)
+		end
 	    self.list.data = newScrollData  
 	end
     ZO_PreHook(SMITHING.deconstructionPanel.inventory, "SortData", prehookCraftSort)
