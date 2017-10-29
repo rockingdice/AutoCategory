@@ -2,7 +2,7 @@
 ## APIVersion: 100021
 ## Author: RockingDice
 ## Description: Type "/ac" 
-## Version: 1.17
+## Version: 1.18
 ## SavedVariables: AutoCategorySavedVars
 ## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver QuickMenu DoItAll
 
