@@ -216,9 +216,9 @@ local function IGV_ScrollList_UpdateScroll_Grid(self)
 			currentData.left = (i - lastIndex) % itemsPerRow * totalControlWidth + LEFT_PADDING 
 		end 
 	end
-	currentY = currentY + totalControlWidth *  (zo_floor((#self.data - 1 - lastIndex) / itemsPerRow)  + 1)
+	currentY = currentY + totalControlWidth *  (zo_floor((#self.data - lastIndex) / itemsPerRow)  + 1)
 	scrollableDistance = currentY - windowHeight
-
+ 
     ResizeScrollBar(self, scrollableDistance)
     ----------------------------------------------------------------------------
 
