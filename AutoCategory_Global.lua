@@ -11,7 +11,7 @@ AutoCategory.Inited = false
 AutoCategory.Enabled = true
 
 AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.15";
+AutoCategory.version = "1.17";
 AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"

@@ -273,7 +273,7 @@ function AutoCategory.HookKeyboardMode()
 		local hiddenItem = false
 		local countItems = true
 		local lastHeaderEntry
-		d(#scrollData)
+		--d(#scrollData)
 	    for i, entry in ipairs(scrollData) do 
 			if AutoCategory.Enabled then					
 				if entry.bestItemTypeName ~= lastBestItemCategoryName then
@@ -293,7 +293,7 @@ function AutoCategory.HookKeyboardMode()
 					lastHeaderEntry = headerEntry
 					--headerEntry.num = num
 					
-					d(entry.bestItemTypeName, entry.isHeader)
+					--d(entry.bestItemTypeName, entry.isHeader)
 					if entry.isHeader then
 						countItems = false
 					else 
@@ -317,7 +317,7 @@ function AutoCategory.HookKeyboardMode()
 					table.insert(newScrollData, entry)
 				end
 				if countItems then
-					d("count:" .. entry.bestItemTypeName)
+					--d("count:" .. entry.bestItemTypeName)
 					addCount(entry.bagTypeId, entry.bestItemTypeName)
 				end
 	    	end
