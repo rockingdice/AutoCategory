@@ -18,14 +18,25 @@ function AutoCategory.UpdateCurrentSavedVars()
 	if not AutoCategory.charSavedVariables.accountWideSetting  then
 		AutoCategory.curSavedVars.rules = AutoCategory.acctSavedVariables.rules
 		AutoCategory.curSavedVars.bags = AutoCategory.charSavedVariables.bags 
+		AutoCategory.curSavedVars.collapses = AutoCategory.charSavedVariables.collapses 
 	else 
 		AutoCategory.curSavedVars.rules = AutoCategory.acctSavedVariables.rules
 		AutoCategory.curSavedVars.bags = AutoCategory.acctSavedVariables.bags  
+		AutoCategory.curSavedVars.collapses = AutoCategory.acctSavedVariables.collapses 
+	end
+end 
+
+function AutoCategory.LoadCollapse()
+	if AutoCategory.acctSavedVariables.general["SAVE_CATEGORY_COLLAPSE_STATUS"] then
+		--loaded from saved vars 
+	else
+		--init
+		AutoCategory.ResetCollapse()
 	end
 end
 
 function AutoCategory.ResetCollapse()
-	AutoCategory.collapses = {
+	AutoCategory.curSavedVars.collapses = {
 		[AC_BAG_TYPE_BACKPACK] = {},
 		[AC_BAG_TYPE_BANK] = {},
 		[AC_BAG_TYPE_GUILDBANK] = {},
@@ -45,6 +56,12 @@ function AutoCategory.ResetToDefaults()
 end
 
 local function CheckVersionCompatible()
+	--v1.06
+	if AutoCategory.acctSavedVariables.appearance == nil then
+		AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance 
+	end
+	--v1.06
+	
 	--v1.12, added bag setting for guildbank/craftbag/craftstation
 	local function RebuildBagSettingIfNeeded(setting, defaultSetting, bagId)
 		if not setting.bags[bagId] then
@@ -123,6 +140,26 @@ local function CheckVersionCompatible()
 		AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] = true
 	end
 	--v1.16
+	
+	--v1.19
+	if AutoCategory.acctSavedVariables.general["SAVE_CATEGORY_COLLAPSE_STATUS"] == nil then 
+		AutoCategory.acctSavedVariables.general["SAVE_CATEGORY_COLLAPSE_STATUS"] = false
+	end
+	
+	local function addCollapseIfPossible(setting)
+		if setting.collapses == nil then
+			setting.collapses = {
+				[AC_BAG_TYPE_BACKPACK] = {},
+				[AC_BAG_TYPE_BANK] = {},
+				[AC_BAG_TYPE_GUILDBANK] = {},
+				[AC_BAG_TYPE_CRAFTBAG] = {},
+				[AC_BAG_TYPE_CRAFTSTATION] = {},
+			}
+		end
+	end
+	addCollapseIfPossible(AutoCategory.charSavedVariables)
+	addCollapseIfPossible(AutoCategory.acctSavedVariables)
+	--v1.19
 end
 
 function AutoCategory.LazyInit()
@@ -155,8 +192,9 @@ function AutoCategory.LazyInit()
 		CheckVersionCompatible()
 		
 		-- initialize
-		AutoCategory.AddonMenuInit()
-		AutoCategory.ResetCollapse()
+		AutoCategory.UpdateCurrentSavedVars()  
+		AutoCategory.LoadCollapse()
+		AutoCategory.AddonMenuInit() 
 		
 		-- hooks
 		AutoCategory.HookGamepadMode()
@@ -245,15 +283,15 @@ function AC_ItemRowHeader_OnMouseExit(header)
 end
 
 function AutoCategory.IsCategoryCollapsed(bagTypeId, categoryName)
-	if AutoCategory.collapses[bagTypeId][categoryName] == nil then
-		AutoCategory.collapses[bagTypeId][categoryName] = false
+	if AutoCategory.curSavedVars.collapses[bagTypeId][categoryName] == nil then
+		AutoCategory.curSavedVars.collapses[bagTypeId][categoryName] = false
 	end
-	local collapsed = AutoCategory.collapses[bagTypeId][categoryName]
+	local collapsed = AutoCategory.curSavedVars.collapses[bagTypeId][categoryName]
 	return collapsed
 end
 
 function AutoCategory.SetCategoryCollapsed(bagTypeId, categoryName, collapsed)
-	AutoCategory.collapses[bagTypeId][categoryName] = collapsed 
+	AutoCategory.curSavedVars.collapses[bagTypeId][categoryName] = collapsed 
 end
  
 function AC_ItemRowHeader_OnMouseClicked(header)
@@ -283,14 +321,14 @@ function AC_ItemRowHeader_OnShowContextMenu(header)
 		end)
 	end
 	AddMenuItem(L(SI_CONTEXT_MENU_EXPAND_ALL), function()
-		for k, v in pairs (AutoCategory.collapses[bagTypeId]) do
-			AutoCategory.collapses[bagTypeId][k] = false
+		for k, v in pairs (AutoCategory.curSavedVars.collapses[bagTypeId]) do
+			AutoCategory.curSavedVars.collapses[bagTypeId][k] = false
 		end
 		AutoCategory.RefreshCurrentList()
 	end)
 	AddMenuItem(L(SI_CONTEXT_MENU_COLLAPSE_ALL), function()
-		for k, v in pairs (AutoCategory.collapses[bagTypeId]) do
-			AutoCategory.collapses[bagTypeId][k] = true
+		for k, v in pairs (AutoCategory.curSavedVars.collapses[bagTypeId]) do
+			AutoCategory.curSavedVars.collapses[bagTypeId][k] = true
 		end
 		AutoCategory.RefreshCurrentList()
 	end) 

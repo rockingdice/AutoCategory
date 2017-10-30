@@ -394,17 +394,7 @@ function AutoCategory.GetRuleByName(name)
 	end
 end
 
-function AutoCategory.RebuildSavedVars()
---1.06--
-	if AutoCategory.acctSavedVariables.appearance == nil then
-		AutoCategory.acctSavedVariables.appearance = AutoCategory.defaultAcctSettings.appearance 
-	end
---end
-end
-
 function AutoCategory.AddonMenuInit()
-	AutoCategory.UpdateCurrentSavedVars() 
-	AutoCategory.RebuildSavedVars()
 	RefreshCache()  
 	RefreshDropdownData() 
  
@@ -1260,6 +1250,15 @@ function AutoCategory.AddonMenuInit()
 						tooltip = L(SI_AC_MENU_GS_CHECKBOX_SHOW_CATEGORY_ITEM_COUNT_TOOLTIP),
 						getFunc = function() return AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] end,
 						setFunc = function(value) AutoCategory.acctSavedVariables.general["SHOW_CATEGORY_ITEM_COUNT"] = value
+							
+						end,
+					},	
+					{
+						type = "checkbox",
+						name = L(SI_AC_MENU_GS_CHECKBOX_SAVE_CATEGORY_COLLAPSE_STATUS),
+						tooltip = L(SI_AC_MENU_GS_CHECKBOX_SAVE_CATEGORY_COLLAPSE_STATUS_TOOLTIP),
+						getFunc = function() return AutoCategory.acctSavedVariables.general["SAVE_CATEGORY_COLLAPSE_STATUS"] end,
+						setFunc = function(value) AutoCategory.acctSavedVariables.general["SAVE_CATEGORY_COLLAPSE_STATUS"] = value
 							
 						end,
 					},

@@ -11,11 +11,10 @@ AutoCategory.Inited = false
 AutoCategory.Enabled = true
 
 AutoCategory.name = "AutoCategory";
-AutoCategory.version = "1.18";
+AutoCategory.version = "1.19";
 AutoCategory.settingName = "Auto Category"
 AutoCategory.settingDisplayName = "RockingDice's AutoCategory"
 AutoCategory.author = "RockingDice"
 AutoCategory.localizefunc = function ( loc_key ) 
 	return GetString( loc_key )
 end
-AutoCategory.collapses = {}
