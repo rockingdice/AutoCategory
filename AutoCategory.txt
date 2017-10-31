@@ -4,7 +4,7 @@
 ## Description: Type "/ac" 
 ## Version: 1.19
 ## SavedVariables: AutoCategorySavedVars
-## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver QuickMenu DoItAll
+## OptionalDependsOn: LibAddonMenu-2.0 InventoryGridView GearChangerByIakoni FCOItemSaver QuickMenu
 
 Libs/LibStub/LibStub.lua
 Libs/LibMediaProvider-1.0/LibMediaProvider-1.0.lua
