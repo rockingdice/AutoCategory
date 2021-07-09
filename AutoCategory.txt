@@ -36,5 +36,4 @@ AutoCategory_API.lua
 AutoCategory_Integrations_Iakoni_Gear_Changer.lua
 AutoCategory_Integrations_Inventory_Grid_View.lua
 AutoCategory_Integrations_QuickMenu.lua
-AutoCategory_Integrations_DoItAll.lua
 Bindings.xml
