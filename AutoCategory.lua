@@ -204,7 +204,6 @@ function AutoCategory.LazyInit()
 		IntegrateIakoniGearChanger()
 		IntegrateInventoryGridView()
 		IntegrateQuickMenu()
-		IntegrateDoItAll()
 
 		AutoCategory.Inited = true
 	end
